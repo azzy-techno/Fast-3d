@@ -1,0 +1,29 @@
+# Public deployment
+
+The deployment target is GitHub Pages in the existing `azzy-techno/Fast-3d` repository. The expected site address is:
+
+https://azzy-techno.github.io/Fast-3d/
+
+This address becomes live only after GitHub Pages is enabled and the deployment workflow succeeds. It is not a verified live URL yet.
+
+## Enable the site
+
+In the repository, open **Settings → Pages → Build and deployment → Source**, and choose **GitHub Actions**. Then open **Actions → Deploy FAST homepage → Run workflow** on `main`. Subsequent pushes to `main` automatically rebuild and publish the site.
+
+- Settings: https://github.com/azzy-techno/Fast-3d/settings/pages
+- Workflow: https://github.com/azzy-techno/Fast-3d/actions/workflows/deploy-pages.yml
+
+The workflow installs the lockfile, builds the static Vite application and deploys only `dist/` using GitHub's Pages artifact mechanism. It uses the repository's automatic workflow token; no hosting API key is embedded in the application. GitHub Pages availability for private repositories depends on the repository owner's GitHub plan.
+
+All asset references honor Vite's base path, including the loading images, 3D logo texture and sound file. To validate the exact project-path build locally:
+
+```bash
+BASE_PATH=/Fast-3d/ npm run build
+BASE_PATH=/Fast-3d/ npm run test:browser
+```
+
+For a domain-root deployment on another static host, use `npm run build` with no `BASE_PATH` and upload `dist/`.
+
+## Cloud access
+
+The current cloud network denied access to GitHub's API, so repository Pages settings and deployment status could not be inspected or changed through the API. The cloud configuration draft requests `api.github.com` for managing/checking Pages and `azzy-techno.github.io` for verifying the deployed site, preserving the existing allowlist. Saving that draft does not apply the network settings; review/save and publish the environment to apply them.

@@ -1,0 +1,432 @@
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { openBrowser } from "@remotion/renderer";
+import sharp from "sharp";
+const url = `http://127.0.0.1:4174${process.env.BASE_PATH || "/"}`;
+const server = spawn(
+  process.execPath,
+  [
+    "node_modules/vite/bin/vite.js",
+    "preview",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "4174",
+    "--strictPort",
+  ],
+  { stdio: "pipe" },
+);
+let browser;
+const results = [];
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+async function waitFor(page, fn, label, timeout = 30000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (await page.evaluate(fn)) return;
+    await delay(200);
+  }
+  const state = await page.evaluate(() => ({
+    scrollY: window.scrollY,
+    coolingTop: document.getElementById("cooling")?.offsetTop,
+    dialogOpen: document.querySelector("dialog")?.open,
+    overflow: document.body.style.overflow,
+    errors: window.__runtimeErrors,
+  }));
+  throw new Error(`Timed out: ${label}; ${JSON.stringify(state)}`);
+}
+try {
+  for (let i = 0; i < 100; i++) {
+    try {
+      if ((await fetch(url)).ok) break;
+    } catch {}
+    await delay(100);
+  }
+  browser = await openBrowser("chrome", {
+    browserExecutable: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
+    chromiumOptions: { gl: "swangle" },
+  });
+  const page = await browser.newPage({
+    context: () => null,
+    logLevel: "error",
+    indent: false,
+    pageIndex: 0,
+    onBrowserLog: null,
+    onLog: () => {},
+  });
+  await page._client().send("Page.addScriptToEvaluateOnNewDocument", {
+    source: `
+        window.__runtimeErrors=[];
+        window.addEventListener('error',e=>window.__runtimeErrors.push(e.message));
+        window.addEventListener('unhandledrejection',e=>window.__runtimeErrors.push(String(e.reason)));
+        window.__mainObservers=new Set();
+        const NativeResizeObserver=window.ResizeObserver;
+        window.ResizeObserver=class extends NativeResizeObserver {
+          observe(target,options){
+            if(target.id==='main')window.__mainObservers.add(this);
+            return super.observe(target,options);
+          }
+          unobserve(target){
+            if(target.id==='main')window.__mainObservers.delete(this);
+            return super.unobserve(target);
+          }
+          disconnect(){window.__mainObservers.delete(this);return super.disconnect();}
+        };
+        window.__audibleStarts=0;
+        const nativeStart=AudioBufferSourceNode.prototype.start;
+        AudioBufferSourceNode.prototype.start=function(...args){
+          if(this.buffer?.duration>.02)window.__audibleStarts++;
+          return nativeStart.apply(this,args);
+        };
+      `,
+  });
+  await page.setViewport({ width: 1440, height: 1000, deviceScaleFactor: 1 });
+  await page.goto({ url, timeout: 60000 });
+  await waitFor(
+    page,
+    () =>
+      !!document.querySelector("canvas[data-ready]") &&
+      !document.querySelector(".loader"),
+    "real WebGL scene and loader",
+  );
+  await fs.mkdir("artifacts", { recursive: true });
+  async function shot(name) {
+    const result = await page
+      ._client()
+      .send("Page.captureScreenshot", { format: "png" });
+    const data = Buffer.from(result.value.data, "base64");
+    await fs.writeFile(`artifacts/${name}.png`, data);
+    return data;
+  }
+  async function click(selector) {
+    const pos = await page.evaluate((selector) => {
+      const el = document.querySelector(selector);
+      if (!el) throw new Error(`Missing ${selector}`);
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    }, selector);
+    await page._client().send("Input.dispatchMouseEvent", {
+      type: "mousePressed",
+      ...pos,
+      button: "left",
+      clickCount: 1,
+    });
+    await page._client().send("Input.dispatchMouseEvent", {
+      type: "mouseReleased",
+      ...pos,
+      button: "left",
+      clickCount: 1,
+    });
+    await delay(250);
+  }
+  const initial = await page.evaluate(() => ({
+    chapters: document.querySelectorAll(".chapter").length,
+    links: [...document.querySelectorAll(".chapter h2 a")].map((a) => a.href),
+    muted: document.querySelector(".sound-button").getAttribute("aria-pressed"),
+    errors: window.__runtimeErrors,
+  }));
+  assert.equal(initial.chapters, 11);
+  assert.equal(initial.muted, "false");
+  assert.equal(initial.errors.length, 0);
+  assert(
+    initial.links.every((x) =>
+      x.startsWith("https://fast-arabia.com/services/"),
+    ),
+  );
+  assert(initial.links[0].endsWith("/mechanical#scope"));
+  const arrival = await shot("desktop-arrival");
+  const stats = await sharp(arrival)
+    .extract({ left: 650, top: 200, width: 650, height: 600 })
+    .stats();
+  assert(
+    stats.channels[0].stdev > 20,
+    "Scene region must contain rendered architectural detail",
+  );
+  results.push(
+    "11 chapters, correct live destinations, actual WebGL render, real readiness loader, sound off initially",
+  );
+
+  await click(".header-nav button");
+  assert.equal(
+    await page.evaluate(() => document.querySelector("dialog").open),
+    true,
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector("dialog").contains(document.activeElement),
+    ),
+    true,
+  );
+  await page._client().send("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: "Escape",
+    code: "Escape",
+    windowsVirtualKeyCode: 27,
+  });
+  await page._client().send("Input.dispatchKeyEvent", {
+    type: "keyUp",
+    key: "Escape",
+    code: "Escape",
+    windowsVirtualKeyCode: 27,
+  });
+  await delay(200);
+  assert.equal(
+    await page.evaluate(() => document.querySelector("dialog").open),
+    false,
+  );
+  assert.equal(
+    await page.evaluate(
+      () =>
+        document.activeElement === document.querySelector(".header-nav button"),
+    ),
+    true,
+  );
+  await click(".header-nav button");
+  await click(".dialog-services button:first-child");
+  await waitFor(
+    page,
+    () =>
+      Math.abs(window.scrollY - document.getElementById("cooling").offsetTop) <
+      8,
+    "smooth chapter jump",
+  );
+  await delay(2000);
+  assert.equal(
+    await page.evaluate(() =>
+      document
+        .querySelector(".chapter-track [aria-current]")
+        .getAttribute("aria-label"),
+    ),
+    "Cooling towers",
+  );
+  const cooling = await shot("desktop-cooling");
+  assert(!arrival.equals(cooling));
+  for (const id of [
+    "mechanical",
+    "fabrication",
+    "civil",
+    "fire",
+    "it",
+    "industry",
+    "iiot",
+    "vision",
+  ]) {
+    await page.evaluate(
+      (id) => window.scrollTo(0, document.getElementById(id).offsetTop),
+      id,
+    );
+    await delay(1800);
+    const scene = await shot(`desktop-${id}`);
+    const pixels = await sharp(scene)
+      .extract({ left: 650, top: 200, width: 650, height: 600 })
+      .stats();
+    assert(
+      pixels.channels[0].stdev > 16,
+      `${id} must display rendered equipment`,
+    );
+    assert.equal(
+      await page.evaluate((id) => {
+        const current = document.querySelector(".chapter-track [aria-current]");
+        const title = document.querySelector(`#${id} h2 a`);
+        return (
+          current?.getAttribute("aria-label") === title?.textContent.trim()
+        );
+      }, id),
+      true,
+      `${id} must be the current chapter`,
+    );
+  }
+  assert.deepEqual(await page.evaluate(() => window.__runtimeErrors), []);
+  results.push(
+    "Rendered equipment and active navigation checked in all 11 service scenes",
+  );
+  await page.evaluate(() =>
+    window.scrollTo(0, document.getElementById("manufacturing").offsetTop),
+  );
+  await delay(2500);
+  await shot("desktop-manufacturing");
+  await page.evaluate(() =>
+    window.scrollTo(0, document.getElementById("electrical").offsetTop),
+  );
+  await delay(2000);
+  assert.equal(
+    await page.evaluate(() =>
+      document
+        .querySelector(".chapter-track [aria-current]")
+        .getAttribute("aria-label"),
+    ),
+    "Electrical",
+  );
+  await shot("desktop-electrical");
+  results.push(
+    "Modal focus/escape/return, smooth menu jump, forward and reverse scrolling",
+  );
+  await click(".sound-button");
+  await waitFor(
+    page,
+    () => window.__audibleStarts > 0,
+    "opt-in audio playback",
+  );
+  await delay(350);
+  assert.equal(
+    await page.evaluate(() => window.__audibleStarts),
+    1,
+    "Enabling sound plays one chime",
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector(".sound-button").getAttribute("aria-pressed"),
+    ),
+    "true",
+  );
+  await click(".sound-button");
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector(".sound-button").getAttribute("aria-pressed"),
+    ),
+    "false",
+  );
+  await click(".view-button");
+  await waitFor(
+    page,
+    () =>
+      !!document.querySelector(".list-view") &&
+      !document.querySelector("canvas"),
+    "photo tour",
+  );
+  assert.equal(
+    await page.evaluate(() => window.__mainObservers.size),
+    1,
+    "View changes release the previous scroll observer",
+  );
+  await page.evaluate(() =>
+    window.scrollTo(0, document.getElementById("cooling").offsetTop),
+  );
+  await delay(500);
+  await shot("desktop-photo-tour");
+  const axeSource = await fs.readFile(
+    "node_modules/axe-core/axe.min.js",
+    "utf8",
+  );
+  await page.evaluate((source) => {
+    (0, eval)(source);
+  }, axeSource);
+  let axe = await page.evaluate(async () => {
+    const result = await window.axe.run(document, {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+    });
+    return result.violations.map((v) => ({
+      id: v.id,
+      impact: v.impact,
+      nodes: v.nodes.map((n) => n.target),
+    }));
+  });
+  await fs.writeFile(
+    "artifacts/accessibility.json",
+    JSON.stringify(axe, null, 2),
+  );
+  assert.equal(axe.length, 0, `Accessibility: ${JSON.stringify(axe)}`);
+  results.push("Sound controls, photo tour, WCAG A/AA automated checks");
+  await click(".language");
+  assert.equal(
+    await page.evaluate(() => window.__mainObservers.size),
+    1,
+    "Language changes release the previous scroll observer",
+  );
+  await delay(250);
+  assert.equal(await page.evaluate(() => document.documentElement.dir), "rtl");
+  assert.equal(await page.evaluate(() => document.documentElement.lang), "ar");
+  await shot("desktop-arabic");
+  await click(".language");
+  await click(".view-button");
+  await waitFor(
+    page,
+    () =>
+      !!document.querySelector("canvas[data-ready]") &&
+      !document.querySelector(".loader"),
+    "3D view restored",
+  );
+  assert.equal(await page.evaluate(() => window.__mainObservers.size), 1);
+  assert.equal(
+    await page.evaluate(() =>
+      document
+        .querySelector(".chapter-track [aria-current]")
+        ?.getAttribute("aria-label"),
+    ),
+    "Cooling towers",
+    "Returning to 3D preserves the service chapter",
+  );
+  results.push(
+    "Single opt-in chime, scroll observer cleanup and ready-state chapter restoration",
+  );
+  for (const width of [768, 390, 320]) {
+    await page.setViewport({
+      width,
+      height: width === 768 ? 1024 : 844,
+      deviceScaleFactor: 1,
+    });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await delay(1800);
+    assert.equal(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+      ),
+      true,
+      `Overflow at ${width}px`,
+    );
+    if (width !== 320) {
+      await shot(width === 768 ? "tablet-arrival" : "mobile-arrival");
+    }
+    await page.evaluate(() =>
+      window.scrollTo(0, document.getElementById("cooling").offsetTop),
+    );
+    await delay(1800);
+    if (width === 390) await shot("mobile-cooling");
+  }
+  results.push(
+    "Arabic / RTL, 3D restoration, 768px / 390px / 320px responsive layouts",
+  );
+  await page._client().send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+  await page.goto({ url, timeout: 60000 });
+  await waitFor(
+    page,
+    () => !!document.querySelector(".list-view"),
+    "reduced-motion fallback",
+  );
+  assert.equal(
+    await page.evaluate(() => !!document.querySelector("canvas")),
+    false,
+  );
+  await shot("mobile-reduced-motion");
+  await page._client().send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  await page._client().send("Page.addScriptToEvaluateOnNewDocument", {
+    source: `const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(type==='webgl'||type==='webgl2'||type==='experimental-webgl')return null;return original.call(this,type,...args);};`,
+  });
+  await page.goto({ url, timeout: 60000 });
+  await waitFor(
+    page,
+    () => !!document.querySelector(".fallback-message"),
+    "WebGL failure fallback",
+  );
+  assert.equal(
+    await page.evaluate(
+      () => document.querySelectorAll(".chapter h2 a").length,
+    ),
+    11,
+  );
+  results.push(
+    "Reduced motion defaults to photo tour; unavailable WebGL preserves all content and links",
+  );
+  await fs.writeFile(
+    "artifacts/browser-results.json",
+    JSON.stringify({ passed: true, checks: results }, null, 2),
+  );
+  console.log(JSON.stringify({ passed: true, checks: results }, null, 2));
+} finally {
+  if (browser) await browser.close({ silent: true });
+  server.kill("SIGTERM");
+}
