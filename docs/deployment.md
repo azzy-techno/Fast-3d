@@ -6,6 +6,8 @@ https://azzy-techno.github.io/Fast-3d/
 
 This address becomes live only after GitHub Pages is enabled and the deployment workflow succeeds. It is not a verified live URL yet.
 
+The homepage and workflow were pushed to `main` in commit `8bbb5d4`. The [first workflow run](https://github.com/azzy-techno/Fast-3d/actions/runs/38699993652) successfully installed dependencies, built the site and uploaded the Pages artifact. Publication failed at **Configure GitHub Pages** with `Get Pages site failed` / `Not Found`: Pages must be enabled with GitHub Actions as its source. The complete local browser suite passed against the `/Fast-3d/` production build, including all 11 scenes, navigation, audio, Arabic, responsive layouts and accessibility checks.
+
 ## Enable the site
 
 In the repository, open **Settings → Pages → Build and deployment → Source**, and choose **GitHub Actions**. Then open **Actions → Deploy FAST homepage → Run workflow** on `main`. Subsequent pushes to `main` automatically rebuild and publish the site.
