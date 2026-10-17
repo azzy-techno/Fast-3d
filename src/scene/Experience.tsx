@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   PerspectiveCamera,
@@ -7,16 +7,26 @@ import {
   ACESFilmicToneMapping,
   BufferGeometry,
   Float32BufferAttribute,
+  Color,
+  Fog,
+  DirectionalLight,
+  HemisphereLight,
+  AmbientLight,
 } from "three";
-import { Environment, Lightformer } from "@react-three/drei";
+import { Environment, Sky, PerformanceMonitor } from "@react-three/drei";
+
+import { Exterior } from "./Exterior";
+import { assetUrl } from "../lib/assets";
 import { chapters, type Point } from "../data/chapters";
 import { useTour } from "../store";
 import { Building } from "./Building";
-import { Box, Room } from "./Primitives";
+import { Room } from "./Primitives";
 import { equipment } from "./Equipment";
 
-const overview: Point = [47, 36, 63];
-const overviewTarget: Point = [0, 9, -6];
+const ExteriorEffects = lazy(() => import("./ExteriorEffects"));
+
+const overview: Point = [49, 29, 67];
+const overviewTarget: Point = [0, 10, -5];
 const route = [
   { p: overview, target: overviewTarget },
   ...chapters.map((c, i) => ({
@@ -48,9 +58,15 @@ function World({
   const shell = useRef<Group>(null);
   const structure = useRef<Group>(null);
   const rooms = useRef<(Group | null)[]>([]);
-  const { camera, size, gl } = useThree();
+  const { camera, size, gl, scene } = useThree();
+  const exteriorFog = useMemo(() => new Color("#a2acac"), []);
+  const interiorFog = useMemo(() => new Color("#0d2435"), []);
   const ready = useRef(false);
   const cameraInitialized = useRef(false);
+  const sun = useRef<DirectionalLight>(null);
+  const fill = useRef<DirectionalLight>(null);
+  const hemisphere = useRef<HemisphereLight>(null);
+  const ambient = useRef<AmbientLight>(null);
   useEffect(() => {
     const cam = camera as PerspectiveCamera;
     const offset = mobile ? -0.02 : rtl ? 0.19 : -0.19;
@@ -76,6 +92,11 @@ function World({
     fromTarget.set(...a.target);
     toTarget.set(...b.target);
     desired.copy(fromPos).lerp(toPos, blend);
+    // A gentle descending arc gives the arrival-to-rooftop movement spatial depth.
+    if (index === 0) {
+      desired.x += Math.sin(blend * Math.PI) * 5;
+      desired.y += Math.sin(blend * Math.PI) * 3;
+    }
     if (mobile) {
       const transition = Math.min(1, progress, 12 - progress);
       const scale = Math.max(
@@ -104,6 +125,28 @@ function World({
       focus.lerp(desiredFocus, damping);
     }
     camera.lookAt(focus);
+    const outside = 1 - Math.min(1, Math.max(0, (progress - 0.48) / 0.25));
+    const exteriorAmount =
+      progress > 11.65 ? Math.min(1, (progress - 11.65) / 0.3) : outside;
+    if (sun.current) {
+      sun.current.position.set(
+        25 - 65 * exteriorAmount,
+        55 - 25 * exteriorAmount,
+        35 + 5 * exteriorAmount,
+      );
+      sun.current.intensity = 3.5 - 0.4 * exteriorAmount;
+    }
+    if (fill.current) fill.current.intensity = 2 - 1.1 * exteriorAmount;
+    if (hemisphere.current)
+      hemisphere.current.intensity = 2 - 1.2 * exteriorAmount;
+    if (ambient.current) ambient.current.intensity = 0.7 - 0.3 * exteriorAmount;
+    if (scene.fog instanceof Fog) {
+      scene.fog.color.copy(interiorFog).lerp(exteriorFog, exteriorAmount);
+      scene.fog.near = 90 + exteriorAmount * 20;
+      scene.fog.far = 220 + exteriorAmount * 100;
+    }
+    if (scene.background instanceof Color)
+      scene.background.copy(interiorFog).lerp(exteriorFog, exteriorAmount);
     if (shell.current)
       shell.current.visible = progress < 0.72 || progress > 11.7;
     if (structure.current)
@@ -121,14 +164,15 @@ function World({
     <>
       <color attach="background" args={["#0d2435"]} />
       <fog attach="fog" args={["#0d2435", 110, 240]} />
-      <ambientLight intensity={0.7} />
-      <hemisphereLight args={["#b0d9eb", "#29404b", 2]} />
+      <ambientLight ref={ambient} intensity={0.4} />
+      <hemisphereLight ref={hemisphere} args={["#bbd6e4", "#756b52", 0.8]} />
       <directionalLight
-        position={[25, 55, 35]}
-        intensity={3.5}
-        color="#ffe1b2"
+        ref={sun}
+        position={[-40, 30, 40]}
+        intensity={3.1}
+        color="#ffe0af"
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={mobile ? [1024, 1024] : [2048, 2048]}
         shadow-camera-left={-55}
         shadow-camera-right={55}
         shadow-camera-top={60}
@@ -138,27 +182,25 @@ function World({
         shadow-normalBias={0.05}
       />
       <directionalLight
+        ref={fill}
         position={[-25, 30, -15]}
-        intensity={2}
+        intensity={0.9}
         color="#7fb9e3"
       />
-      <Environment resolution={64}>
-        <Lightformer
-          position={[0, 40, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[80, 80, 1]}
-          intensity={1.2}
-          color="#b2d7ea"
-        />
-        <Lightformer
-          position={[0, 20, 45]}
-          scale={[70, 30, 1]}
-          intensity={2}
-          color="#f8deb7"
-        />
-      </Environment>
+      <Environment
+        files={assetUrl("exterior/sunset.hdr")}
+        environmentIntensity={0.7}
+      />
       <group ref={shell}>
-        <Box p={[0, -6.5, 0]} s={[350, 0.3, 350]} c="#152b38" metal={0.05} />
+        <Sky
+          distance={450}
+          sunPosition={[-100, 28, -70]}
+          turbidity={7}
+          rayleigh={1.2}
+          mieCoefficient={0.008}
+          mieDirectionalG={0.85}
+        />
+        <Exterior mobile={mobile} />
         <Building />
       </group>
       <group ref={structure} visible={false}>
@@ -195,6 +237,8 @@ export default function Experience({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mobile, setMobile] = useState(window.innerWidth < 900);
+  const [enhanced, setEnhanced] = useState(true);
+  const outside = useTour((s) => s.active === 0 || s.active === 12);
   useEffect(() => {
     const canvas = canvasRef.current;
     const lost = (event: Event) => {
@@ -234,6 +278,17 @@ export default function Experience({
       >
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
+          <PerformanceMonitor
+            ms={400}
+            iterations={3}
+            bounds={() => [24, 45]}
+            onDecline={() => setEnhanced(false)}
+          />
+          {!mobile && enhanced && outside && (
+            <Suspense fallback={null}>
+              <ExteriorEffects />
+            </Suspense>
+          )}
         </Suspense>
       </Canvas>
     </div>

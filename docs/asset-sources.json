@@ -9,5 +9,7 @@
   "it.webp": "https://fast-arabia.com/assets/img/it-hero.webp",
   "manufacturing.webp": "https://fast-arabia.com/assets/img/auto-hero.webp",
   "digital.webp": "https://fast-arabia.com/assets/img/d3-hero.webp",
-  "team.webp": "https://fast-arabia.com/assets/about-group.webp"
+  "team.webp": "https://fast-arabia.com/assets/about-group.webp",
+  "exterior/pedestrian.glb": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb",
+  "exterior/sunset.hdr": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/equirectangular/venice_sunset_1k.hdr"
 }

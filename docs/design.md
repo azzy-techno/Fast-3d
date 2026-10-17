@@ -82,3 +82,11 @@ The cloud environment draft now includes the homepage install/build commands and
 Completed the interaction lifecycle review. GSAP now reverts the previous scroll context when the view or language changes, releasing the associated ResizeObserver. Enabling sound plays a single chime; chapter changes handle their own playback. Returning from the photo tour waits for the new canvas and starts the camera at the current service location.
 
 The production browser suite now captures and validates rendered equipment and active navigation in every one of the 11 service scenes. It also measures actual audio playback starts and verifies that only one homepage scroll observer remains after view/language changes. TypeScript/Vite build, expanded browser checks, source lint and the existing automated accessibility checks pass. All newly captured service scenes were visually reviewed.
+
+## Exterior detail pass — 17 October 2026
+
+Expanded the arrival into a surrounding business district with varied building heights, layered windows, connected roads, moving vehicles, animated pedestrians, palm leaflets, planted borders, seating, street lighting, water and a small bird flock. Refined the main facade with reflective glazing, recessed panels, stone grain and shaded entrance details. Local HDR lighting, distance haze, adaptive desktop contact shading/bloom and a descending approach arc support the architectural view. Service geometry and content remain unchanged; exterior lighting blends back toward the established service lighting during entry.
+
+The imported character rig was checked for correct metre-scale placement, changing bone poses and pavement movement; desktop has six figures and mobile three. Desktop and phone arrival compositions were visually inspected. Assets, provenance, adaptive rendering and the remaining limits on photorealism are recorded in `exterior-assets.md`.
+
+Validation: the `/Fast-3d/` production build and full browser suite pass, including all service scenes, navigation, sound, view restoration, Arabic, responsive widths, reduced motion, missing-WebGL recovery and automated accessibility checks. The final exterior rendering is additionally checked for successful local character/HDR loading under the project URL and browser runtime errors. Real hardware frame-rate benchmarking remains outstanding.

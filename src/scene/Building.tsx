@@ -1,67 +1,48 @@
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
-import { Box, Cylinder, Pipe } from "./Primitives";
+import { Box, Cylinder } from "./Primitives";
 import { Cooling } from "./Equipment";
-import type { Point } from "../data/chapters";
-function Palm({ p, height = 5 }: { p: Point; height?: number }) {
-  return (
-    <group position={p}>
-      <Cylinder
-        p={[0, height / 2, 0]}
-        height={height}
-        radius={0.16}
-        c="#766957"
-        metal={0}
-      />
-      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <group
-          key={i}
-          rotation={[0, (i * Math.PI) / 4, 0]}
-          position={[0, height, 0]}
-        >
-          <mesh
-            position={[0.95, 0.12, 0]}
-            scale={[1.45, 0.09, 0.28]}
-            rotation={[0, 0, -0.3]}
-          >
-            <sphereGeometry args={[1, 6, 5]} />
-            <meshStandardMaterial
-              color={i % 2 ? "#4e705e" : "#63856c"}
-              roughness={1}
-            />
-          </mesh>
-          <Box
-            p={[0.85, 0.08, 0]}
-            s={[1.8, 0.05, 0.1]}
-            c="#799070"
-            r={[0, 0, -0.2]}
-          />
-        </group>
-      ))}
-    </group>
-  );
-}
-function Tree({ p }: { p: Point }) {
-  return (
-    <group position={p}>
-      <Cylinder p={[0, 1, 0]} radius={0.12} height={2} c="#726955" />
-      <mesh position={[0, 2.5, 0]} scale={[1.15, 1.4, 1.15]}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#526f5d" roughness={1} />
-      </mesh>
-    </group>
-  );
-}
+import { useSurface } from "./Exterior";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Mesh } from "three";
+
 export function Building() {
   const logo = useTexture(assetUrl("fast-logo.png"));
+  const stone = useSurface("stone");
+  const ripples = useSurface("water");
+  const water = useRef<Mesh>(null);
+  useFrame(({ clock }) => {
+    ripples.offset.x = Math.sin(clock.elapsedTime * 0.08) * 0.03;
+    ripples.offset.y = clock.elapsedTime * 0.006;
+  });
   return (
     <group>
       <Box p={[0, -0.5, -8]} s={[53, 0.7, 63]} c="#a7a99f" metal={0} />
       <Box p={[0, -0.09, -8]} s={[49, 0.12, 59]} c="#aeb8b5" metal={0} />
       <Box p={[0, 0.05, 5]} s={[36, 0.35, 22]} c="#cad0cb" metal={0} />
       <Box p={[0, 10.8, -1]} s={[32, 21.6, 19]} c="#264557" metal={0.6} />
-      <Box p={[0, 10.9, 8.56]} s={[31.5, 19.9, 0.1]} c="#4d7586" metal={0.85} />
-      <Box p={[16.06, 10.9, -1]} s={[0.1, 19.9, 19]} c="#486e7f" metal={0.85} />
+      <mesh position={[0, 10.9, 8.56]} castShadow receiveShadow>
+        <boxGeometry args={[31.5, 19.9, 0.1]} />
+        <meshPhysicalMaterial
+          color="#63868f"
+          metalness={0.88}
+          roughness={0.12}
+          clearcoat={1}
+          clearcoatRoughness={0.08}
+          envMapIntensity={1.4}
+        />
+      </mesh>
+      <mesh position={[16.06, 10.9, -1]} castShadow receiveShadow>
+        <boxGeometry args={[0.1, 19.9, 19]} />
+        <meshPhysicalMaterial
+          color="#6a8287"
+          metalness={0.88}
+          roughness={0.13}
+          clearcoat={1}
+          envMapIntensity={1.4}
+        />
+      </mesh>
       {[0, 7, 14, 21.7].map((y) => (
         <group key={y}>
           <Box p={[0, y, 8.9]} s={[33, 0.38, 0.9]} c="#d2d7d2" metal={0.2} />
@@ -101,7 +82,16 @@ export function Building() {
           metal={0.65}
         />
       ))}
-      <Box p={[-11, 11.1, 9.3]} s={[4.8, 22.3, 1.5]} c="#c3c7c0" metal={0.1} />
+      <mesh position={[-11, 11.1, 9.3]} castShadow receiveShadow>
+        <boxGeometry args={[4.8, 22.3, 1.5]} />
+        <meshStandardMaterial
+          color="#e1d0ae"
+          map={stone}
+          bumpMap={stone}
+          bumpScale={0.025}
+          roughness={0.85}
+        />
+      </mesh>
       {Array.from({ length: 13 }, (_, i) => (
         <Box
           key={i}
@@ -164,49 +154,98 @@ export function Building() {
           metal={0.8}
         />
       ))}
-      {/* Arrival court, water and Saudi landscaping. */}
-      <Box p={[3, 0.05, 20]} s={[27, 0.1, 7]} c="#9ba8a7" metal={0} />
-      <Box p={[-14, 0.4, 19]} s={[9, 0.6, 5]} c="#c4c8c0" metal={0} />
-      <Box p={[-14, 0.72, 19]} s={[8.4, 0.04, 4.4]} c="#3b9eb2" metal={0.75} />
-      <Box p={[0, -0.06, 27]} s={[90, 0.08, 8]} c="#364c58" metal={0} />
-      <Box p={[30, -0.06, -9]} s={[8, 0.08, 65]} c="#364c58" metal={0} />
-      {Array.from({ length: 12 }, (_, i) => (
+      {/* Paved arrival court, reflective water and a shaded pedestrian entrance. */}
+      <mesh
+        position={[3, 0.07, 19.5]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[28, 7]} />
+        <meshStandardMaterial
+          map={stone}
+          color="#d3c9b5"
+          bumpMap={stone}
+          bumpScale={0.03}
+          roughness={0.85}
+        />
+      </mesh>
+      <Box p={[-14, 0.4, 19]} s={[9, 0.6, 5]} c="#c8bdab" metal={0} />
+      <mesh
+        ref={water}
+        position={[-14, 0.73, 19]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[8.4, 4.4]} />
+        <meshPhysicalMaterial
+          color="#467f83"
+          metalness={0.6}
+          roughness={0.13}
+          clearcoat={1}
+          bumpMap={ripples}
+          bumpScale={0.045}
+          envMapIntensity={1.5}
+        />
+      </mesh>
+      {[-17, -14, -11].map((x) => (
+        <group key={x}>
+          <mesh position={[x, 1.05, 19]}>
+            <cylinderGeometry args={[0.025, 0.04, 0.65, 8]} />
+            <meshStandardMaterial
+              color="#b2ded9"
+              transparent
+              opacity={0.65}
+              roughness={0.1}
+            />
+          </mesh>
+          <mesh position={[x, 0.755, 19]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.25, 0.29, 32]} />
+            <meshStandardMaterial color="#a4c8c3" transparent opacity={0.5} />
+          </mesh>
+        </group>
+      ))}
+      {[-6, -3, 0, 3, 6, 9, 12].map((x) => (
         <Box
-          key={i}
-          p={[-40 + i * 7, 0, 27]}
-          s={[3, 0.015, 0.15]}
-          c="#a9b8b6"
-        />
-      ))}
-      {[-23, -18, -3, 13, 23].map((x, i) => (
-        <Palm key={x} p={[x, 0.1, i % 2 ? 19 : 22]} height={i % 2 ? 5 : 6} />
-      ))}
-      {[-18, -10, -2, 6, 14].map((z) => (
-        <group key={z}>
-          <Box p={[-22, 0.25, z]} s={[4, 0.5, 5.5]} c="#7e927d" metal={0} />
-          <Tree p={[-22, 0.5, z]} />
-          <Palm p={[23, 0.1, z]} height={5} />
-        </group>
-      ))}
-      {[0, 1, 2, 3].map((i) => (
-        <group key={i} position={[22, 0, -25 + i * 5]}>
-          <Box p={[0, 0.03, 0]} s={[5, 0.02, 0.08]} c="#b7c3be" />
-          <Box
-            p={[0, 0.65, 1.8]}
-            s={[3.8, 1.2, 1.8]}
-            c={i % 2 ? "#d0d5cd" : "#3b5b6f"}
-          />
-          <Box p={[0, 1.3, 1.8]} s={[2, 0.6, 1.65]} c="#547385" />
-        </group>
-      ))}
-      {[-9, 9].map((x) => (
-        <Pipe
           key={x}
-          a={[x, 0.1, 23]}
-          b={[x, 3.4, 23]}
-          radius={0.07}
-          c="#354e5e"
+          p={[x, 6.37, 12]}
+          s={[0.1, 0.18, 6]}
+          c="#ad9774"
+          metal={0.1}
         />
+      ))}
+      {[-7, 13].map((x) => (
+        <group key={x}>
+          <Box p={[x, 0.35, 16.5]} s={[2, 0.7, 2]} c="#b7b2a3" metal={0} />
+          <mesh position={[x, 0.87, 16.5]} scale={[0.8, 0.55, 0.8]} castShadow>
+            <sphereGeometry args={[1, 16, 12]} />
+            <meshStandardMaterial color="#5b6b42" roughness={1} />
+          </mesh>
+        </group>
+      ))}
+      {Array.from({ length: 8 }, (_, i) => (
+        <Cylinder
+          key={i}
+          p={[-7 + i * 3, 0.5, 23]}
+          height={1}
+          radius={0.09}
+          c="#51595a"
+        />
+      ))}
+      {/* Shaded interiors and recessed mullions add depth behind the curtain wall. */}
+      {[3.5, 10.5, 17.5].map((y, f) => (
+        <group key={y}>
+          {Array.from({ length: 14 }, (_, i) => (
+            <mesh key={i} position={[-8 + i * 1.65, y, 8.69]}>
+              <planeGeometry args={[1.4, 2.3]} />
+              <meshStandardMaterial
+                color={(i + f) % 4 === 0 ? "#b6aa89" : "#304f5d"}
+                roughness={0.4}
+                metalness={0.45}
+                transparent
+                opacity={(i + f) % 4 === 0 ? 0.42 : 0.17}
+              />
+            </mesh>
+          ))}
+        </group>
       ))}
     </group>
   );

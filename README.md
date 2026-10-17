@@ -30,6 +30,10 @@ Arrival → cooling towers → electrical → mechanical → fabrication → civ
 - `?view=list` opens the photo tour directly. Both views have the same service information.
 - Local assets and fonts: the homepage needs no runtime CDN or account key.
 
+## Exterior detail
+
+The arrival now sits within a surrounding business district, with detailed palms, planted borders, animated pedestrians and birds, traffic, street furniture, reflective glass and a water feature. HDR lighting, atmospheric haze and a descending entry camera add depth. Desktop contact shading and bloom adapt to measured frame rate; phones use a lighter scene. Asset credits and rendering limits are documented in [exterior notes](docs/exterior-assets.md).
+
 ## Implementation
 
 | File                       | Responsibility                                                                                    |
