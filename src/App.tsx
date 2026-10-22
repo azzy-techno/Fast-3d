@@ -115,7 +115,9 @@ export default function App() {
       anchors: true,
     });
     lenis.current = scroller;
-    const update = (time: number) => scroller.raf(time * 1000);
+    // Keep scroll duration tied to elapsed time even when rendering drops frames.
+    // GSAP's lag-smoothed ticker time otherwise stretches Lenis navigation.
+    const update = () => scroller.raf(performance.now());
     scroller.on("scroll", ScrollTrigger.update);
     gsap.ticker.add(update);
     return () => {

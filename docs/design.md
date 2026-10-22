@@ -90,3 +90,9 @@ Expanded the arrival into a surrounding business district with varied building h
 The imported character rig was checked for correct metre-scale placement, changing bone poses and pavement movement; desktop has six figures and mobile three. Desktop and phone arrival compositions were visually inspected. Assets, provenance, adaptive rendering and the remaining limits on photorealism are recorded in `exterior-assets.md`.
 
 Validation: the `/Fast-3d/` production build and full browser suite pass, including all service scenes, navigation, sound, view restoration, Arabic, responsive widths, reduced motion, missing-WebGL recovery and automated accessibility checks. The final exterior rendering is additionally checked for successful local character/HDR loading under the project URL and browser runtime errors. Real hardware frame-rate benchmarking remains outstanding.
+
+## City continuity and pedestrian direction — 22 October 2026
+
+Corrected the pedestrian heading to respect the imported model's local −Z forward axis. Expanded the district from 16 to 35 buildings, with additional rows on the left. Extended road surfaces, lane markings and pavements beyond the camera's visible range, opened intersections and moved building footprints clear of the through roads. The model's foot orientation was checked against both travel directions, and all 35 building footprints were checked for building/road collisions.
+
+Lenis now receives monotonic elapsed time so low rendering frame rates cannot stretch a chapter jump through GSAP ticker lag smoothing.

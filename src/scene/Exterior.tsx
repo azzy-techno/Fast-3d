@@ -182,22 +182,42 @@ function City() {
       bands: Instance[] = [],
       rooftops: Instance[] = [];
     const sites = [
-      [-56, -23, 13, 18, 22],
+      [-56, -24, 13, 18, 22],
       [-51, -61, 22, 17, 32],
-      [-27, -72, 19, 16, 45],
+      [-12, -60, 19, 16, 45],
       [0, -81, 17, 18, 38],
-      [28, -73, 16, 17, 54],
+      [40, -86, 16, 17, 54],
       [56, -59, 24, 21, 30],
-      [62, -24, 21, 21, 37],
-      [91, -38, 17, 21, 58],
+      [62, -25, 21, 18, 37],
+      [105, -25, 17, 18, 58],
       [-85, -65, 17, 23, 49],
-      [-78, 2, 20, 15, 14],
+      [-80, -22, 20, 15, 14],
       [92, -90, 19, 19, 65],
       [-107, -115, 25, 22, 55],
       [-62, -120, 24, 24, 70],
-      [-20, -130, 20, 20, 63],
-      [35, -133, 21, 21, 76],
+      [-10, -130, 20, 20, 63],
+      [48, -133, 21, 21, 76],
       [70, -130, 20, 20, 51],
+      // Fill the left-hand district in staggered rows, with clear street corridors.
+      [-42, 23, 19, 18, 21],
+      [-69, 23, 20, 18, 29],
+      [-99, 23, 23, 18, 24],
+      [-127, 23, 20, 18, 36],
+      [-156, 23, 24, 18, 27],
+      [-108, -23, 20, 17, 33],
+      [-137, -23, 24, 17, 42],
+      [-166, -23, 22, 17, 30],
+      [-114, -65, 22, 23, 47],
+      [-145, -65, 23, 23, 37],
+      [-177, -65, 22, 23, 56],
+      [-141, -115, 21, 22, 64],
+      [-175, -115, 23, 22, 43],
+      [-108, -166, 22, 23, 62],
+      [-65, -166, 24, 24, 57],
+      [-10, -181, 20, 22, 70],
+      [65, -181, 22, 22, 63],
+      [-151, -173, 23, 24, 58],
+      [-198, -165, 24, 24, 74],
     ];
     sites.forEach(([x, z, w, d, h], n) => {
       x *= 1.22;
@@ -461,7 +481,8 @@ function Pedestrian({ index }: { index: number }) {
       0.12,
       lane ? 34 : 21.8,
     );
-    root.current.rotation.y = (direction * Math.PI) / 2;
+    // The imported Walk rig faces local -Z, not +Z. Match its facing to travel.
+    root.current.rotation.y = (-direction * Math.PI) / 2;
   });
   return (
     <group ref={root} name="walking-pedestrian">
@@ -648,16 +669,21 @@ export function Exterior({ mobile }: { mobile: boolean }) {
     stone = useSurface("stone");
   // Metre-scale paving on the large district plane, rather than giant tiles.
   useMemo(() => {
-    stone.repeat.set(180, 180);
+    stone.repeat.set(420, 420);
   }, [stone]);
   const markings = useMemo(() => {
     const items: Instance[] = [];
-    for (let i = 0; i < 32; i++)
-      items.push({ p: [-112 + i * 7, 0.02, 27], s: [3, 0.018, 0.12] });
+    for (let i = 0; i < 144; i++)
+      items.push({ p: [-500 + i * 7, 0.02, 27], s: [3, 0.018, 0.12] });
     for (let i = 0; i < 9; i++)
       items.push({ p: [34, 0.025, 23 + i], s: [3.6, 0.02, 0.46] });
-    for (let i = 0; i < 22; i++)
-      items.push({ p: [30, 0.02, -115 + i * 6], s: [0.12, 0.018, 2.5] });
+    for (let i = 0; i < 168; i++) {
+      const z = -500 + i * 6;
+      if (Math.abs(z - 27) > 6) {
+        items.push({ p: [30, 0.02, z], s: [0.12, 0.018, 2.5] });
+        items.push({ p: [-31, 0.02, z], s: [0.12, 0.018, 2.5] });
+      }
+    }
     return items;
   }, []);
   return (
@@ -667,18 +693,18 @@ export function Exterior({ mobile }: { mobile: boolean }) {
         position={[0, -0.5, -25]}
         receiveShadow
       >
-        <planeGeometry args={[600, 600]} />
+        <planeGeometry args={[1400, 1400]} />
         <meshStandardMaterial color="#9e9987" map={stone} roughness={1} />
       </mesh>
       <City />
-      {[-92, 92].map((x) => (
+      {[-267, 267].map((x) => (
         <mesh
           key={x}
           rotation={[-Math.PI / 2, 0, 0]}
           position={[x, -0.31, -32]}
           receiveShadow
         >
-          <planeGeometry args={[120, 8]} />
+          <planeGeometry args={[466, 8]} />
           <meshStandardMaterial map={road} roughness={0.95} />
         </mesh>
       ))}
@@ -687,7 +713,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
         position={[0, -0.31, -65]}
         receiveShadow
       >
-        <planeGeometry args={[300, 8]} />
+        <planeGeometry args={[1000, 8]} />
         <meshStandardMaterial map={road} roughness={0.95} />
       </mesh>
 
@@ -696,7 +722,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
         position={[0, -0.025, 27]}
         receiveShadow
       >
-        <planeGeometry args={[260, 9]} />
+        <planeGeometry args={[1000, 9]} />
         <meshStandardMaterial
           map={road}
           roughness={0.94}
@@ -706,14 +732,36 @@ export function Exterior({ mobile }: { mobile: boolean }) {
       </mesh>
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[30, -0.03, -40]}
+        position={[30, -0.03, 0]}
         receiveShadow
       >
-        <planeGeometry args={[8, 126]} />
+        <planeGeometry args={[8, 1000]} />
         <meshStandardMaterial map={road} roughness={0.94} />
       </mesh>
-      <Box p={[0, -0.1, 35]} s={[250, 0.35, 6]} c="#bcb7a5" metal={0} />
-      <Box p={[0, 0.04, 31.7]} s={[250, 0.25, 0.3]} c="#d3cbb8" metal={0} />
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[-31, -0.03, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[7, 1000]} />
+        <meshStandardMaterial map={road} roughness={0.94} />
+      </mesh>
+      {/* Pavements reach beyond the fog, with openings at both intersections. */}
+      {[
+        [-267.25, 465.5],
+        [-0.75, 53.5],
+        [267, 466],
+      ].map(([x, width]) => (
+        <group key={x}>
+          <Box p={[x, -0.1, 35]} s={[width, 0.35, 6]} c="#bcb7a5" metal={0} />
+          <Box
+            p={[x, 0.04, 31.7]}
+            s={[width, 0.25, 0.3]}
+            c="#d3cbb8"
+            metal={0}
+          />
+        </group>
+      ))}
       <Repeated items={markings} color="#ddd8c3" metal={0} />
       <Landscaping mobile={mobile} />
       {Array.from({ length: mobile ? 3 : 6 }, (_, i) => (
