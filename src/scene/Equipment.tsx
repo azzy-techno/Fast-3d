@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group } from "three";
 import { Box, Cylinder, Pipe, Screen } from "./Primitives";
@@ -27,6 +27,7 @@ function Label({
     ctx.fillText(text, 256, 48);
     return new CanvasTexture(canvas);
   }, [text]);
+  useEffect(() => () => texture.dispose(), [texture]);
   return (
     <mesh position={p}>
       <planeGeometry args={[width, (width * 96) / 512]} />
@@ -48,7 +49,7 @@ function Fan({ p, radius = 1 }: { p: Point; radius?: number }) {
         height={0.05}
         c="#142d3d"
       />
-      <group ref={blades} position={[0, 0.27, 0]}>
+      <group userData={{ dynamic: true }} ref={blades} position={[0, 0.27, 0]}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <group key={i} rotation={[0, (i * Math.PI) / 3, 0]}>
             <Box
@@ -416,7 +417,12 @@ function Conveyor({ vision = false }: { vision?: boolean }) {
   const goods = useRef<Group>(null);
   useFrame(({ clock }) => {
     if (goods.current)
-      goods.current.position.x = ((clock.elapsedTime * 0.3) % 2) - 1;
+      goods.current.children.forEach((box, i) => {
+        const x = ((clock.elapsedTime * 0.65 + i * 3.2) % 9.6) - 4.8;
+        box.position.x = x - [-3, 0, 3][i];
+        const edge = Math.min(1, (4.8 - Math.abs(x)) / 0.45);
+        box.scale.setScalar(Math.max(0.01, edge));
+      });
   });
   return (
     <group>
@@ -437,7 +443,7 @@ function Conveyor({ vision = false }: { vision?: boolean }) {
       {[-0.15, 2.15].map((z) => (
         <Box key={z} p={[0, 1.4, z]} s={[10, 0.24, 0.1]} c="#7a94a1" />
       ))}
-      <group ref={goods}>
+      <group userData={{ dynamic: true }} ref={goods}>
         {[-3, 0, 3].map((x) => (
           <group key={x}>
             <Box p={[x, 1.9, 1]} s={[1.15, 1, 1.2]} c="#ba9e75" metal={0} />
@@ -468,43 +474,62 @@ function Conveyor({ vision = false }: { vision?: boolean }) {
   );
 }
 function Robot({ p, mirrored = false }: { p: Point; mirrored?: boolean }) {
-  const arm = useRef<Group>(null);
+  const base = useRef<Group>(null),
+    shoulder = useRef<Group>(null),
+    elbow = useRef<Group>(null),
+    tool = useRef<Group>(null);
   useFrame(({ clock }) => {
-    if (arm.current)
-      arm.current.rotation.y =
-        Math.sin(clock.elapsedTime * 0.4) * 0.24 + (mirrored ? Math.PI : 0);
+    const t = clock.elapsedTime * 0.65 + (mirrored ? Math.PI : 0);
+    if (base.current)
+      base.current.rotation.y = Math.sin(t) * 0.38 + (mirrored ? Math.PI : 0);
+    if (shoulder.current)
+      shoulder.current.rotation.z = -0.35 + Math.sin(t + 0.4) * 0.22;
+    if (elbow.current) elbow.current.rotation.z = -0.8 + Math.sin(t + 1) * 0.3;
+    if (tool.current) tool.current.rotation.z = 1.15 - Math.sin(t + 0.6) * 0.15;
   });
-  const c = "#e0a346";
+  const c = "#d9a153";
   return (
     <group position={p}>
       <Box p={[0, 0.15, 0]} s={[1.8, 0.3, 1.8]} c="#526879" />
       <Cylinder p={[0, 0.6, 0]} radius={0.62} height={0.8} c={c} />
-      <group ref={arm} position={[0, 0.9, 0]}>
+      <group userData={{ dynamic: true }} ref={base} position={[0, 0.9, 0]}>
         <Cylinder
-          p={[0, 0.1, 0]}
-          radius={0.48}
-          height={0.55}
+          radius={0.47}
+          height={0.4}
           r={[Math.PI / 2, 0, 0]}
-          c="#6c7f88"
+          c="#536572"
         />
-        <Box
-          p={[0.45, 1.05, 0]}
-          s={[0.55, 2.2, 0.55]}
-          r={[0, 0, -0.45]}
-          c={c}
-        />
-        <Cylinder
-          p={[0.9, 2, 0]}
-          radius={0.38}
-          height={0.65}
-          r={[Math.PI / 2, 0, 0]}
-          c="#6c7f88"
-        />
-        <Box p={[1.6, 1.95, 0]} s={[1.6, 0.4, 0.4]} r={[0, 0, -0.1]} c={c} />
-        <Box p={[2.35, 1.65, 0]} s={[0.25, 0.6, 0.35]} c="#c0c9cc" />
-        {[-0.22, 0.22].map((z) => (
-          <Box key={z} p={[2.35, 1.35, z]} s={[0.15, 0.45, 0.08]} c="#1c3545" />
-        ))}
+        <group ref={shoulder}>
+          <Box p={[0, 0.95, 0]} s={[0.48, 1.9, 0.48]} c={c} />
+          <Cylinder
+            p={[0, 1.9, 0]}
+            radius={0.34}
+            height={0.62}
+            r={[Math.PI / 2, 0, 0]}
+            c="#536572"
+          />
+          <group ref={elbow} position={[0, 1.9, 0]}>
+            <Box p={[0, 0.8, 0]} s={[0.35, 1.6, 0.35]} c={c} />
+            <Cylinder
+              p={[0, 1.6, 0]}
+              radius={0.22}
+              height={0.46}
+              r={[Math.PI / 2, 0, 0]}
+              c="#536572"
+            />
+            <group ref={tool} position={[0, 1.6, 0]}>
+              <Box p={[0, 0.23, 0]} s={[0.28, 0.46, 0.35]} c="#b3c4c7" />
+              {[-0.22, 0.22].map((z) => (
+                <Box
+                  key={z}
+                  p={[0, 0.53, z]}
+                  s={[0.15, 0.4, 0.08]}
+                  c="#223c47"
+                />
+              ))}
+            </group>
+          </group>
+        </group>
       </group>
     </group>
   );
@@ -584,7 +609,7 @@ export function IoT() {
         radius={0.04}
         c="#293f4c"
       />
-      <group ref={trace} position={[0, 3.2, 0.3]}>
+      <group userData={{ dynamic: true }} ref={trace} position={[0, 3.2, 0.3]}>
         <Box s={[0.14, 0.14, 0.14]} c="#9deccf" glow />
       </group>
       <Screen p={[-0.5, 2.7, -2.8]} s={[4, 2, 0.05]} color="#7cdbb7" />

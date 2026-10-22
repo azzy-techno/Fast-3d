@@ -5,46 +5,22 @@ import {
   Vector3,
   Group,
   ACESFilmicToneMapping,
-  BufferGeometry,
-  Float32BufferAttribute,
   Color,
   Fog,
   DirectionalLight,
   HemisphereLight,
   AmbientLight,
+  SpotLight,
 } from "three";
 import { Environment, Sky, PerformanceMonitor } from "@react-three/drei";
-
 import { Exterior } from "./Exterior";
 import { assetUrl } from "../lib/assets";
-import { chapters, type Point } from "../data/chapters";
 import { useTour } from "../store";
 import { Building } from "./Building";
-import { Room } from "./Primitives";
-import { equipment } from "./Equipment";
-
+import { Interior, RoofAccess } from "./Architecture";
+import { Atmosphere } from "./Atmosphere";
+import { journeyState, sampleJourney } from "./journey";
 const ExteriorEffects = lazy(() => import("./ExteriorEffects"));
-
-const overview: Point = [49, 29, 67];
-const overviewTarget: Point = [0, 10, -5];
-const route = [
-  { p: overview, target: overviewTarget },
-  ...chapters.map((c, i) => ({
-    p: [
-      c.origin[0] + (i === 7 ? 12 : 11),
-      c.origin[1] + (i === 4 ? 9 : 6.7),
-      c.origin[2] + 15.5,
-    ] as Point,
-    target: [c.origin[0], c.origin[1] + 1.7, c.origin[2]] as Point,
-  })),
-  { p: [57, 43, 50] as Point, target: [0, 8, -9] as Point },
-];
-const fromPos = new Vector3(),
-  toPos = new Vector3(),
-  fromTarget = new Vector3(),
-  toTarget = new Vector3(),
-  focus = new Vector3(...overviewTarget),
-  desired = new Vector3();
 
 function World({
   onReady,
@@ -55,174 +31,198 @@ function World({
   rtl: boolean;
   mobile: boolean;
 }) {
-  const shell = useRef<Group>(null);
-  const structure = useRef<Group>(null);
-  const rooms = useRef<(Group | null)[]>([]);
+  const shell = useRef<Group>(null),
+    city = useRef<Group>(null);
   const { camera, size, gl, scene } = useThree();
-  const exteriorFog = useMemo(() => new Color("#a2acac"), []);
-  const interiorFog = useMemo(() => new Color("#0d2435"), []);
-  const ready = useRef(false);
-  const cameraInitialized = useRef(false);
-  const sun = useRef<DirectionalLight>(null);
-  const fill = useRef<DirectionalLight>(null);
-  const hemisphere = useRef<HemisphereLight>(null);
-  const ambient = useRef<AmbientLight>(null);
+  const ready = useRef(false),
+    initialized = useRef(false),
+    warmed = useRef(false);
+  const progress = useRef(useTour.getState().progress);
+  const sun = useRef<DirectionalLight>(null),
+    hemisphere = useRef<HemisphereLight>(null),
+    ambient = useRef<AmbientLight>(null),
+    localLight = useRef<SpotLight>(null);
+  const vectors = useMemo(
+    () => ({
+      p: new Vector3(),
+      target: new Vector3(),
+      exterior: new Color("#aebfc1"),
+      interior: new Color("#bdc4bc"),
+    }),
+    [],
+  );
   useEffect(() => {
-    const cam = camera as PerspectiveCamera;
-    const offset = mobile ? -0.02 : rtl ? 0.19 : -0.19;
-    cam.setViewOffset(
-      size.width,
-      size.height,
-      size.width * offset,
-      mobile ? size.height * 0.19 : 0,
-      size.width,
-      size.height,
-    );
-    cam.updateProjectionMatrix();
-  }, [camera, size, rtl, mobile]);
-  useFrame((state, dt) => {
-    const progress = useTour.getState().progress;
-    const index = Math.min(11, Math.floor(progress));
-    let blend = Math.max(0, Math.min(1, (progress - index - 0.25) / 0.65));
-    blend = blend * blend * (3 - 2 * blend);
-    const a = route[index],
-      b = route[index + 1];
-    fromPos.set(...a.p);
-    toPos.set(...b.p);
-    fromTarget.set(...a.target);
-    toTarget.set(...b.target);
-    desired.copy(fromPos).lerp(toPos, blend);
-    // A gentle descending arc gives the arrival-to-rooftop movement spatial depth.
-    if (index === 0) {
-      desired.x += Math.sin(blend * Math.PI) * 5;
-      desired.y += Math.sin(blend * Math.PI) * 3;
-    }
-    if (mobile) {
-      const transition = Math.min(1, progress, 12 - progress);
-      const scale = Math.max(
-        1.08,
-        (size.height / size.width) * (1.02 - 0.26 * transition),
-      );
-      const cam = camera as PerspectiveCamera;
-      const shift = size.height * (0.19 + 0.055 * transition);
-      if (cam.view && Math.abs(cam.view.offsetY - shift) > 0.1) {
-        cam.view.offsetY = shift;
-        cam.updateProjectionMatrix();
+    let cancelled = false;
+    const hidden: Group[] = [];
+    scene.traverse((object) => {
+      if (!object.visible) {
+        hidden.push(object as Group);
+        object.visible = true;
       }
-      desired
-        .sub(fromTarget.clone().lerp(toTarget, blend))
-        .multiplyScalar(scale)
-        .add(fromTarget.clone().lerp(toTarget, blend));
+    });
+    const compile = gl.compileAsync(scene, camera);
+    hidden.forEach((object) => {
+      object.visible = false;
+    });
+    compile
+      .then(() => {
+        if (!cancelled) warmed.current = true;
+      })
+      .catch(() => {
+        if (!cancelled) warmed.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [gl, scene, camera]);
+  useFrame((_, dt) => {
+    const requested = useTour.getState().progress;
+    if (!initialized.current) {
+      progress.current = requested;
+      initialized.current = true;
     }
-    const desiredFocus = fromTarget.lerp(toTarget, blend);
-    if (!cameraInitialized.current) {
-      camera.position.copy(desired);
-      focus.copy(desiredFocus);
-      cameraInitialized.current = true;
-    } else {
-      const damping = 1 - Math.exp(-Math.min(dt, 0.08) * 7);
-      camera.position.lerp(desired, damping);
-      focus.lerp(desiredFocus, damping);
+    // Smooth a single scalar, then sample the constrained route. Interpolating
+    // camera positions independently would cut corners through corridor walls.
+    progress.current +=
+      (requested - progress.current) * (1 - Math.exp(-Math.min(dt, 0.1) * 13));
+    const p = progress.current;
+    journeyState.progress = p;
+    const fov = sampleJourney(p, vectors.p, vectors.target);
+    const inside =
+      Math.min(1, Math.max(0, (p - 1.3) / 0.13)) *
+      (1 - Math.min(1, Math.max(0, (p - 11.66) / 0.16)));
+    const outside = 1 - inside;
+    const cam = camera as PerspectiveCamera;
+    if (mobile && outside > 0) {
+      const scale =
+        1 + Math.max(0, (size.height / size.width) * 0.95 - 1) * outside;
+      vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
     }
-    camera.lookAt(focus);
-    const outside = 1 - Math.min(1, Math.max(0, (progress - 0.48) / 0.25));
-    const exteriorAmount =
-      progress > 11.65 ? Math.min(1, (progress - 11.65) / 0.3) : outside;
-    if (sun.current) {
-      sun.current.position.set(
-        25 - 65 * exteriorAmount,
-        55 - 25 * exteriorAmount,
-        35 + 5 * exteriorAmount,
+    camera.position.copy(vectors.p);
+    camera.lookAt(vectors.target);
+    // Lens shifts compose the architecture beside/beyond the copy without
+    // moving the camera out through an interior wall on narrow screens.
+    const offsetX = mobile
+      ? 0
+      : (rtl ? 1 : -1) * (0.19 * outside + 0.09 * inside);
+    const offsetY = mobile ? 0.19 * outside + 0.1 * inside : 0;
+    const nextFov = fov + (mobile ? inside * 8 : 0);
+    if (
+      Math.abs(cam.fov - nextFov) > 0.02 ||
+      !cam.view ||
+      Math.abs(cam.view.offsetX - size.width * offsetX) > 0.1 ||
+      Math.abs(cam.view.offsetY - size.height * offsetY) > 0.1 ||
+      cam.view.fullWidth !== size.width ||
+      cam.view.fullHeight !== size.height
+    ) {
+      cam.fov = nextFov;
+      cam.setViewOffset(
+        size.width,
+        size.height,
+        size.width * offsetX,
+        size.height * offsetY,
+        size.width,
+        size.height,
       );
-      sun.current.intensity = 3.5 - 0.4 * exteriorAmount;
+      cam.updateProjectionMatrix();
     }
-    if (fill.current) fill.current.intensity = 2 - 1.1 * exteriorAmount;
+    if (sun.current) sun.current.intensity = 2.6 * outside + 0.8 * inside;
+    if (ambient.current)
+      ambient.current.intensity = 0.36 * outside + 0.38 * inside;
     if (hemisphere.current)
-      hemisphere.current.intensity = 2 - 1.2 * exteriorAmount;
-    if (ambient.current) ambient.current.intensity = 0.7 - 0.3 * exteriorAmount;
+      hemisphere.current.intensity = 0.85 * outside + 0.75 * inside;
+    if (localLight.current) {
+      localLight.current.position.set(
+        vectors.p.x,
+        vectors.p.y + 1,
+        vectors.p.z + 1,
+      );
+      localLight.current.intensity = 32 * inside;
+      localLight.current.target.position.set(
+        vectors.target.x,
+        vectors.target.y - 1.1,
+        vectors.target.z,
+      );
+      localLight.current.target.updateMatrixWorld();
+    }
     if (scene.fog instanceof Fog) {
-      scene.fog.color.copy(interiorFog).lerp(exteriorFog, exteriorAmount);
-      scene.fog.near = 90 + exteriorAmount * 20;
-      scene.fog.far = 220 + exteriorAmount * 100;
+      scene.fog.color.copy(vectors.interior).lerp(vectors.exterior, outside);
+      scene.fog.near = 35 + outside * 90;
+      scene.fog.far = 100 + outside * 250;
     }
     if (scene.background instanceof Color)
-      scene.background.copy(interiorFog).lerp(exteriorFog, exteriorAmount);
-    if (shell.current)
-      shell.current.visible = progress < 0.72 || progress > 11.7;
-    if (structure.current)
-      structure.current.visible = progress >= 0.6 && progress <= 11.8;
-    rooms.current.forEach((g, i) => {
-      if (g) g.visible = Math.abs(progress - (i + 1)) < 0.95;
-    });
-    if (!ready.current && state.clock.elapsedTime > 0.15) {
+      scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
+    if (shell.current) shell.current.visible = p < 1.38 || p > 11.64;
+    if (city.current) city.current.visible = p < 1.9 || p > 11.64;
+    gl.domElement.dataset.journey = p.toFixed(4);
+    if (warmed.current && !ready.current) {
       ready.current = true;
       gl.domElement.dataset.ready = "true";
       onReady();
     }
-  });
+  }, -1);
   return (
     <>
-      <color attach="background" args={["#0d2435"]} />
-      <fog attach="fog" args={["#0d2435", 110, 240]} />
-      <ambientLight ref={ambient} intensity={0.4} />
-      <hemisphereLight ref={hemisphere} args={["#bbd6e4", "#756b52", 0.8]} />
+      <color attach="background" args={["#aebfc1"]} />
+      <fog attach="fog" args={["#aebfc1", 125, 350]} />
+      <ambientLight ref={ambient} intensity={0.36} />
+      <hemisphereLight ref={hemisphere} args={["#d4e6eb", "#82745e", 0.85]} />
       <directionalLight
         ref={sun}
-        position={[-40, 30, 40]}
-        intensity={3.1}
-        color="#ffe0af"
+        position={[-40, 45, 35]}
+        intensity={2.6}
+        color="#ffdfb1"
         castShadow
         shadow-mapSize={mobile ? [1024, 1024] : [2048, 2048]}
         shadow-camera-left={-55}
         shadow-camera-right={55}
         shadow-camera-top={60}
         shadow-camera-bottom={-60}
-        shadow-camera-far={160}
-        shadow-bias={-0.0007}
-        shadow-normalBias={0.05}
+        shadow-camera-far={170}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.025}
       />
       <directionalLight
-        ref={fill}
-        position={[-25, 30, -15]}
-        intensity={0.9}
-        color="#7fb9e3"
+        position={[20, 30, -15]}
+        intensity={0.65}
+        color="#bedce9"
+      />
+      <spotLight
+        ref={localLight}
+        color="#fff1d9"
+        intensity={0}
+        distance={18}
+        decay={1.7}
+        angle={1.15}
+        penumbra={0.8}
+        castShadow
+        shadow-mapSize={[512, 512]}
+        shadow-camera-near={0.2}
+        shadow-camera-far={20}
+        shadow-bias={-0.0003}
+        shadow-normalBias={0.015}
       />
       <Environment
         files={assetUrl("exterior/sunset.hdr")}
-        environmentIntensity={0.7}
+        environmentIntensity={0.65}
       />
-      <group ref={shell}>
+      <group ref={city}>
         <Sky
           distance={450}
-          sunPosition={[-100, 28, -70]}
-          turbidity={7}
-          rayleigh={1.2}
-          mieCoefficient={0.008}
-          mieDirectionalG={0.85}
+          sunPosition={[-100, 40, -70]}
+          turbidity={3.2}
+          rayleigh={1.5}
+          mieCoefficient={0.005}
+          mieDirectionalG={0.8}
         />
         <Exterior mobile={mobile} />
+      </group>
+      <Atmosphere mobile={mobile} />
+      <group ref={shell}>
         <Building />
+        <RoofAccess />
       </group>
-      <group ref={structure} visible={false}>
-        <Structure />
-      </group>
-      {chapters.map((chapter, i) => {
-        const Equipment = equipment[i];
-        return (
-          <group
-            key={chapter.id}
-            ref={(el) => {
-              rooms.current[i] = el;
-            }}
-            position={chapter.origin}
-            visible={false}
-          >
-            <Room color={chapter.color}>
-              <Equipment />
-            </Room>
-          </group>
-        );
-      })}
+      <Interior />
     </>
   );
 }
@@ -238,7 +238,6 @@ export default function Experience({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mobile, setMobile] = useState(window.innerWidth < 900);
   const [enhanced, setEnhanced] = useState(true);
-  const outside = useTour((s) => s.active === 0 || s.active === 12);
   useEffect(() => {
     const canvas = canvasRef.current;
     const lost = (event: Event) => {
@@ -257,14 +256,9 @@ export default function Experience({
     <div className="scene" aria-hidden="true">
       <Canvas
         ref={canvasRef}
-        dpr={mobile ? 1 : [1, 1.25]}
+        dpr={mobile ? 1 : enhanced ? [1, 1.25] : 1}
         shadows
-        camera={{
-          position: overview,
-          fov: mobile ? 48 : 42,
-          near: 0.1,
-          far: 400,
-        }}
+        camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 450 }}
         gl={{
           antialias: true,
           alpha: false,
@@ -272,19 +266,16 @@ export default function Experience({
           toneMapping: ACESFilmicToneMapping,
         }}
         fallback={<span>3D rendering is unavailable. Use the photo tour.</span>}
-        onCreated={({ gl }) => {
-          gl.setClearColor("#0d2435");
-        }}
       >
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
           <PerformanceMonitor
-            ms={400}
-            iterations={3}
+            ms={500}
+            iterations={4}
             bounds={() => [24, 45]}
             onDecline={() => setEnhanced(false)}
           />
-          {!mobile && enhanced && outside && (
+          {!mobile && enhanced && (
             <Suspense fallback={null}>
               <ExteriorEffects />
             </Suspense>
@@ -292,32 +283,5 @@ export default function Experience({
         </Suspense>
       </Canvas>
     </div>
-  );
-}
-function Structure() {
-  const geometry = useMemo(() => {
-    const vertices: number[] = [];
-    const line = (a: Point, b: Point) => vertices.push(...a, ...b);
-    for (const y of [-5, 3, 8, 15, 23]) {
-      line([-17, y, 9], [17, y, 9]);
-      line([17, y, 9], [17, y, -36]);
-      line([17, y, -36], [-17, y, -36]);
-      line([-17, y, -36], [-17, y, 9]);
-    }
-    for (const x of [-17, 17])
-      for (const z of [-36, -14, 9]) line([x, -5, z], [x, 23, z]);
-    const g = new BufferGeometry();
-    g.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-    return g;
-  }, []);
-  return (
-    <lineSegments geometry={geometry}>
-      <lineBasicMaterial
-        color="#7ba9c1"
-        transparent
-        opacity={0.13}
-        depthWrite={false}
-      />
-    </lineSegments>
   );
 }

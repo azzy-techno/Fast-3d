@@ -1,0 +1,93 @@
+import assert from "node:assert/strict";
+import { build } from "esbuild";
+import { pathToFileURL } from "node:url";
+import { mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+const dir = await mkdtemp(path.join(os.tmpdir(), "fast-route-"));
+try {
+  const file = path.join(dir, "route.mjs");
+  await build({
+    stdin: {
+      contents:
+        'export * from "./src/scene/journey.ts"; export { Vector3 } from "three";',
+      resolveDir: process.cwd(),
+    },
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    outfile: file,
+  });
+  const { sampleJourney, serviceRooms, Vector3 } = await import(
+    pathToFileURL(file)
+  );
+  const p = new Vector3(),
+    target = new Vector3(),
+    previous = new Vector3(),
+    reverse = new Vector3(),
+    reverseTarget = new Vector3();
+  let closest = Infinity,
+    maxStep = 0,
+    doors = 0;
+  for (let n = 0; n <= 12000; n++) {
+    const progress = n / 1000;
+    sampleJourney(progress, p, target);
+    assert([...p.toArray(), ...target.toArray()].every(Number.isFinite));
+    closest = Math.min(closest, p.distanceTo(target));
+    assert(
+      p.distanceTo(target) > 0.5,
+      `Degenerate look direction at ${progress}`,
+    );
+    if (n) {
+      maxStep = Math.max(maxStep, p.distanceTo(previous));
+      assert(
+        p.distanceTo(previous) < 0.9,
+        `Camera discontinuity at ${progress}`,
+      );
+    }
+    if (progress >= 2 && progress <= 11.4) {
+      assert(
+        p.y > 7.4 && p.y < 8.5,
+        `Camera outside service floor at ${progress}`,
+      );
+      assert(
+        Math.abs(p.x) < 4.1,
+        `Camera enters equipment envelope at ${progress}`,
+      );
+      if (Math.abs(Math.abs(p.x) - 2.32) < 0.05) {
+        const room = serviceRooms.find(
+          (room) =>
+            Math.sign(p.x) === room.side &&
+            Math.abs(p.z - (room.z + 2.5)) < 0.84,
+        );
+        assert(
+          room,
+          `Camera crosses solid partition instead of doorway at ${progress}: ${p.toArray()}`,
+        );
+        doors++;
+      }
+    }
+    sampleJourney(progress, reverse, reverseTarget);
+    assert(
+      p.equals(reverse) && target.equals(reverseTarget),
+      "Sampling must be deterministic",
+    );
+    previous.copy(p);
+  }
+  assert(doors > 10);
+  console.log(
+    JSON.stringify(
+      {
+        passed: true,
+        samples: 12001,
+        minimumTargetDistance: closest,
+        maximumStepAtOneThousandthProgress: maxStep,
+        doorwaySamples: doors,
+      },
+      null,
+      2,
+    ),
+  );
+} finally {
+  await rm(dir, { recursive: true, force: true });
+}

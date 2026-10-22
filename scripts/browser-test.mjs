@@ -168,6 +168,99 @@ try {
     "11 chapters, correct live destinations, actual WebGL render, real readiness loader, sound off initially",
   );
 
+  // Exercise travel intervals as well as destination screenshots: the interior
+  // must stay mounted and reverse scrubbing must return to the same route point.
+  async function travelTo(progress) {
+    await page.evaluate((progress) => {
+      const ids = [
+        "arrival",
+        ...Array.from(document.querySelectorAll(".chapter")).map((el) => el.id),
+        "together",
+      ];
+      const index = Math.min(11, Math.floor(progress));
+      const a = document.getElementById(ids[index]).offsetTop;
+      const b =
+        index === 11
+          ? document.documentElement.scrollHeight - innerHeight
+          : document.getElementById(ids[index + 1]).offsetTop;
+      scrollTo(0, a + (b - a) * (progress - index));
+    }, progress);
+    const start = Date.now();
+    while (Date.now() - start < 20000) {
+      const rendered = await page.evaluate(() =>
+        Number(document.querySelector("canvas")?.dataset.journey),
+      );
+      if (Math.abs(rendered - progress) < 0.015) return;
+      await delay(150);
+    }
+    throw new Error(`Route did not settle at ${progress}`);
+  }
+  for (const progress of [1.34, 1.65, 1.84, 1.94, 2.55, 1.65]) {
+    await travelTo(progress);
+    assert.equal(
+      await page.evaluate(
+        () =>
+          !!document.querySelector("canvas[data-ready]") &&
+          !document.querySelector(".loader"),
+      ),
+      true,
+    );
+    if (progress === 1.65) await shot("desktop-workplace");
+    if (progress === 2.55) await shot("desktop-service-corridor");
+  }
+  const furniture = await page.evaluate(() =>
+    performance
+      .getEntriesByType("resource")
+      .filter((r) => r.name.includes("/interior/lounge-"))
+      .map((r) => r.name),
+  );
+  assert(
+    furniture.some((url) => url.endsWith("lounge-chair.glb")) &&
+      furniture.some((url) => url.endsWith("lounge-sofa.glb")),
+    "Licensed furniture must load",
+  );
+  assert.match(
+    await page.evaluate(
+      () => document.querySelector(".journey-headline").textContent,
+    ),
+    /people inside/,
+  );
+  await click(".cinema-toggle");
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector(".app").classList.contains("cinematic"),
+    ),
+    true,
+  );
+  await shot("desktop-cinema");
+  await click(".cinema-toggle");
+  await click(".plan-toggle");
+  assert.equal(
+    await page.evaluate(
+      () => document.querySelector("#journey-floor-plan").hidden,
+    ),
+    false,
+  );
+  await shot("desktop-floor-plan");
+  await click(".plan-drawing li:first-child button");
+  await waitFor(
+    page,
+    () =>
+      Math.abs(scrollY - document.getElementById("electrical").offsetTop) < 8,
+    "floor plan service navigation",
+  );
+  assert.equal(
+    await page.evaluate(
+      () => document.querySelector("#journey-floor-plan").hidden,
+    ),
+    true,
+  );
+  await travelTo(0);
+  assert.deepEqual(await page.evaluate(() => window.__runtimeErrors), []);
+  results.push(
+    "Roof doors, furnished workplace, service lift and corridor render continuously in both scroll directions; cinema and floor-plan navigation work",
+  );
+
   await click(".header-nav button");
   assert.equal(
     await page.evaluate(() => document.querySelector("dialog").open),
@@ -403,7 +496,22 @@ try {
       window.scrollTo(0, document.getElementById("cooling").offsetTop),
     );
     await delay(1800);
-    if (width === 390) await shot("mobile-cooling");
+    if (width === 390) {
+      await shot("mobile-cooling");
+      await travelTo(1.65);
+      await shot("mobile-workplace");
+      await travelTo(2);
+      await shot("mobile-electrical");
+      await click(".plan-toggle");
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+        true,
+      );
+      await shot("mobile-floor-plan");
+      await click(".plan-toggle");
+    }
   }
   results.push(
     "Arabic / RTL, 3D restoration, 768px / 390px / 320px responsive layouts",

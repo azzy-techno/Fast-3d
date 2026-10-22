@@ -1,0 +1,148 @@
+import fs from "node:fs/promises";
+import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { openBrowser } from "@remotion/renderer";
+const server = spawn(
+  process.execPath,
+  [
+    "node_modules/vite/bin/vite.js",
+    "preview",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "4175",
+    "--strictPort",
+  ],
+  { stdio: "pipe", env: { ...process.env, BASE_PATH: "/Fast-3d/" } },
+);
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+let browser;
+try {
+  for (let i = 0; i < 100; i++) {
+    try {
+      if ((await fetch("http://127.0.0.1:4175/Fast-3d/")).ok) break;
+    } catch {}
+    await delay(100);
+  }
+  browser = await openBrowser("chrome", {
+    browserExecutable: "/usr/bin/chromium",
+    chromiumOptions: { gl: "swangle" },
+  });
+  const page = await browser.newPage({
+    context: () => null,
+    logLevel: "error",
+    indent: false,
+    pageIndex: 0,
+    onBrowserLog: (log) => {
+      if (log.type === "error") console.log("BROWSER", log.text);
+    },
+    onLog: () => {},
+  });
+  await page.setViewport({ width: 1440, height: 1000, deviceScaleFactor: 1 });
+  await page.goto({ url: "http://127.0.0.1:4175/Fast-3d/", timeout: 120000 });
+  for (let i = 0; i < 240; i++) {
+    if (
+      await page.evaluate(
+        () =>
+          !!document.querySelector("canvas[data-ready]") &&
+          !document.querySelector(".loader"),
+      )
+    )
+      break;
+    await delay(500);
+  }
+  console.log(
+    "READY",
+    await page.evaluate(() => ({
+      ready: !!document.querySelector("canvas[data-ready]"),
+      failure: document.querySelector(".fallback-message")?.textContent,
+    })),
+  );
+  assert.equal(
+    await page.evaluate(
+      () =>
+        !!document.querySelector("canvas[data-ready]") &&
+        !document.querySelector(".fallback-message"),
+    ),
+    true,
+    "The real 3D scene must be ready before capture",
+  );
+  await fs.mkdir("artifacts/journey", { recursive: true });
+  async function capture(p, name, mobile = false) {
+    if (
+      process.env.JOURNEY_SHOTS &&
+      !process.env.JOURNEY_SHOTS.split(",").includes(name)
+    )
+      return;
+    if (mobile)
+      await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
+    await page.evaluate((p) => {
+      const ids = [
+        "arrival",
+        "cooling",
+        "electrical",
+        "mechanical",
+        "fabrication",
+        "civil",
+        "fire",
+        "it",
+        "manufacturing",
+        "industry",
+        "iiot",
+        "vision",
+        "together",
+      ];
+      const i = Math.min(11, Math.floor(p));
+      const a = document.getElementById(ids[i]).offsetTop;
+      const b =
+        i === 11
+          ? document.documentElement.scrollHeight - innerHeight
+          : document.getElementById(ids[i + 1]).offsetTop;
+      scrollTo(0, a + (b - a) * (p - i));
+    }, p);
+    let settled = false;
+    for (let i = 0; i < 100; i++) {
+      const actual = await page.evaluate(() =>
+        Number(document.querySelector("canvas")?.dataset.journey),
+      );
+      if (Math.abs(actual - p) < 0.01) {
+        settled = true;
+        break;
+      }
+      await delay(200);
+    }
+    assert(settled, `Camera must settle before capture: ${name}`);
+    await delay(300);
+    const result = await page
+      ._client()
+      .send("Page.captureScreenshot", { format: "png" });
+    await fs.writeFile(
+      `artifacts/journey/${name}.png`,
+      Buffer.from(result.value.data, "base64"),
+    );
+    console.log(
+      "SHOT",
+      name,
+      await page.evaluate(
+        () => document.querySelector("canvas")?.dataset.journey,
+      ),
+    );
+  }
+  await capture(0, "arrival");
+  await capture(1, "roof");
+  await capture(1.34, "roof-door");
+  await capture(1.53, "workplace-entry");
+  await capture(1.65, "offices");
+  await capture(1.74, "office-corridor");
+  await capture(1.94, "systems-entry");
+  await capture(2, "electrical");
+  await capture(2.55, "service-corridor");
+  await capture(3, "mechanical");
+  await capture(8, "manufacturing");
+  await capture(10, "iiot");
+  await capture(2, "phone-electrical", true);
+  await capture(1.65, "phone-offices", true);
+} finally {
+  if (browser) await browser.close({ silent: true });
+  server.kill("SIGTERM");
+}

@@ -5,6 +5,8 @@ import {
   MeshStandardMaterial,
   Vector3,
   Quaternion,
+  CanvasTexture,
+  SRGBColorSpace,
 } from "three";
 import type { Point } from "../data/chapters";
 const box = new BoxGeometry(1, 1, 1);
@@ -114,6 +116,63 @@ export function Pipe({
     />
   );
 }
+const dashboardTextures = new Map<string, CanvasTexture>();
+function dashboardTexture(color: string) {
+  if (dashboardTextures.has(color)) return dashboardTextures.get(color)!;
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 320;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#132b36";
+  ctx.fillRect(0, 0, 512, 320);
+  ctx.fillStyle = "#1d3b46";
+  ctx.fillRect(0, 0, 512, 52);
+  ctx.font = "500 18px sans-serif";
+  ctx.fillStyle = "#d3ded9";
+  ctx.fillText("FAST / SYSTEM OVERVIEW", 20, 32);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(476, 26, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = "12px sans-serif";
+  ctx.fillStyle = "#9aafb2";
+  ctx.fillText("OPERATING SEQUENCE", 22, 82);
+  ctx.fillText("CONNECTED", 368, 82);
+  ctx.strokeStyle = "#31505a";
+  ctx.lineWidth = 1;
+  for (let y = 110; y < 235; y += 30) {
+    ctx.beginPath();
+    ctx.moveTo(22, y);
+    ctx.lineTo(490, y);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let x = 22; x < 490; x += 4) {
+    const y = 170 + Math.sin(x * 0.025) * 30 + Math.cos(x * 0.073) * 11;
+    if (x === 22) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  for (let i = 0; i < 3; i++) {
+    const x = 22 + i * 158;
+    ctx.fillStyle = "#203e46";
+    ctx.fillRect(x, 252, 144, 46);
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 10, 263, 4, 24);
+    ctx.font = "11px sans-serif";
+    ctx.fillStyle = "#a9b9b8";
+    ctx.fillText(["POWER", "FLOW", "NETWORK"][i], x + 23, 269);
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#e2e7df";
+    ctx.fillText("SEQUENCE ACTIVE", x + 23, 287);
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  dashboardTextures.set(color, texture);
+  return texture;
+}
 export function Screen({
   p,
   s = [1.1, 0.65, 0.06],
@@ -123,25 +182,14 @@ export function Screen({
   s?: Point;
   color?: string;
 }) {
+  const map = useMemo(() => dashboardTexture(color), [color]);
   return (
     <group position={p}>
-      <Box s={[s[0] + 0.15, s[1] + 0.15, 0.12]} c="#102336" />
-      <Box p={[0, 0, 0.075]} s={s} c="#123d53" />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <Box
-          key={i}
-          p={[-s[0] * 0.35 + i * s[0] * 0.17, -s[1] * 0.12, 0.115]}
-          s={[s[0] * 0.08, s[1] * (0.2 + ((i * 3) % 5) * 0.12), 0.012]}
-          c={color}
-          glow
-        />
-      ))}
-      <Box
-        p={[0, s[1] * 0.34, 0.115]}
-        s={[s[0] * 0.8, 0.025, 0.012]}
-        c={color}
-        glow
-      />
+      <Box s={[s[0] + 0.12, s[1] + 0.12, 0.12]} c="#152b34" />
+      <mesh position={[0, 0, 0.065]}>
+        <planeGeometry args={[s[0], s[1]]} />
+        <meshBasicMaterial map={map} toneMapped={false} />
+      </mesh>
     </group>
   );
 }

@@ -17,6 +17,7 @@ import { useGSAP } from "@gsap/react";
 import { chapters, destinations } from "./data/chapters";
 import { useTour } from "./store";
 import { assetUrl } from "./lib/assets";
+import { JourneyGuide } from "./components/JourneyGuide";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 const Experience = lazy(() => import("./scene/Experience"));
@@ -50,6 +51,7 @@ class SceneBoundary extends Component<
 
 export default function App() {
   const [rtl, setRtl] = useState(false);
+  const [cinematic, setCinematic] = useState(false);
   const [list, setList] = useState(
     () =>
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -143,6 +145,9 @@ export default function App() {
   useGSAP(
     () => {
       let stops: number[] = [];
+      const copies = Array.from(
+        document.querySelectorAll<HTMLElement>(".chapter-copy"),
+      );
       const measure = () => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
         stops = destinations.map((id, i) =>
@@ -161,6 +166,19 @@ export default function App() {
           Math.min(1, (y - stops[i]) / Math.max(1, stops[i + 1] - stops[i])),
         );
         useTour.getState().setProgress(Math.min(12, i + fraction));
+        if (!list)
+          copies.forEach((copy, index) => {
+            const local = i + fraction - (index + 1);
+            const opacity =
+              local < 0 ? 1 : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
+            copy.style.opacity = String(opacity);
+            copy.style.visibility = opacity < 0.01 ? "hidden" : "visible";
+          });
+        else
+          copies.forEach((copy) => {
+            copy.style.opacity = "";
+            copy.style.visibility = "";
+          });
         setPercent(
           Math.round(
             (y /
@@ -243,7 +261,7 @@ export default function App() {
 
   return (
     <div
-      className={`app ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${active === 0 ? "at-arrival" : ""}`}
+      className={`app ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${active === 0 ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
     >
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
@@ -260,6 +278,14 @@ export default function App() {
         </SceneBoundary>
       )}
       <div className="scene-scrim" aria-hidden="true" />
+      {!list && !loading && (
+        <JourneyGuide
+          rtl={rtl}
+          jump={jump}
+          cinematic={cinematic}
+          setCinematic={setCinematic}
+        />
+      )}
       <header className="header">
         <a
           className="brand"
@@ -381,6 +407,10 @@ export default function App() {
             style={{ "--chapter-color": chapter.color } as React.CSSProperties}
           >
             <div className="chapter-copy">
+              <p className="chapter-kicker">
+                {t("THE CONNECTED BUILDING", "المبنى المترابط")}
+                <span>{String(i + 1).padStart(2, "0")} / 11</span>
+              </p>
               <h2 id={`${chapter.id}-title`}>
                 <a href={chapter.href}>
                   {rtl ? chapter.ar : chapter.title}
@@ -450,6 +480,10 @@ export default function App() {
               {t("Discuss your project", "ناقش مشروعك")}
               {arrow}
             </a>
+            <button className="replay-tour" onClick={() => jump("arrival")}>
+              {t("Replay the journey", "إعادة الجولة")}{" "}
+              <span aria-hidden="true">↺</span>
+            </button>
             <div className="credentials">
               <span>
                 {t("ISO 9001 · 14001 · 45001", "ISO 9001 · 14001 · 45001")}
@@ -484,6 +518,12 @@ export default function App() {
                 {arrow}
               </a>
               <p>© {new Date().getFullYear()} FAST</p>
+              <a
+                className="asset-credit"
+                href={assetUrl("interior/ATTRIBUTION.txt")}
+              >
+                {t("3D asset credits", "حقوق النماذج ثلاثية الأبعاد")}
+              </a>
             </div>
           </footer>
         </section>

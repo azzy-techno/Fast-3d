@@ -34,7 +34,7 @@ const random = (n: number) => {
 };
 const exteriorVisible = () => {
   const p = useTour.getState().progress;
-  return p < 0.85 || p > 11.65;
+  return p < 1.9 || p > 11.65;
 };
 
 /** Deterministic, locally generated surface grain, with no remote texture requests. */
@@ -565,16 +565,18 @@ function Birds() {
       if (w)
         w.rotation.z =
           Math.sin(clock.elapsedTime * 4.2 + Math.floor(i / 2) * 1.3) *
-          0.42 *
+          (Math.sin(clock.elapsedTime * 0.38 + Math.floor(i / 2)) > 0.35
+            ? 0.08
+            : 0.42) *
           (i % 2 ? -1 : 1);
     });
   });
   return (
     <group ref={root} name="flying-birds">
-      {Array.from({ length: 7 }, (_, i) => (
+      {Array.from({ length: 11 }, (_, i) => (
         <group
           key={i}
-          position={[i * 1.7, Math.sin(i) * 1.3, i * 0.9]}
+          position={[i * 1.7, Math.sin(i) * 1.3, Math.abs(i - 5) * 1.2]}
           scale={0.65}
         >
           <mesh scale={[0.12, 0.1, 0.42]}>

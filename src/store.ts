@@ -7,5 +7,8 @@ export const useTour = create<{
   progress: 0,
   active: 0,
   setProgress: (progress) =>
-    set({ progress, active: Math.max(0, Math.min(12, Math.round(progress))) }),
+    set({
+      progress,
+      active: Math.max(0, Math.min(12, Math.floor(progress + 0.1))),
+    }),
 }));

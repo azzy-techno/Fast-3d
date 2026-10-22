@@ -1,0 +1,13 @@
+FAST conceptual building tour — furniture asset attribution
+
+Lounge chair: Sheen Chair. © 2020 Wayfair LLC; Eric Chadwick.
+License: CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenChair
+Changes: geometry simplification, texture resizing/WebP, Meshopt compression.
+
+Lounge sofa: Sheen Wood Leather Sofa.
+Original: Fran Calvente (2021), CC0. https://polyhaven.com/a/sofa_03
+Improvements: Eric Chadwick, © 2024 Darmstadt Graphics Group GmbH.
+License: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
+Source: https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa
+Changes: geometry simplification, texture resizing/WebP, Meshopt compression.

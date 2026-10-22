@@ -1,0 +1,172 @@
+import { Vector3 } from "three";
+import type { Point } from "../data/chapters";
+
+export const serviceRooms = Array.from({ length: 10 }, (_, i) => ({
+  index: i + 1,
+  x: i % 2 === 0 ? -6.6 : 6.6,
+  z: -4 - Math.floor(i / 2) * 7.2,
+  side: i % 2 === 0 ? -1 : 1,
+}));
+export const journeyState = { progress: 0, section: "arrival" };
+type Shot = { at: number; p: Point; target: Point; fov: number };
+const frames: Shot[] = [];
+const shot = (at: number, p: Point, target: Point, fov = 62) =>
+  frames.push({ at, p, target, fov });
+shot(0, [49, 29, 67], [0, 10, -5], 42);
+shot(0.22, [47, 30, 63], [0, 11, -4], 42);
+shot(0.58, [31, 33, 36], [0, 20, -2], 45);
+shot(0.86, [15, 31, 19], [0, 25, -1], 48);
+shot(1, [10, 28.5, 13], [0, 24.8, -1], 52);
+shot(1.12, [9, 28, 12], [0, 24.8, -1], 52);
+shot(1.28, [11, 25, 2], [11, 25, -5], 62);
+shot(1.37, [11, 24.8, -5], [11, 24.8, -9], 66);
+shot(1.4, [11, 23, -5], [7, 23, -5], 66);
+shot(1.44, [11, 20, -5], [9, 20, 1], 66);
+shot(1.48, [11, 17.7, -5], [11, 17.7, 3], 66);
+shot(1.53, [10.2, 17.7, 0.5], [6.4, 17.2, -5], 68);
+shot(1.58, [11, 17.7, 3.8], [2, 17.6, 3.8], 66);
+shot(1.67, [4, 17.7, 3.8], [-6, 17.5, -1], 66);
+shot(1.74, [0, 17.7, 2], [0, 17.7, -7], 66);
+shot(1.82, [0, 17.7, -7], [0, 17.7, -11], 66);
+shot(1.85, [0, 14, -7], [4, 14, -7], 66);
+shot(1.88, [0, 9, -7], [3, 9, -2], 66);
+shot(1.9, [0, 7.7, -7], [0, 7.7, 0], 66);
+shot(1.95, [0, 7.7, -1], [-6.6, 7.5, -4], 66);
+for (let i = 0; i < serviceRooms.length; i++) {
+  const room = serviceRooms[i],
+    next = serviceRooms[i + 1];
+  const at = i + 2;
+  const p: Point = [room.side * 3.5, 8.05, room.z + 3];
+  const target: Point = [room.x, 7.45, room.z - 0.6];
+  shot(at, p, target, 68);
+  shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 66);
+  if (next) {
+    shot(
+      at + 0.38,
+      [room.side * 2.1, 7.7, room.z + 2.5],
+      [0, 7.6, room.z + 1],
+      68,
+    );
+    shot(at + 0.51, [0, 7.7, room.z + 2.5], [0, 7.6, next.z - 2], 68);
+    shot(at + 0.68, [0, 7.7, next.z + 2.5], [next.x, 7.5, next.z], 68);
+    shot(
+      at + 0.84,
+      [next.side * 2.1, 7.7, next.z + 2.5],
+      [next.x, 7.5, next.z - 0.6],
+      68,
+    );
+  }
+}
+shot(11.4, [2.1, 7.7, -30.3], [0, 7.7, -35], 68);
+shot(11.55, [0, 7.7, -35], [0, 7.7, -41], 66);
+shot(11.6, [0, 9, -39], [5, 10, -40], 62);
+shot(11.66, [0, 12, -40], [7, 12, -32], 60);
+shot(11.72, [0, 30, -40], [0, 10, -12], 58);
+shot(11.86, [48, 38, -4], [0, 10, -9], 48);
+shot(12, [57, 43, 50], [0, 8, -9], 42);
+
+// Shape-preserving cubic Hermite interpolation: continuous velocity, no spline
+// overshoot through a wall, and deterministic forward/reverse scrubbing.
+function slope(
+  prev: number,
+  value: number,
+  next: number,
+  dt0: number,
+  dt1: number,
+) {
+  const a = (value - prev) / dt0,
+    b = (next - value) / dt1;
+  if (a * b <= 0) return 0;
+  const w1 = 2 * dt1 + dt0,
+    w2 = dt1 + 2 * dt0;
+  return (w1 + w2) / (w1 / a + w2 / b);
+}
+function scalar(i: number, t: number, get: (frame: Shot) => number) {
+  const a = frames[i],
+    b = frames[i + 1],
+    prev = frames[Math.max(0, i - 1)],
+    next = frames[Math.min(frames.length - 1, i + 2)];
+  const dt = b.at - a.at,
+    va = get(a),
+    vb = get(b);
+  const ma = i === 0 ? 0 : slope(get(prev), va, vb, a.at - prev.at, dt);
+  const mb =
+    i + 2 === frames.length ? 0 : slope(va, vb, get(next), dt, next.at - b.at);
+  const t2 = t * t,
+    t3 = t2 * t;
+  return (
+    (2 * t3 - 3 * t2 + 1) * va +
+    (t3 - 2 * t2 + t) * dt * ma +
+    (-2 * t3 + 3 * t2) * vb +
+    (t3 - t2) * dt * mb
+  );
+}
+const getters = {
+  p: [0, 1, 2].map((axis) => (frame: Shot) => frame.p[axis]),
+  target: [0, 1, 2].map((axis) => (frame: Shot) => frame.target[axis]),
+  fov: (frame: Shot) => frame.fov,
+};
+export function sampleJourney(
+  progress: number,
+  position: Vector3,
+  target: Vector3,
+) {
+  const p = Math.max(0, Math.min(12, progress));
+  let i = 0;
+  while (i < frames.length - 2 && p > frames[i + 1].at) i++;
+  const t = (p - frames[i].at) / (frames[i + 1].at - frames[i].at);
+  for (let axis = 0; axis < 3; axis++) {
+    position.setComponent(axis, scalar(i, t, getters.p[axis]));
+    target.setComponent(axis, scalar(i, t, getters.target[axis]));
+  }
+  return scalar(i, t, getters.fov);
+}
+export function journeyBeat(progress: number) {
+  if (progress < 0.65)
+    return [
+      "01 / THE ARRIVAL",
+      "One address. An entire ecosystem.",
+      "A journey through the systems that make a building work.",
+    ];
+  if (progress < 1.22)
+    return [
+      "02 / ABOVE THE CITY",
+      "It begins with a breath.",
+      "Rooftop cooling keeps everything below in balance.",
+    ];
+  if (progress < 1.47)
+    return [
+      "03 / CROSS THE THRESHOLD",
+      "Follow the building inward.",
+      "From the roof, descend into the spaces these systems serve.",
+    ];
+  if (progress < 1.73)
+    return [
+      "04 / THE HUMAN SIDE",
+      "Built around the people inside.",
+      "Workspaces, meeting rooms and quiet corners. Every space, connected.",
+    ];
+  if (progress < 1.96)
+    return [
+      "05 / BELOW THE SURFACE",
+      "Behind every working day.",
+      "The service lift takes us to the infrastructure at the heart of the building.",
+    ];
+  if (progress < 7.5)
+    return [
+      "06 / THE SERVICE GALLERY",
+      "Follow the connections.",
+      "Power, water, structure and protection — one continuous system.",
+    ];
+  if (progress < 11.4)
+    return [
+      "07 / THE INTELLIGENT FLOOR",
+      "From infrastructure to intelligence.",
+      "Connected equipment becomes insight. Insight becomes action.",
+    ];
+  return [
+    "08 / THE BIGGER PICTURE",
+    "Every discipline. One partner.",
+    "Step back and see how it all comes together.",
+  ];
+}

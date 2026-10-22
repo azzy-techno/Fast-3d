@@ -107,7 +107,8 @@ button {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+    linear-gradient(
+      /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
       /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
       90deg,
       rgba(5, 20, 33, 0.95),
@@ -115,7 +116,8 @@ button {
       rgba(5, 20, 33, 0.16) 58%,
       transparent 82%
     ),
-    linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+    linear-gradient(
+      /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
       /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
       0deg,
       rgba(5, 20, 33, 0.75),
@@ -137,7 +139,8 @@ main {
   align-items: center;
   gap: 64px;
   z-index: 20;
-  background: linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+  background: linear-gradient(
+    /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
     #0b2235d9,
     transparent
   ); /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
@@ -792,7 +795,8 @@ footer p {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+  background: linear-gradient(
+    /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
     0deg,
     #0b2437,
     transparent
@@ -963,8 +967,9 @@ footer p {
   .header {
     height: 84px;
     gap: 20px;
-    background: linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
-      #0b2235e8,
+    background: linear-gradient(
+      /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+        #0b2235e8,
       transparent
     ); /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
   }
@@ -1047,8 +1052,9 @@ footer p {
     height: 44px;
   }
   .scene-scrim {
-    background: linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
-      /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
+    background: linear-gradient(
+      /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+        /* taste-skill-ignore: neutral readability scrim over the moving scene or photograph */
         0deg,
       rgba(5, 20, 33, 0.98) 3%,
       rgba(5, 20, 33, 0.9) 26%,
@@ -1499,12 +1505,366 @@ footer p,
     font-size: 13px;
   }
   .tour-view:not(.at-arrival) .scene-scrim {
-    background: linear-gradient( /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
-      0deg,
+    background: linear-gradient(
+      /* taste-skill-ignore: neutral scrim for readable text over source imagery or the 3D scene */
+        0deg,
       #051421 38%,
       rgba(5, 20, 33, 0.92) 48%,
       rgba(5, 20, 33, 0.5) 58%,
       transparent 75%
     );
   } /* taste-skill-ignore: neutral readability scrim over 3D equipment */
+}
+
+/* A continuous architectural story with generous travel time between rooms. */
+.tour-view .chapter {
+  height: 210svh;
+  min-height: 1400px;
+}
+.tour-view #cooling {
+  height: 580svh;
+  min-height: 3600px;
+}
+.tour-view .chapter-copy {
+  max-width: 350px;
+  padding: 22px 24px 24px;
+  margin-inline-start: -24px;
+  background: #0b202be8;
+  border-inline-start: 1px solid #8ba8a54d;
+  border-radius: 0 2px 2px 0;
+  backdrop-filter: blur(12px);
+}
+.tour-view .chapter h2 {
+  font-size: clamp(32px, 3.2vw, 48px);
+  letter-spacing: -0.055em;
+}
+.tour-view .chapter-description {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.tour-view .source-photo {
+  display: none;
+}
+.tour-view .capabilities {
+  font-size: 12px;
+  gap: 8px 12px;
+  margin-top: 18px;
+}
+.tour-view .chapter-place {
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.chapter-kicker {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #a9c3c5;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.chapter-kicker span {
+  color: #e5d6b8;
+  white-space: nowrap;
+}
+.tour-view .scene-scrim {
+  background:
+    linear-gradient(90deg, #061922c9, #06192226 36%, transparent 70%),
+    linear-gradient(
+      0deg,
+      #06192299,
+      transparent 24%,
+      transparent 85%,
+      #06192245
+    );
+  transition: opacity 0.5s;
+}
+.tour-view.at-arrival .scene-scrim {
+  background:
+    linear-gradient(90deg, #061922db, #06192255 44%, transparent 80%),
+    linear-gradient(0deg, #061922b3, transparent 50%);
+}
+.tour-view .chapter-location {
+  display: none;
+}
+.journey-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+.journey-toolbar {
+  position: absolute;
+  top: 120px;
+  inset-inline-end: var(--page);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 11px;
+}
+.journey-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 14px;
+  background: #0b202bcf;
+  border: 1px solid #9ab4b340;
+  border-radius: 2px;
+  pointer-events: auto;
+  min-height: 40px;
+}
+.floor-indicator {
+  letter-spacing: 0.11em;
+  color: #e3e6dd;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  background: #0b202b9c;
+}
+.floor-indicator i {
+  width: 4px;
+  height: 4px;
+  background: #c7dba8;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #b9dc91;
+}
+.journey-interlude {
+  position: absolute;
+  inset-inline-start: var(--page);
+  bottom: 160px;
+  width: 350px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  padding: 24px;
+  margin-inline-start: -24px;
+  background: #0b202be8;
+  border-inline-start: 1px solid #96b7b16b;
+  backdrop-filter: blur(12px);
+}
+.journey-eyebrow {
+  color: #bed4cb;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  margin-bottom: 22px;
+}
+.journey-headline {
+  font-family: "Sora Variable", sans-serif;
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: -0.05em;
+}
+.journey-description {
+  margin-top: 16px;
+  color: #c2d0ce;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.journey-scroll-cue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  font-size: 10px;
+  color: #bac9c7;
+}
+.journey-scroll-cue span {
+  font-size: 20px;
+}
+.floor-plan {
+  pointer-events: auto;
+  position: absolute;
+  inset-inline-end: var(--page);
+  top: 178px;
+  padding: 24px;
+  width: 380px;
+  background: #0b202bf5;
+  border: 1px solid #86a7a14d;
+  box-shadow: 0 12px 60px #0003;
+  backdrop-filter: blur(16px);
+}
+.floor-plan[hidden] {
+  display: none;
+}
+.plan-title {
+  display: flex;
+  justify-content: space-between;
+  color: #b5cfca;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #57757455;
+}
+.plan-drawing {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding-top: 16px;
+}
+.plan-drawing svg {
+  width: 125px;
+  height: 220px;
+  color: #8ca9a4;
+  flex-shrink: 0;
+}
+.plan-drawing ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+.plan-drawing li button {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 11px;
+  min-height: 28px;
+  text-align: start;
+}
+.plan-drawing li span {
+  font-size: 9px;
+  color: #94b4af;
+}
+.plan-drawing [aria-current] {
+  color: #a4dfd8;
+}
+.floor-plan > p {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #a7bdb7;
+  margin-top: 18px;
+}
+.replay-tour {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-top: 25px;
+  min-height: 44px;
+  color: #b7cfc9;
+  font-size: 13px;
+}
+.cinematic .chapter-copy,
+.cinematic .hero-content,
+.cinematic .hero-topline,
+.cinematic .scene-note,
+.cinematic .journey-interlude,
+.cinematic .closing-content {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.cinematic .scene-scrim {
+  opacity: 0;
+}
+.cinematic .journey-toolbar {
+  opacity: 0.8;
+}
+@media (max-width: 900px) {
+  .tour-view .chapter {
+    height: 245svh;
+    min-height: 1700px;
+    padding-top: 48svh;
+  }
+  .tour-view #cooling {
+    height: 660svh;
+    min-height: 4300px;
+  }
+  .tour-view .chapter-copy {
+    top: 48svh;
+    padding: 16px 18px;
+    margin-inline-start: -8px;
+    max-width: 360px;
+    backdrop-filter: none;
+  }
+  .tour-view .chapter h2 {
+    font-size: 30px;
+  }
+  .tour-view .chapter-description {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .tour-view .chapter-place {
+    margin-bottom: 12px;
+  }
+  .tour-view .chapter-kicker {
+    margin-bottom: 16px;
+    font-size: 9px;
+  }
+  .tour-view .capabilities {
+    margin-top: 12px;
+    font-size: 11px;
+  }
+  .tour-view .service-link {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .journey-toolbar {
+    top: 96px;
+    inset-inline: 24px;
+    gap: 8px;
+    justify-content: space-between;
+    font-size: 10px;
+  }
+  .journey-toolbar button {
+    gap: 8px;
+    padding: 6px 9px;
+    min-height: 36px;
+  }
+  .floor-indicator {
+    font-size: 8px;
+    padding: 8px;
+    letter-spacing: 0.04em;
+  }
+  .floor-indicator i {
+    display: none;
+  }
+  .journey-interlude {
+    bottom: 118px;
+    width: calc(100% - 48px);
+    padding: 18px;
+    margin-inline-start: 0;
+  }
+  .journey-headline {
+    font-size: 27px;
+  }
+  .journey-description {
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .journey-eyebrow {
+    font-size: 9px;
+    margin-bottom: 14px;
+  }
+  .journey-scroll-cue {
+    margin-top: 14px;
+  }
+  .floor-plan {
+    inset-inline: 24px;
+    top: 143px;
+    width: auto;
+    padding: 16px;
+    max-height: calc(100svh - 255px);
+    overflow-y: auto;
+  }
+  .plan-drawing {
+    gap: 12px;
+  }
+  .plan-drawing svg {
+    width: 94px;
+  }
+  .plan-drawing li button {
+    min-height: 31px;
+    font-size: 10px;
+  }
+  .tour-view:not(.at-arrival) .scene-scrim {
+    background: linear-gradient(
+      0deg,
+      #061922c9,
+      #06192270 22%,
+      transparent 55%
+    );
+  }
+  .tour-view .hero-topline {
+    top: 152px;
+  }
 }
