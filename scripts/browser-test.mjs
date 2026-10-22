@@ -134,6 +134,28 @@ try {
     ),
   );
   assert(initial.links[0].endsWith("/mechanical#scope"));
+  const exteriorTextures = await page.evaluate(() =>
+    performance
+      .getEntriesByType("resource")
+      .filter((entry) => entry.name.includes("/assets/exterior/optimized/"))
+      .map((entry) => new URL(entry.name).pathname),
+  );
+  const expectedTextures = (
+    await fs.readdir("public/assets/exterior/optimized")
+  ).filter((name) => name.endsWith(".webp"));
+  assert.equal(expectedTextures.length, 12);
+  for (const name of expectedTextures) {
+    assert(
+      exteriorTextures.includes(
+        `${process.env.BASE_PATH || "/"}assets/exterior/optimized/${name}`,
+      ),
+      `Scene loads supplied texture: ${name}`,
+    );
+  }
+  results.push({
+    check: "All 12 supplied exterior textures load under deployment base path",
+    passed: true,
+  });
   const arrival = await shot("desktop-arrival");
   const stats = await sharp(arrival)
     .extract({ left: 650, top: 200, width: 650, height: 600 })

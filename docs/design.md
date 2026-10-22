@@ -96,3 +96,9 @@ Validation: the `/Fast-3d/` production build and full browser suite pass, includ
 Corrected the pedestrian heading to respect the imported model's local −Z forward axis. Expanded the district from 16 to 35 buildings, with additional rows on the left. Extended road surfaces, lane markings and pavements beyond the camera's visible range, opened intersections and moved building footprints clear of the through roads. The model's foot orientation was checked against both travel directions, and all 35 building footprints were checked for building/road collisions.
 
 Lenis now receives monotonic elapsed time so low rendering frame rates cannot stretch a chapter jump through GSAP ticker lag smoothing.
+
+## Uploaded exterior materials — 22 October 2026
+
+Applied the repository owner's glass image to the FAST curtain walls and selected city towers, replacing flat window overlays. Added the supplied stone/apartment/villa/storefront facades and industrial, rooftop, paving, asphalt, grass and sand textures to their matching exterior surfaces. World-scale UVs keep windows and ground detail proportional, while merged surfaces limit draw calls. WebP delivery reduces the twelve texture files from 30.07 MiB to 4.00 MiB; originals remain available. The glass uses moderate physical reflections so the supplied image remains visible. This is a material-detail improvement, not a change to the interior tour or its content.
+
+Validation: the `/Fast-3d/` production build and browser suite pass, including loading all twelve supplied textures from the deployment base path, all eleven service scenes, responsive layouts, navigation, audio, Arabic, accessibility checks and fallback modes. Desktop and phone arrival screenshots were inspected.

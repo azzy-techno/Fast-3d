@@ -6,6 +6,7 @@ import { useSurface } from "./Exterior";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Mesh } from "three";
+import { ExteriorSurfaces, groundSurface } from "./ExteriorSurfaces";
 
 export function Building() {
   const logo = useTexture(assetUrl("fast-logo.png"));
@@ -22,65 +23,31 @@ export function Building() {
       <Box p={[0, -0.09, -8]} s={[49, 0.12, 59]} c="#aeb8b5" metal={0} />
       <Box p={[0, 0.05, 5]} s={[36, 0.35, 22]} c="#cad0cb" metal={0} />
       <Box p={[0, 10.8, -1]} s={[32, 21.6, 19]} c="#264557" metal={0.6} />
-      <mesh position={[0, 10.9, 8.56]} castShadow receiveShadow>
-        <boxGeometry args={[31.5, 19.9, 0.1]} />
-        <meshPhysicalMaterial
-          color="#63868f"
-          metalness={0.88}
-          roughness={0.12}
-          clearcoat={1}
-          clearcoatRoughness={0.08}
-          envMapIntensity={1.4}
-        />
-      </mesh>
-      <mesh position={[16.06, 10.9, -1]} castShadow receiveShadow>
-        <boxGeometry args={[0.1, 19.9, 19]} />
-        <meshPhysicalMaterial
-          color="#6a8287"
-          metalness={0.88}
-          roughness={0.13}
-          clearcoat={1}
-          envMapIntensity={1.4}
-        />
-      </mesh>
+      <ExteriorSurfaces
+        texture="facade-tower-glass"
+        glass
+        surfaces={[
+          { p: [0, 10.85, 8.56], size: [32, 21.7], repeat: [2, 1.5] },
+          {
+            p: [16.06, 10.85, -1],
+            size: [19, 21.7],
+            rotation: [0, Math.PI / 2, 0],
+            repeat: [19 / 16, 1.5],
+          },
+          {
+            p: [-16.06, 10.85, -1],
+            size: [19, 21.7],
+            rotation: [0, -Math.PI / 2, 0],
+            repeat: [19 / 16, 1.5],
+          },
+        ]}
+      />
       {[0, 7, 14, 21.7].map((y) => (
         <group key={y}>
           <Box p={[0, y, 8.9]} s={[33, 0.38, 0.9]} c="#d2d7d2" metal={0.2} />
           <Box p={[16.4, y, -1]} s={[0.7, 0.38, 20]} c="#d2d7d2" metal={0.2} />
           <Box p={[-16.4, y, -1]} s={[0.7, 0.38, 20]} c="#d2d7d2" metal={0.2} />
         </group>
-      ))}
-      {Array.from({ length: 17 }, (_, i) => (
-        <Box
-          key={i}
-          p={[-16 + i * 2, 10.9, 8.77]}
-          s={[0.12, 21.4, 0.25]}
-          c="#94a9b0"
-        />
-      ))}
-      {Array.from({ length: 11 }, (_, i) => (
-        <Box
-          key={i}
-          p={[16.18, 10.9, -10.5 + i * 1.9]}
-          s={[0.25, 21.4, 0.12]}
-          c="#94a9b0"
-        />
-      ))}
-      {[3.5, 10.5, 17.5].map((y) => (
-        <group key={y}>
-          <Box p={[0, y, 8.78]} s={[32, 0.09, 0.14]} c="#a9bbc0" />
-          <Box p={[16.19, y, -1]} s={[0.13, 0.09, 19]} c="#a9bbc0" />
-          <Box p={[0, y - 2.8, 8.82]} s={[31.8, 0.06, 0.05]} c="#e6d9b5" glow />
-        </group>
-      ))}
-      {Array.from({ length: 15 }, (_, i) => (
-        <Box
-          key={i}
-          p={[-14 + i * 2, 19.2, 8.64]}
-          s={[1.3, 3.3, 0.04]}
-          c={i % 3 === 0 ? "#718b90" : "#4b6877"}
-          metal={0.65}
-        />
       ))}
       <mesh position={[-11, 11.1, 9.3]} castShadow receiveShadow>
         <boxGeometry args={[4.8, 22.3, 1.5]} />
@@ -103,6 +70,30 @@ export function Building() {
       ))}
       <Box p={[0, 22.3, -1]} s={[34, 0.7, 21]} c="#d3d6cd" metal={0.1} />
       <Box p={[0, 22.8, -1]} s={[31.5, 0.3, 18.5]} c="#899b9c" />
+      <ExteriorSurfaces
+        texture="roof-flat"
+        surfaces={[
+          { ...groundSurface([0, 22.96, -1], [31.5, 18.5]), repeat: [1, 1] },
+          { ...groundSurface([0, 10.71, -23], [32, 25]), repeat: [1, 1] },
+        ]}
+      />
+      <ExteriorSurfaces
+        texture="facade-industrial"
+        surfaces={[
+          {
+            p: [-16.02, 5.1, -23],
+            size: [25, 10.2],
+            rotation: [0, -Math.PI / 2, 0],
+            repeat: [2, 1],
+          },
+          {
+            p: [0, 5.1, -35.52],
+            size: [32, 10.2],
+            rotation: [0, Math.PI, 0],
+            repeat: [3, 1],
+          },
+        ]}
+      />
       <group position={[0, 23, -1]} scale={0.8}>
         <Cooling />
       </group>
@@ -155,20 +146,22 @@ export function Building() {
         />
       ))}
       {/* Paved arrival court, reflective water and a shaded pedestrian entrance. */}
-      <mesh
-        position={[3, 0.07, 19.5]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[28, 7]} />
-        <meshStandardMaterial
-          map={stone}
-          color="#d3c9b5"
-          bumpMap={stone}
-          bumpScale={0.03}
-          roughness={0.85}
-        />
-      </mesh>
+      <ExteriorSurfaces
+        texture="ground-paving-corniche"
+        surfaces={[
+          groundSurface([3, 0.08, 19.5], [28, 7]),
+          groundSurface([21, -0.015, -8], [6, 59]),
+          groundSurface([-21, -0.015, -8], [6, 59]),
+        ]}
+      />
+      <ExteriorSurfaces
+        texture="ground-grass"
+        color="#bec7a0"
+        surfaces={[
+          groundSurface([-23.5, 0.015, -8], [1, 54], 3),
+          groundSurface([23.5, 0.015, -8], [1, 54], 3),
+        ]}
+      />
       <Box p={[-14, 0.4, 19]} s={[9, 0.6, 5]} c="#c8bdab" metal={0} />
       <mesh
         ref={water}
@@ -229,23 +222,6 @@ export function Building() {
           radius={0.09}
           c="#51595a"
         />
-      ))}
-      {/* Shaded interiors and recessed mullions add depth behind the curtain wall. */}
-      {[3.5, 10.5, 17.5].map((y, f) => (
-        <group key={y}>
-          {Array.from({ length: 14 }, (_, i) => (
-            <mesh key={i} position={[-8 + i * 1.65, y, 8.69]}>
-              <planeGeometry args={[1.4, 2.3]} />
-              <meshStandardMaterial
-                color={(i + f) % 4 === 0 ? "#b6aa89" : "#304f5d"}
-                roughness={0.4}
-                metalness={0.45}
-                transparent
-                opacity={(i + f) % 4 === 0 ? 0.42 : 0.17}
-              />
-            </mesh>
-          ))}
-        </group>
       ))}
     </group>
   );

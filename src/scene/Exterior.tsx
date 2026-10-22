@@ -22,6 +22,11 @@ import { Box, Cylinder } from "./Primitives";
 import { assetUrl } from "../lib/assets";
 import { useTour } from "../store";
 import type { Point } from "../data/chapters";
+import {
+  ExteriorSurfaces,
+  groundSurface,
+  type Surface,
+} from "./ExteriorSurfaces";
 
 const random = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -176,9 +181,9 @@ function Repeated({
 }
 
 function City() {
-  const { masses, windows, bands, rooftops } = useMemo(() => {
+  const { masses, facades, bands, rooftops } = useMemo(() => {
     const masses: Instance[] = [],
-      windows: Instance[] = [],
+      facades: Record<string, Surface[]> = {},
       bands: Instance[] = [],
       rooftops: Instance[] = [];
     const sites = [
@@ -233,27 +238,58 @@ function City() {
         s: [w + 5, 0.8, d + 5],
         color: "#c1bbaa",
       });
-      const floors = Math.floor(h / 3.3);
-      for (let f = 0; f < floors; f++) {
-        const y = 2 + f * 3.3;
-        bands.push({ p: [x, y - 1.1, z + d / 2 + 0.08], s: [w, 0.16, 0.28] });
-        bands.push({ p: [x + w / 2 + 0.08, y - 1.1, z], s: [0.28, 0.16, d] });
-        for (let k = 0; k < Math.floor(w / 2.2); k++)
-          windows.push({
-            p: [x - w / 2 + 1.3 + k * 2.2, y, z + d / 2 + 0.035],
-            s: [1.45, 2, 0.07],
-            color:
-              random(n * 89 + f * 7 + k) > 0.84
-                ? "#a89a79"
-                : ["#49636c", "#59747b", "#75898a"][k % 3],
-          });
-        for (let k = 0; k < Math.floor(d / 2.2); k++)
-          windows.push({
-            p: [x + w / 2 + 0.035, y, z - d / 2 + 1.3 + k * 2.2],
-            s: [0.07, 2, 1.45],
-            color: ["#526971", "#6b7b7c", "#88928e"][k % 3],
-          });
-      }
+      const style =
+        h < 13
+          ? "facade-villa"
+          : [
+              "facade-office-stone",
+              "facade-tower-glass",
+              "facade-apartment-white",
+              "facade-apartment-sand",
+            ][n % 4];
+      const retail = n >= 16 && n <= 20;
+      const base = retail ? 3.6 : 0.6;
+      const height = h - base;
+      const tileWidth = style === "facade-villa" ? 12 : 16;
+      const tileHeight = style === "facade-villa" ? 7 : 13.2;
+      const walls: Surface[] = [
+        { p: [x, base + height / 2, z + d / 2 + 0.02], size: [w, height] },
+        {
+          p: [x, base + height / 2, z - d / 2 - 0.02],
+          size: [w, height],
+          rotation: [0, Math.PI, 0],
+        },
+        {
+          p: [x + w / 2 + 0.02, base + height / 2, z],
+          size: [d, height],
+          rotation: [0, Math.PI / 2, 0],
+        },
+        {
+          p: [x - w / 2 - 0.02, base + height / 2, z],
+          size: [d, height],
+          rotation: [0, -Math.PI / 2, 0],
+        },
+      ];
+      (facades[style] ??= []).push(
+        ...walls.map((wall) => ({
+          ...wall,
+          repeat: [wall.size[0] / tileWidth, height / tileHeight] as [
+            number,
+            number,
+          ],
+        })),
+      );
+      if (retail)
+        (facades["facade-retail-ground"] ??= []).push({
+          p: [x, 2.05, z + d / 2 + 0.025],
+          size: [w, 3.1],
+          repeat: [w / 18, 0.56],
+          offset: [0, 0.22],
+        });
+      (facades["roof-flat"] ??= []).push({
+        ...groundSurface([x, h + 0.41, z], [w, d]),
+        repeat: [1, 1],
+      });
       bands.push({ p: [x, h + 0.1, z], s: [w + 0.6, 0.6, d + 0.6] });
       rooftops.push({
         p: [x, h + 0.7, z],
@@ -266,12 +302,19 @@ function City() {
         color: "#8d9a99",
       });
     });
-    return { masses, windows, bands, rooftops };
+    return { masses, facades, bands, rooftops };
   }, []);
   return (
     <group name="surrounding-city">
       <Repeated items={masses} />
-      <Repeated items={windows} metal={0.8} roughness={0.19} />
+      {Object.entries(facades).map(([texture, surfaces]) => (
+        <ExteriorSurfaces
+          key={texture}
+          texture={texture}
+          surfaces={surfaces}
+          glass={texture === "facade-tower-glass"}
+        />
+      ))}
       <Repeated items={bands} />
       <Repeated items={rooftops} />
     </group>
@@ -665,12 +708,6 @@ function Car({ index, parked = false }: { index: number; parked?: boolean }) {
 }
 
 export function Exterior({ mobile }: { mobile: boolean }) {
-  const road = useSurface("road"),
-    stone = useSurface("stone");
-  // Metre-scale paving on the large district plane, rather than giant tiles.
-  useMemo(() => {
-    stone.repeat.set(420, 420);
-  }, [stone]);
   const markings = useMemo(() => {
     const items: Instance[] = [];
     for (let i = 0; i < 144; i++)
@@ -688,64 +725,31 @@ export function Exterior({ mobile }: { mobile: boolean }) {
   }, []);
   return (
     <group name="exterior-city">
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.5, -25]}
-        receiveShadow
-      >
-        <planeGeometry args={[1400, 1400]} />
-        <meshStandardMaterial color="#9e9987" map={stone} roughness={1} />
-      </mesh>
+      <ExteriorSurfaces
+        texture="ground-sand"
+        surfaces={[groundSurface([0, -0.5, -25], [1400, 1400], 12)]}
+      />
       <City />
-      {[-267, 267].map((x) => (
-        <mesh
-          key={x}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[x, -0.31, -32]}
-          receiveShadow
-        >
-          <planeGeometry args={[466, 8]} />
-          <meshStandardMaterial map={road} roughness={0.95} />
-        </mesh>
-      ))}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.31, -65]}
-        receiveShadow
-      >
-        <planeGeometry args={[1000, 8]} />
-        <meshStandardMaterial map={road} roughness={0.95} />
-      </mesh>
-
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.025, 27]}
-        receiveShadow
-      >
-        <planeGeometry args={[1000, 9]} />
-        <meshStandardMaterial
-          map={road}
-          roughness={0.94}
-          bumpMap={road}
-          bumpScale={0.035}
-        />
-      </mesh>
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[30, -0.03, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[8, 1000]} />
-        <meshStandardMaterial map={road} roughness={0.94} />
-      </mesh>
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[-31, -0.03, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[7, 1000]} />
-        <meshStandardMaterial map={road} roughness={0.94} />
-      </mesh>
+      <ExteriorSurfaces
+        texture="ground-asphalt"
+        color="#b9b9bc"
+        surfaces={[
+          groundSurface([-267, -0.31, -32], [466, 8]),
+          groundSurface([267, -0.31, -32], [466, 8]),
+          groundSurface([0, -0.31, -65], [1000, 8]),
+          groundSurface([0, -0.025, 27], [1000, 9]),
+          groundSurface([30, -0.03, 0], [8, 1000]),
+          groundSurface([-31, -0.03, 0], [7, 1000]),
+        ]}
+      />
+      <ExteriorSurfaces
+        texture="ground-paving-corniche"
+        surfaces={[
+          groundSurface([-267.25, 0.08, 35], [465.5, 6]),
+          groundSurface([-0.75, 0.08, 35], [53.5, 6]),
+          groundSurface([267, 0.08, 35], [466, 6]),
+        ]}
+      />
       {/* Pavements reach beyond the fog, with openings at both intersections. */}
       {[
         [-267.25, 465.5],
