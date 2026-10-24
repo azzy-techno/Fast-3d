@@ -18,6 +18,7 @@ import { journeyState, serviceRooms } from "./journey";
 import { equipment } from "./Equipment";
 import { SystemAnimation } from "./SystemAnimation";
 import { StaticInstances } from "./StaticInstances";
+import { WorkplaceDetails } from "./PremiumInterior";
 import { InteriorFloor } from "./InteriorFloor";
 
 export type Part = { p: Point; s: Point; c?: string; r?: Point };
@@ -110,7 +111,7 @@ export function Wayfinding({
   );
 }
 
-function ImportedFurniture({
+export function ImportedFurniture({
   kind,
   p,
   rotation = 0,
@@ -147,7 +148,7 @@ function ImportedFurniture({
   );
 }
 
-function Planter({ p, scale = 1 }: { p: Point; scale?: number }) {
+export function Planter({ p, scale = 1 }: { p: Point; scale?: number }) {
   return (
     <group position={p} scale={scale}>
       <Cylinder
@@ -272,6 +273,7 @@ function OfficeFloor() {
   return (
     <group name="furnished-office-floor">
       <InteriorFloor office />
+      <WorkplaceDetails />
       <ArchitectureBatch items={structure.solid} />
       <ArchitectureBatch items={structure.trim} color="#747c76" metal={0.3} />
       <ArchitectureBatch items={structure.lights} color="#ffebcb" glow />
@@ -331,23 +333,40 @@ function OfficeFloor() {
   );
 }
 
-function Lift({ p, roof = false }: { p: Point; roof?: boolean }) {
+export function Lift({
+  p,
+  roof = false,
+  exit = false,
+}: {
+  p: Point;
+  roof?: boolean;
+  exit?: boolean;
+}) {
   const panels = useRef<Group>(null),
     cabin = useRef<Group>(null);
   useFrame(({ camera }) => {
     if (!panels.current) return;
     const progress = journeyState.progress;
-    const center = roof
-      ? p[1] === 23
-        ? 1.3
-        : 1.54
-      : progress < 1.86
-        ? 1.8
-        : 1.96;
+    const center = exit
+      ? progress < 11.55
+        ? 11.49
+        : 11.61
+      : roof
+        ? p[1] === 23
+          ? 1.3
+          : 1.54
+        : progress < 1.86
+          ? 1.8
+          : 1.96;
     const open = Math.max(
       0,
-      Math.min(1, 1 - Math.abs(progress - center) / 0.19),
+      Math.min(1, 1 - Math.abs(progress - center) / (exit ? 0.065 : 0.19)),
     );
+    if (cabin.current && exit)
+      cabin.current.position.y =
+        progress < 11.53
+          ? 6
+          : Math.max(0.25, Math.min(6, camera.position.y - 1.7));
     if (cabin.current && p[1] === 16) {
       if (roof) {
         cabin.current.visible = progress >= 1.375;
@@ -373,13 +392,25 @@ function Lift({ p, roof = false }: { p: Point; roof?: boolean }) {
       <Box p={[0, 0, 0]} s={[3.7, 0.12, 3.6]} c="#a0a99d" />
       <Box p={[0, 3.15, 0]} s={[2.5, 0.03, 0.06]} c="#e5e0c5" glow />
       <Wayfinding
-        text={roof ? "THE WORKPLACE" : "SYSTEMS GALLERY"}
-        sub={roof ? "FAST / LEVEL 03 → LEVEL 02" : "FAST / LEVEL 02 → LEVEL 01"}
+        text={
+          exit
+            ? "WELCOME / RECEPTION"
+            : roof
+              ? "THE WORKPLACE"
+              : "SYSTEMS GALLERY"
+        }
+        sub={
+          exit
+            ? "FAST / LEVEL 01 → GROUND FLOOR"
+            : roof
+              ? "FAST / LEVEL 03 → LEVEL 02"
+              : "FAST / LEVEL 02 → LEVEL 01"
+        }
         p={[0, 2.2, -1.6]}
         width={2.8}
       />
       <Wayfinding
-        text={roof ? "02" : "01"}
+        text={exit ? "G" : roof ? "02" : "01"}
         sub="DESTINATION"
         p={[1.75, 1.75, 0]}
         rotation={[0, -Math.PI / 2, 0]}
@@ -403,7 +434,13 @@ function Lift({ p, roof = false }: { p: Point; roof?: boolean }) {
         <Box p={[0.63, 0, 0]} s={[1.25, 3, 0.06]} c="#899897" metal={0.6} />
       </group>
       <Wayfinding
-        text={roof ? "ROOF ACCESS / 03" : "SERVICE GALLERY / 01"}
+        text={
+          exit
+            ? "RECEPTION / G"
+            : roof
+              ? "ROOF ACCESS / 03"
+              : "SERVICE GALLERY / 01"
+        }
         p={[0, 3, 1.86]}
         width={3}
       />
@@ -420,7 +457,12 @@ export function Interior() {
     services = useRef<Group>(null);
   const roomRefs = useRef<(Group | null)[]>([]);
   const geometry = useMemo(() => {
-    const floors: Part[] = [{ p: [0, 5.85, -18], s: [23, 0.3, 39] }];
+    const floors: Part[] = [];
+    for (let x = -11; x <= 11; x++)
+      for (let z = -37; z <= 1; z++) {
+        if (Math.abs(x) < 2.5 && (Math.abs(z + 7) < 2.5 || z < -35)) continue;
+        floors.push({ p: [x, 5.85, z], s: [1, 0.3, 1] });
+      }
     const walls: Part[] = [],
       trim: Part[] = [],
       lights: Part[] = [],
@@ -465,12 +507,12 @@ export function Interior() {
   useFrame(({ camera }) => {
     const p = journeyState.progress;
     if (office.current) office.current.visible = p > 1.27 && p < 2.06;
-    if (services.current) services.current.visible = p > 1.73 && p < 11.78;
+    if (services.current) services.current.visible = p > 1.73 && p < 11.615;
     roomRefs.current.forEach((room, i) => {
       if (room)
         room.visible =
           p > 1.73 &&
-          p < 11.78 &&
+          p < 11.615 &&
           Math.abs(serviceRooms[i].z - camera.position.z) < 17;
     });
   });

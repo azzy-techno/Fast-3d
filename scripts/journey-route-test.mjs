@@ -18,7 +18,7 @@ try {
     format: "esm",
     outfile: file,
   });
-  const { sampleJourney, serviceRooms, Vector3 } = await import(
+  const { sampleJourney, sampleGuide, serviceRooms, Vector3 } = await import(
     pathToFileURL(file)
   );
   const p = new Vector3(),
@@ -75,6 +75,49 @@ try {
     previous.copy(p);
   }
   assert(doors > 10);
+  const host = new Vector3(),
+    hostTarget = new Vector3(),
+    hostPrevious = new Vector3();
+  let hostMaxStep = 0,
+    hostWorstAt = 0;
+  for (let n = 0; n <= 12000; n++) {
+    sampleGuide(n / 1000, host, hostTarget);
+    assert([...host.toArray(), ...hostTarget.toArray()].every(Number.isFinite));
+    if (n && host.distanceTo(hostPrevious) > hostMaxStep) {
+      hostMaxStep = host.distanceTo(hostPrevious);
+      hostWorstAt = n / 1000;
+    }
+    if (
+      n / 1000 >= 2 &&
+      n / 1000 <= 11.4 &&
+      Math.abs(Math.abs(host.x) - 2.32) < 0.05
+    ) {
+      const room = serviceRooms.find(
+        (room) =>
+          Math.sign(host.x) === room.side &&
+          Math.abs(host.z - (room.z + 2.5)) < 0.84,
+      );
+      assert(
+        room,
+        `Guide crosses a solid partition at ${n / 1000}: ${host.toArray()}`,
+      );
+    }
+    hostPrevious.copy(host);
+  }
+  assert(
+    hostMaxStep < 0.7,
+    `Guide discontinuity at ${hostWorstAt}: ${hostMaxStep}`,
+  );
+  sampleJourney(11.55, p, target);
+  assert(p.y < 6 && p.y > 2, "Exit descends in lift");
+  sampleJourney(11.69, p, target);
+  assert(p.y < 2.1 && p.z > -1, "Reception reached at walking height");
+  sampleJourney(11.81, p, target);
+  assert(p.z > 9 && p.y < 2.1, "Walk outside before drone ascent");
+  sampleGuide(11.86, host, hostTarget);
+  assert.equal(host.z, 18, "Host stays on forecourt during farewell");
+  sampleGuide(12, host, hostTarget);
+  assert.equal(host.y, 0.25, "Host does not fly with drone");
   console.log(
     JSON.stringify(
       {

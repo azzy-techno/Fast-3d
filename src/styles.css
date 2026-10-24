@@ -1868,3 +1868,44 @@ footer p,
     top: 152px;
   }
 }
+
+/* Give the lift, reception and farewell the same breathing room as the arrival. */
+.tour-view #vision {
+  height: 740svh;
+  min-height: 5200px;
+}
+
+.host-cue {
+  position: absolute;
+  inset-inline-end: var(--page);
+  top: 180px;
+  padding: 16px 20px;
+  max-width: 280px;
+  background: #102c32ed;
+  border-inline-start: 2px solid #d2b583;
+  border-radius: 2px;
+  color: #f0eadc;
+}
+.host-cue span {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: #c6b592;
+}
+.host-cue p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 7px 0 0;
+}
+@media (max-width: 600px) {
+  .host-cue {
+    top: 146px;
+    inset-inline-start: var(--page);
+    inset-inline-end: auto;
+    width: 140px;
+    box-sizing: border-box;
+    padding: 10px;
+  }
+  .host-cue p {
+    font-size: 12px;
+  }
+}

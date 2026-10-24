@@ -11,3 +11,18 @@ Improvements: Eric Chadwick, © 2024 Darmstadt Graphics Group GmbH.
 License: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
 Source: https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa
 Changes: geometry simplification, texture resizing/WebP, Meshopt compression.
+
+Guided tour character (guide/host.glb)
+Creator: Ready Player Me. Original glTF copyright: Ready Player Me.
+Source: https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/readyplayer.me.glb
+Embedded avatar from the Three.js examples; not an original FAST employee likeness.
+Provider terms: https://readyplayer.me/terms
+Changes: optimized mesh/textures for web delivery, navy outfit tint, headwear hidden.
+The character is not claimed to be CC0.
+
+Guide motion (guide/motion.json)
+Source: Adobe/Mixamo Idle and Walk clips, distributed in Three.js Soldier.glb.
+https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Soldier.glb
+https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html
+Changes: retargeted to the host's proportions; in-place motion, distance-driven playback.
+Greeting, pointing and farewell gestures are procedural skeletal layers authored for this site.

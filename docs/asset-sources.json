@@ -14,5 +14,7 @@
   "exterior/sunset.hdr": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/equirectangular/venice_sunset_1k.hdr",
   "interior/lounge-chair.glb": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenChair/glTF-Binary/SheenChair.glb",
   "interior/lounge-sofa.glb": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb",
-  "exterior/cloud.png": "https://raw.githubusercontent.com/pmndrs/drei-assets/master/cloud.png"
+  "exterior/cloud.png": "https://raw.githubusercontent.com/pmndrs/drei-assets/master/cloud.png",
+  "guide/host.glb": "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/readyplayer.me.glb",
+  "guide/motion.json": "Retargeted Idle/Walk from the existing Mixamo Soldier asset; see scripts/prepare-guide.mjs"
 }

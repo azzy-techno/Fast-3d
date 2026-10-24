@@ -40,7 +40,10 @@ export function InteriorFloor({ office = false }: { office?: boolean }) {
       maxZ = office ? 8.5 : 1.5;
     for (let x = minX; x < maxX; x++)
       for (let z = minZ; z < maxZ; z++) {
-        if (office && Math.abs(x + 0.5) < 2.5 && Math.abs(z + 0.5 + 7) < 2.5)
+        if (
+          Math.abs(x + 0.5) < 2.5 &&
+          (Math.abs(z + 0.5 + 7) < 2.5 || (!office && z < -35))
+        )
           continue;
         const plane = new PlaneGeometry(1, 1);
         plane.rotateX(-Math.PI / 2);

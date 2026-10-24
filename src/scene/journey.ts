@@ -14,10 +14,11 @@ const shot = (at: number, p: Point, target: Point, fov = 62) =>
   frames.push({ at, p, target, fov });
 shot(0, [49, 29, 67], [0, 10, -5], 42);
 shot(0.22, [47, 30, 63], [0, 11, -4], 42);
-shot(0.58, [31, 33, 36], [0, 20, -2], 45);
-shot(0.86, [15, 31, 19], [0, 25, -1], 48);
-shot(1, [10, 28.5, 13], [0, 24.8, -1], 52);
-shot(1.12, [9, 28, 12], [0, 24.8, -1], 52);
+shot(0.55, [15, 27, 14], [8, 24, 5], 48);
+shot(0.7, [11, 25.1, 10], [8, 24.1, 5], 54);
+shot(0.86, [10, 25.05, 9], [3, 24.2, -1], 58);
+shot(1, [9, 25.05, 8], [0, 24.4, -1], 62);
+shot(1.12, [9, 25.05, 7.8], [0, 24.4, -1], 62);
 shot(1.28, [11, 25, 2], [11, 25, -5], 62);
 shot(1.37, [11, 24.8, -5], [11, 24.8, -9], 66);
 shot(1.4, [11, 23, -5], [7, 23, -5], 66);
@@ -57,13 +58,24 @@ for (let i = 0; i < serviceRooms.length; i++) {
     );
   }
 }
+// Enter the rear lift, descend to ground, then walk the reception approach.
 shot(11.4, [2.1, 7.7, -30.3], [0, 7.7, -35], 68);
-shot(11.55, [0, 7.7, -35], [0, 7.7, -41], 66);
-shot(11.6, [0, 9, -39], [5, 10, -40], 62);
-shot(11.66, [0, 12, -40], [7, 12, -32], 60);
-shot(11.72, [0, 30, -40], [0, 10, -12], 58);
-shot(11.86, [48, 38, -4], [0, 10, -9], 48);
-shot(12, [57, 43, 50], [0, 8, -9], 42);
+shot(11.44, [0, 7.7, -32], [0, 7.7, -38], 68);
+shot(11.49, [0, 7.7, -34], [0, 7.7, -40], 66);
+shot(11.53, [0, 7.7, -37], [0, 7.7, -41], 66);
+shot(11.55, [0, 5.2, -37], [4, 5.2, -37], 66);
+shot(11.58, [0, 1.95, -37], [3, 1.95, -32], 66);
+shot(11.61, [0, 1.95, -31], [0, 1.8, -26], 66);
+shot(11.65, [0, 1.95, -11], [-4, 1.8, -3], 66);
+shot(11.69, [0, 1.95, 4.5], [-6, 1.6, 1.8], 66);
+shot(11.715, [1, 1.95, 4.5], [9, 1.5, 2.5], 66);
+shot(11.73, [2.4, 1.95, 4.8], [3, 1.8, 10], 64);
+shot(11.77, [3, 1.95, 8], [3, 1.6, 16], 62);
+shot(11.81, [3, 1.95, 13], [3, 1.6, 20], 60);
+shot(11.85, [6, 2.2, 22], [3, 1.3, 18], 54);
+shot(11.89, [9, 4.5, 27], [3, 1.2, 18], 50);
+shot(11.94, [22, 16, 38], [1, 9, 1], 46);
+shot(12, [40, 32, 47], [0, 8, -9], 42);
 
 // Shape-preserving cubic Hermite interpolation: continuous velocity, no spline
 // overshoot through a wall, and deterministic forward/reverse scrubbing.
@@ -164,9 +176,127 @@ export function journeyBeat(progress: number) {
       "From infrastructure to intelligence.",
       "Connected equipment becomes insight. Insight becomes action.",
     ];
+  if (progress < 11.64)
+    return [
+      "08 / THE RETURN",
+      "Back to where people meet.",
+      "Follow your guide to the lift. Next stop: reception.",
+    ];
+  if (progress < 11.83)
+    return [
+      "09 / THE RECEPTION",
+      "A warm welcome. A lasting connection.",
+      "Through the reception lounge and out into the city.",
+    ];
   return [
-    "08 / THE BIGGER PICTURE",
+    "10 / UNTIL NEXT TIME",
     "Every discipline. One partner.",
     "Step back and see how it all comes together.",
   ];
+}
+
+// Arc-length lookahead keeps the host on the very same doorway-constrained route.
+const arc: number[] = [0];
+const arcP = new Vector3(),
+  arcPrevious = new Vector3(),
+  arcTarget = new Vector3();
+for (let i = 0; i <= 12000; i++) {
+  sampleJourney(i / 1000, arcP, arcTarget);
+  if (i)
+    arc[i] =
+      arc[i - 1] + Math.hypot(arcP.x - arcPrevious.x, arcP.z - arcPrevious.z);
+  arcPrevious.copy(arcP);
+}
+export function routeDistance(p: number) {
+  const n = Math.max(0, Math.min(12000, p * 1000)),
+    i = Math.floor(n);
+  return arc[i] + (arc[Math.min(12000, i + 1)] - arc[i]) * (n - i);
+}
+export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
+  if (p <= 0.7) {
+    position.set(8, 23, 5);
+    facing.set(12, 24, 12);
+    return;
+  }
+  if (p >= 11.84) {
+    position.set(3, 0.25, 18);
+    facing.set(3, 1.5, 25);
+    return;
+  }
+  const smooth = (a: number, b: number) => {
+    const t = Math.max(0, Math.min(1, (p - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+  const liftBlend = Math.max(
+    smooth(1.27, 1.34) * (1 - smooth(1.49, 1.56)),
+    smooth(1.73, 1.79) * (1 - smooth(1.91, 1.96)),
+    smooth(11.46, 11.5) * (1 - smooth(11.6, 11.64)),
+  );
+  const distance = routeDistance(p) + 2.6 * (1 - liftBlend);
+  let i = Math.floor(p * 1000);
+  while (i < 11840 && arc[i] < distance) i++;
+  const span = arc[i] - arc[Math.max(0, i - 1)];
+  const lead = Math.max(
+    p,
+    (i - 1 + (span > 0 ? (distance - arc[i - 1]) / span : 1)) / 1000,
+  );
+  sampleJourney(lead, position, facing);
+  sampleJourney(p, arcP, arcTarget);
+  const floor =
+    p < 1.375
+      ? 23
+      : p < 1.48
+        ? Math.max(16, arcP.y - 1.7)
+        : p < 1.82
+          ? 16
+          : p < 1.9
+            ? Math.max(6, arcP.y - 1.7)
+            : p < 11.53
+              ? 6
+              : p < 11.58
+                ? Math.max(0.25, arcP.y - 1.7)
+                : 0.25;
+  position.y = floor;
+  position.x += liftBlend * 0.65;
+  position.z -= liftBlend * 0.85;
+  if (p > 0.7 && p < 1.28) {
+    const weight = smooth(0.7, 0.86) * (1 - smooth(1.14, 1.28));
+    sampleJourney(1, arcP, arcTarget);
+    arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.8).add(arcP);
+    arcTarget.y = 23;
+    position.lerp(arcTarget, weight);
+  }
+  const chapter = Math.round(p);
+  if (
+    chapter >= 2 &&
+    chapter <= 11 &&
+    p > chapter - 0.07 &&
+    p < chapter + 0.38
+  ) {
+    const weight =
+      smooth(chapter - 0.07, chapter) *
+      (1 - smooth(chapter + 0.2, chapter + 0.38));
+    sampleJourney(chapter, arcP, arcTarget);
+    arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.3).add(arcP);
+    arcTarget.y = 6;
+    position.lerp(arcTarget, weight);
+  }
+  if (p >= 1.96 && p <= 11.4) {
+    const x = Math.abs(position.x);
+    const ease = (v: number) => {
+      const t = Math.max(0, Math.min(1, v));
+      return t * t * (3 - 2 * t);
+    };
+    const clearance = ease((x - 1.6) / 0.4) * (1 - ease((x - 2.6) / 1.2));
+    const room = serviceRooms
+      .filter((r) => r.side === Math.sign(position.x))
+      .sort(
+        (a, b) =>
+          Math.abs(position.z - a.z - 2.5) - Math.abs(position.z - b.z - 2.5),
+      )[0];
+    if (room) position.z += (room.z + 2.5 - position.z) * clearance;
+  }
+  if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
+  if (p < 0.86)
+    position.lerp(new Vector3(8, 23, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
 }

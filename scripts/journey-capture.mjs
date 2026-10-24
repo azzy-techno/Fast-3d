@@ -101,7 +101,7 @@ try {
       scrollTo(0, a + (b - a) * (p - i));
     }, p);
     let settled = false;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 300; i++) {
       const actual = await page.evaluate(() =>
         Number(document.querySelector("canvas")?.dataset.journey),
       );
@@ -121,6 +121,12 @@ try {
       Buffer.from(result.value.data, "base64"),
     );
     console.log(
+      "HOST",
+      await page.evaluate(() => ({
+        ...document.querySelector("canvas").dataset,
+      })),
+    );
+    console.log(
       "SHOT",
       name,
       await page.evaluate(
@@ -128,6 +134,15 @@ try {
       ),
     );
   }
+  await capture(0.61, "host-welcome");
+  await capture(0.9, "host-follow");
+  await capture(11.55, "exit-lift");
+  await capture(11.68, "reception-entry");
+  await capture(11.69, "reception-premium");
+  await capture(11.73, "reception");
+  await capture(11.8, "exit-walk");
+  await capture(11.86, "host-goodbye");
+  await capture(11.96, "drone");
   await capture(0, "arrival");
   await capture(1, "roof");
   await capture(1.34, "roof-door");
@@ -140,6 +155,8 @@ try {
   await capture(3, "mechanical");
   await capture(8, "manufacturing");
   await capture(10, "iiot");
+  await capture(1, "phone-host", true);
+  await capture(11.86, "phone-farewell", true);
   await capture(2, "phone-electrical", true);
   await capture(1.65, "phone-offices", true);
 } finally {

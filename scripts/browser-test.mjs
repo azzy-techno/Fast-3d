@@ -195,6 +195,34 @@ try {
     }
     throw new Error(`Route did not settle at ${progress}`);
   }
+  for (const [progress, name] of [
+    [0.61, "host-welcome"],
+    [1, "host-follow"],
+    [2, "host-presenting"],
+    [11.55, "exit-lift"],
+    [11.69, "reception"],
+    [11.86, "host-farewell"],
+    [11.96, "drone-return"],
+    [11.69, "reception-reverse"],
+  ]) {
+    await travelTo(progress);
+    const host = await page.evaluate(() => ({
+      ...document.querySelector("canvas").dataset,
+    }));
+    assert(
+      host.guidePosition.split(",").map(Number).every(Number.isFinite),
+      "Guide must have a finite position",
+    );
+    if (progress < 0.7 || progress > 11.84) assert.equal(host.guide, "waving");
+    if (progress === 11.69)
+      assert.equal(Number(host.guidePosition.split(",")[1]), 0.25);
+    if (progress === 11.86)
+      assert.equal(Number(host.guidePosition.split(",")[2]), 18);
+    await shot("desktop-" + name);
+  }
+  results.push(
+    "Rigged rooftop host, service gestures, descending exit lift, reception, grounded farewell and reverse route",
+  );
   for (const progress of [1.34, 1.65, 1.84, 1.94, 2.55, 1.65]) {
     await travelTo(progress);
     assert.equal(

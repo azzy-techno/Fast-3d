@@ -13,6 +13,8 @@ import {
   SpotLight,
 } from "three";
 import { Environment, Sky, PerformanceMonitor } from "@react-three/drei";
+import { Host } from "./Host";
+import { Reception } from "./PremiumInterior";
 import { Exterior } from "./Exterior";
 import { assetUrl } from "../lib/assets";
 import { useTour } from "../store";
@@ -90,7 +92,7 @@ function World({
     const fov = sampleJourney(p, vectors.p, vectors.target);
     const inside =
       Math.min(1, Math.max(0, (p - 1.3) / 0.13)) *
-      (1 - Math.min(1, Math.max(0, (p - 11.66) / 0.16)));
+      (1 - Math.min(1, Math.max(0, (p - 11.77) / 0.08)));
     const outside = 1 - inside;
     const cam = camera as PerspectiveCamera;
     if (mobile && outside > 0) {
@@ -152,8 +154,8 @@ function World({
     }
     if (scene.background instanceof Color)
       scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
-    if (shell.current) shell.current.visible = p < 1.38 || p > 11.64;
-    if (city.current) city.current.visible = p < 1.9 || p > 11.64;
+    if (shell.current) shell.current.visible = p < 1.38 || p > 11.825;
+    if (city.current) city.current.visible = p < 1.9 || p > 11.6;
     gl.domElement.dataset.journey = p.toFixed(4);
     if (warmed.current && !ready.current) {
       ready.current = true;
@@ -223,6 +225,8 @@ function World({
         <RoofAccess />
       </group>
       <Interior />
+      <Reception />
+      <Host />
     </>
   );
 }

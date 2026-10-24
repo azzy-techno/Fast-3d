@@ -17,6 +17,7 @@ export function JourneyGuide({
   const root = useRef<HTMLDivElement>(null),
     copy = useRef<HTMLDivElement>(null),
     marker = useRef<SVGCircleElement>(null);
+  const [hostCue, setHostCue] = useState("");
   const [mapOpen, setMapOpen] = useState(false);
   const [beat, setBeat] = useState(journeyBeat(0));
   const [floor, setFloor] = useState("CITY / ARRIVAL");
@@ -25,6 +26,7 @@ export function JourneyGuide({
     const update = () => {
       const p = useTour.getState().progress;
       const beat = journeyBeat(p);
+      setHostCue(p > 0.4 && p < 0.74 ? "welcome" : p > 11.84 ? "farewell" : "");
       setBeat((previous) => (previous[0] === beat[0] ? previous : beat));
       const floor =
         p < 0.7
@@ -33,9 +35,11 @@ export function JourneyGuide({
             ? "03 / ROOF"
             : p < 1.85
               ? "02 / WORKPLACE"
-              : p < 11.7
+              : p < 11.6
                 ? "01 / SYSTEMS"
-                : "CITY / RETURN";
+                : p < 11.83
+                  ? "G / RECEPTION"
+                  : "CITY / FAREWELL";
       setFloor((previous) => (previous === floor ? previous : floor));
       if (root.current)
         root.current.dataset.phase =
@@ -43,6 +47,7 @@ export function JourneyGuide({
       const local = p % 1;
       const visible =
         (p > 1.22 && p < 1.96) ||
+        (p > 11.4 && p < 11.94) ||
         (p > 2 && p < 11.5 && local > 0.38 && local < 0.84);
       if (copy.current) copy.current.style.opacity = visible ? "1" : "0";
       if (marker.current)
@@ -67,6 +72,20 @@ export function JourneyGuide({
       ];
   return (
     <div className="journey-guide" ref={root}>
+      {hostCue && (
+        <div className="host-cue">
+          <span>{rtl ? "مرشدك في فاست" : "YOUR FAST GUIDE"}</span>
+          <p>
+            {rtl
+              ? hostCue === "welcome"
+                ? "أهلاً بك. هيا نبدأ الجولة."
+                : "إلى اللقاء. شكراً لزيارتك."
+              : hostCue === "welcome"
+                ? "Hi. Let me show you around."
+                : "Until next time. Thanks for joining me."}
+          </p>
+        </div>
+      )}
       <div className="journey-toolbar">
         <span className="floor-indicator">
           <i />
