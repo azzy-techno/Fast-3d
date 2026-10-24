@@ -17,6 +17,7 @@ import { useGSAP } from "@gsap/react";
 import { chapters, destinations } from "./data/chapters";
 import { useTour } from "./store";
 import { assetUrl } from "./lib/assets";
+import { ServiceSound } from "./lib/serviceSound";
 import { JourneyGuide } from "./components/JourneyGuide";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -69,8 +70,8 @@ export default function App() {
   const main = useRef<HTMLElement>(null);
   const lenis = useRef<Lenis | null>(null);
   const audio = useRef<Howl | null>(null);
+  const soundscapes = useRef<ServiceSound | null>(null);
   const active = useTour((s) => s.active);
-  const lastSoundChapter = useRef(active);
   const [percent, setPercent] = useState(0);
   const t = (en: string, ar: string) => (rtl ? ar : en);
   const sceneReady = useCallback(() => setReady(true), []);
@@ -213,19 +214,26 @@ export default function App() {
   );
 
   useEffect(() => {
-    const chapterChanged = lastSoundChapter.current !== active;
-    lastSoundChapter.current = active;
-    if (sound && chapterChanged && active > 0) {
-      audio.current?.stop();
-      audio.current?.play();
-    }
-  }, [active, sound]);
-  useEffect(
-    () => () => {
+    const engine = new ServiceSound();
+    soundscapes.current = engine;
+    const update = () => engine.update(useTour.getState().progress);
+    const off = useTour.subscribe(update);
+    const visibility = () => {
+      if (document.hidden) engine.stop();
+      else update();
+    };
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      off();
+      document.removeEventListener("visibilitychange", visibility);
+      engine.dispose();
       audio.current?.unload();
-    },
-    [],
-  );
+    };
+  }, []);
+  useEffect(() => {
+    soundscapes.current?.setEnabled(sound && !list);
+    soundscapes.current?.update(useTour.getState().progress);
+  }, [sound, list]);
   const toggleSound = () => {
     if (!audio.current)
       audio.current = new Howl({
@@ -234,7 +242,10 @@ export default function App() {
         preload: true,
       });
     if (!sound) audio.current.play();
-    else audio.current.stop();
+    else {
+      audio.current.stop();
+      soundscapes.current?.setEnabled(false);
+    }
     setSound(!sound);
   };
   const jump = (id: string) => {

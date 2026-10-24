@@ -37,29 +37,33 @@ for (let i = 0; i < serviceRooms.length; i++) {
   const room = serviceRooms[i],
     next = serviceRooms[i + 1];
   const at = i + 2;
-  const p: Point = [room.side * 3.5, 8.05, room.z + 3];
-  const target: Point = [room.x, 7.45, room.z - 0.6];
-  shot(at, p, target, 68);
-  shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 66);
+  const p: Point = [room.side * 3.5, 8.05, room.z + 3.2];
+  const target: Point = [
+    room.x + (room.side < 0 ? 1.2 : 0),
+    7.45,
+    room.z - 0.6,
+  ];
+  shot(at, p, target, 74);
+  shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
   if (next) {
     shot(
       at + 0.38,
-      [room.side * 2.1, 7.7, room.z + 2.5],
+      [room.side * 2.1, 7.7, room.z + 3.1],
       [0, 7.6, room.z + 1],
       68,
     );
-    shot(at + 0.51, [0, 7.7, room.z + 2.5], [0, 7.6, next.z - 2], 68);
-    shot(at + 0.68, [0, 7.7, next.z + 2.5], [next.x, 7.5, next.z], 68);
+    shot(at + 0.51, [0, 7.7, room.z + 3.1], [0, 7.6, next.z - 2], 68);
+    shot(at + 0.68, [0, 7.7, next.z + 3.1], [next.x, 7.5, next.z], 68);
     shot(
       at + 0.84,
-      [next.side * 2.1, 7.7, next.z + 2.5],
+      [next.side * 2.1, 7.7, next.z + 3.1],
       [next.x, 7.5, next.z - 0.6],
       68,
     );
   }
 }
 // Enter the rear lift, descend to ground, then walk the reception approach.
-shot(11.4, [2.1, 7.7, -30.3], [0, 7.7, -35], 68);
+shot(11.4, [2.1, 7.7, -29.7], [0, 7.7, -35], 68);
 shot(11.44, [0, 7.7, -32], [0, 7.7, -38], 68);
 shot(11.49, [0, 7.7, -34], [0, 7.7, -40], 66);
 shot(11.53, [0, 7.7, -37], [0, 7.7, -41], 66);
@@ -213,6 +217,10 @@ export function routeDistance(p: number) {
   return arc[i] + (arc[Math.min(12000, i + 1)] - arc[i]) * (n - i);
 }
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
+  if (p >= 1.9 && p <= 11.53) {
+    sampleServiceGuide(p, position, facing);
+    return;
+  }
   if (p <= 0.7) {
     position.set(8, 23, 5);
     facing.set(12, 24, 12);
@@ -265,38 +273,89 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.8).add(arcP);
     arcTarget.y = 23;
     position.lerp(arcTarget, weight);
-  }
-  const chapter = Math.round(p);
-  if (
-    chapter >= 2 &&
-    chapter <= 11 &&
-    p > chapter - 0.07 &&
-    p < chapter + 0.38
-  ) {
-    const weight =
-      smooth(chapter - 0.07, chapter) *
-      (1 - smooth(chapter + 0.2, chapter + 0.38));
-    sampleJourney(chapter, arcP, arcTarget);
-    arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.3).add(arcP);
-    arcTarget.y = 6;
-    position.lerp(arcTarget, weight);
-  }
-  if (p >= 1.96 && p <= 11.4) {
-    const x = Math.abs(position.x);
-    const ease = (v: number) => {
-      const t = Math.max(0, Math.min(1, v));
-      return t * t * (3 - 2 * t);
-    };
-    const clearance = ease((x - 1.6) / 0.4) * (1 - ease((x - 2.6) / 1.2));
-    const room = serviceRooms
-      .filter((r) => r.side === Math.sign(position.x))
-      .sort(
-        (a, b) =>
-          Math.abs(position.z - a.z - 2.5) - Math.abs(position.z - b.z - 2.5),
-      )[0];
-    if (room) position.z += (room.z + 2.5 - position.z) * clearance;
+    if (p >= 0.86 && p <= 1.14) facing.set(0, 24.5, -1);
   }
   if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
   if (p < 0.86)
     position.lerp(new Vector3(8, 23, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
+}
+
+// The guide uses the front visitor aisle and the outer presentation bay.
+// Equipment is contained inside +/-3.3 m of the room centre, ending at z+1.65.
+// Camera and guide use separate lanes through the 1.9 m door opening.
+export const exhibitEnvelope = { halfWidth: 3.3, front: 1.65, back: -3.15 };
+export const presentationX = 10.55;
+const exhibitFocus: Point[] = [
+  [0, 3, 0.85],
+  [0, 0.7, 0],
+  [1.5, 1.5, 2.3],
+  [0, 1.9, 2.7],
+  [0, 2.65, 0],
+  [0, 2.1, 0],
+  [0, 1.9, 1],
+  [0, 3.4, -2.68],
+  [0.2, 1.45, 1],
+  [0.8, 3.8, 1],
+];
+type GuideKey = { at: number; p: Point; room: number };
+const guideKeys: GuideKey[] = [];
+const guideKey = (at: number, p: Point, room: number) =>
+  guideKeys.push({ at, p, room });
+guideKey(1.9, [0.65, 6, -7.85], 0);
+guideKey(1.92, [0.65, 6, -3], 0);
+guideKey(1.94, [-2.1, 6, -1.95], 0);
+for (let i = 0; i < serviceRooms.length; i++) {
+  const room = serviceRooms[i],
+    next = serviceRooms[i + 1],
+    at = i + 2;
+  const bay = room.side < 0 ? -2.85 : presentationX,
+    parkZ = room.side < 0 ? -1.5 : 0.6;
+  guideKey(at - (i === 0 ? 0.045 : 0.1), [bay, 6, room.z + 2.05], i);
+  guideKey(at - (i === 0 ? 0.02 : 0.04), [bay, 6, room.z + parkZ], i);
+  guideKey(at + 0.28, [bay, 6, room.z + parkZ], i);
+  guideKey(at + (next ? 0.38 : 0.35), [bay, 6, room.z + 2.05], i);
+  guideKey(at + (next ? 0.54 : 0.44), [room.side * 2.1, 6, room.z + 2.05], i);
+  if (next) {
+    guideKey(at + 0.62, [room.side * 1.3, 6, room.z + 2.05], i);
+    guideKey(at + 0.72, [room.side * 1.3, 6, next.z + 2.05], i + 1);
+    guideKey(at + 0.78, [next.side * 2.1, 6, next.z + 2.05], i + 1);
+  } else {
+    guideKey(11.48, [0.65, 6, -33.5], i);
+    guideKey(11.51, [0.65, 6, -35.2], i);
+    guideKey(11.53, [0.65, 6, -37.85], i);
+  }
+}
+export function guideExhibit(p: number) {
+  if (p < 1.9 || p > 11.53) return null;
+  let i = 0;
+  while (i < guideKeys.length - 2 && p > guideKeys[i + 1].at) i++;
+  return serviceRooms[guideKeys[i + 1].room];
+}
+function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
+  let i = 0;
+  while (i < guideKeys.length - 2 && p > guideKeys[i + 1].at) i++;
+  const a = guideKeys[i],
+    b = guideKeys[i + 1],
+    t = Math.max(0, Math.min(1, (p - a.at) / (b.at - a.at))),
+    u = t * t * (3 - 2 * t);
+  position.set(
+    a.p[0] + (b.p[0] - a.p[0]) * u,
+    a.p[1] + (b.p[1] - a.p[1]) * u,
+    a.p[2] + (b.p[2] - a.p[2]) * u,
+  );
+  const room = serviceRooms[b.room];
+  const focus = exhibitFocus[b.room];
+  facing.set(
+    room.x + focus[0] * 0.55,
+    6.08 + focus[1] * 0.55,
+    room.z - 0.55 + focus[2] * 0.55,
+  );
+}
+
+export function guideIsPresenting(p: number) {
+  if (p >= 0.86 && p <= 1.14) return true;
+  const at = Math.round(p);
+  return (
+    at >= 2 && at <= 11 && p >= at - (at === 2 ? 0.02 : 0.04) && p <= at + 0.28
+  );
 }

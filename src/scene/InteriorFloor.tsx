@@ -42,7 +42,7 @@ export function InteriorFloor({ office = false }: { office?: boolean }) {
       for (let z = minZ; z < maxZ; z++) {
         if (
           Math.abs(x + 0.5) < 2.5 &&
-          (Math.abs(z + 0.5 + 7) < 2.5 || (!office && z < -35))
+          ((office && Math.abs(z + 0.5 + 7) < 2.5) || (!office && z < -35))
         )
           continue;
         const plane = new PlaneGeometry(1, 1);

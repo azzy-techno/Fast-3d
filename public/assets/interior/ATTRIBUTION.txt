@@ -26,3 +26,10 @@ https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Soldier.glb
 https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html
 Changes: retargeted to the host's proportions; in-place motion, distance-driven playback.
 Greeting, pointing and farewell gestures are procedural skeletal layers authored for this site.
+
+Civilian street figures now share the Ready Player Me guide model and retargeted walk above,
+with varied outfit tint, height and facial-hair visibility. The old Soldier character is no
+longer displayed; its animations remain the source of the offline retargeted motion.
+
+Service ambience: original procedural sound designs generated for this project.
+See ../audio/README.txt and scripts/generate-service-sounds.py. No third-party recordings.

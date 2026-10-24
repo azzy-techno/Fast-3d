@@ -1,9 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
-import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
 import {
-  AnimationMixer,
   BufferGeometry,
   CanvasTexture,
   Color,
@@ -486,50 +484,58 @@ function Landscaping({ mobile }: { mobile: boolean }) {
 }
 
 function Pedestrian({ index }: { index: number }) {
-  const { scene, animations } = useGLTF(assetUrl("exterior/pedestrian.glb"));
-  const { model, mixer, scale } = useMemo(() => {
-    const model = clone(scene);
-    model.updateMatrixWorld(true);
-    model.traverse((o) => {
-      if (o instanceof Mesh) {
-        o.castShadow = true;
-        o.receiveShadow = true;
-      }
-    });
-    const mixer = new AnimationMixer(model);
-    // The source rig already converts centimetres to metres on its Character node.
-    return { model, mixer, scale: 1 };
-  }, [scene, animations, index]);
-  useEffect(() => {
-    const walk = animations.find((a) => a.name === "Walk");
-    if (walk) {
-      const action = mixer.clipAction(walk);
-      action.reset().play();
-      action.time = index * 0.63;
-    }
-    return () => {
-      mixer.stopAllAction();
-      mixer.uncacheRoot(model);
-    };
-  }, [mixer, model, animations, index]);
+  const rig = useHumanRig(
+    ["#617b91", "#a5967c", "#71867a", "#777583", "#839aab", "#9b907f"][
+      index % 6
+    ],
+    1.65 + (index % 4) * 0.055,
+    index % 3 === 0,
+  );
   const root = useRef<Group>(null);
+  const motion = useRef({
+    distance: index * 9.7,
+    phase: index * 0.23,
+    angle: Math.PI / 2,
+    previousX: 0,
+    initialized: false,
+  });
   useFrame((_, dt) => {
     if (!root.current || !exteriorVisible()) return;
-    mixer.update(Math.min(dt, 0.05));
-    const t = mixer.time * 0.72 + index * 23.9;
-    const lane = index % 2,
-      direction = lane ? -1 : 1;
-    root.current.position.set(
-      ((t % 160) - 80) * direction,
-      0.12,
-      lane ? 34 : 21.8,
-    );
-    // The imported Walk rig faces local -Z, not +Z. Match its facing to travel.
-    root.current.rotation.y = (-direction * Math.PI) / 2;
+    const state = motion.current,
+      delta = Math.min(dt, 0.1) * (0.72 + (index % 3) * 0.09);
+    state.distance += delta;
+    const lap = state.distance % 92,
+      forward = lap < 46;
+    const t = (lap % 46) / 46,
+      ease = t * t * (3 - 2 * t);
+    const x = forward ? -23 + 46 * ease : 23 - 46 * ease;
+    const moved = state.initialized ? Math.abs(x - state.previousX) : 0;
+    state.previousX = x;
+    state.initialized = true;
+    const speed = Math.min(1, moved / Math.max(dt, 0.001) / 0.15);
+    state.phase += (moved / WALK_STRIDE) * rig.walk.getClip().duration;
+    rig.walk.time = state.phase % rig.walk.getClip().duration;
+    rig.walk.setEffectiveWeight(speed);
+    rig.idle.setEffectiveWeight(1 - speed);
+    rig.mixer.update(0);
+    standHuman(rig, 1 - speed);
+    const desired = forward ? Math.PI / 2 : -Math.PI / 2;
+    state.angle +=
+      Math.atan2(
+        Math.sin(desired - state.angle),
+        Math.cos(desired - state.angle),
+      ) *
+      (1 - Math.exp(-dt * 9));
+    root.current.position.set(x, 0.12, index % 2 ? 34 : 21.8);
+    root.current.rotation.y = state.angle;
+    root.current.updateMatrixWorld(true);
+    groundHuman(rig, 0.12);
+    root.current.userData.travelDirection = forward ? 1 : -1;
+    root.current.userData.stride = state.phase;
   });
   return (
-    <group ref={root} name="walking-pedestrian">
-      <primitive object={model} scale={scale} />
+    <group ref={root} name="civilian-pedestrian">
+      <primitive object={rig.model} />
     </group>
   );
 }

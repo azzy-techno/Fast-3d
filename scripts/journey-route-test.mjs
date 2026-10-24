@@ -18,9 +18,13 @@ try {
     format: "esm",
     outfile: file,
   });
-  const { sampleJourney, sampleGuide, serviceRooms, Vector3 } = await import(
-    pathToFileURL(file)
-  );
+  const {
+    sampleJourney,
+    sampleGuide,
+    guideIsPresenting,
+    serviceRooms,
+    Vector3,
+  } = await import(pathToFileURL(file));
   const p = new Vector3(),
     target = new Vector3(),
     previous = new Vector3(),
@@ -78,6 +82,9 @@ try {
   const host = new Vector3(),
     hostTarget = new Vector3(),
     hostPrevious = new Vector3();
+  let worstCameraAt = 0;
+  let minCameraClearance = Infinity,
+    minExhibitClearance = Infinity;
   let hostMaxStep = 0,
     hostWorstAt = 0;
   for (let n = 0; n <= 12000; n++) {
@@ -102,12 +109,48 @@ try {
         `Guide crosses a solid partition at ${n / 1000}: ${host.toArray()}`,
       );
     }
+    if (n / 1000 >= 1.94 && n / 1000 <= 11.43) {
+      sampleJourney(n / 1000, p, target);
+      const distance = Math.hypot(host.x - p.x, host.z - p.z);
+      if (distance < minCameraClearance) worstCameraAt = n / 1000;
+      minCameraClearance = Math.min(minCameraClearance, distance);
+      for (const room of serviceRooms) {
+        const dx = Math.max(0, Math.abs(host.x - room.x) - 3.3);
+        const dz = Math.max(0, room.z - 3.15 - host.z, host.z - room.z - 1.65);
+        const clearance = Math.hypot(dx, dz);
+        minExhibitClearance = Math.min(minExhibitClearance, clearance);
+      }
+    }
     hostPrevious.copy(host);
   }
   assert(
     hostMaxStep < 0.7,
     `Guide discontinuity at ${hostWorstAt}: ${hostMaxStep}`,
   );
+  console.log({ minCameraClearance, minExhibitClearance, worstCameraAt });
+  assert(
+    minCameraClearance > 1.0,
+    "Guide must not approach or pass through camera",
+  );
+  assert(
+    minExhibitClearance > 0.32,
+    "Guide body must clear equipment envelopes",
+  );
+  for (let chapter = 2; chapter <= 11; chapter++) {
+    sampleGuide(chapter, host, hostTarget);
+    sampleGuide(chapter + 0.2, reverse, reverseTarget);
+    assert(
+      host.equals(reverse),
+      "Guide must stay in its bay throughout a showcase",
+    );
+    sampleJourney(chapter, p, target);
+    assert(
+      Math.hypot(host.x - p.x, host.z - p.z) > 4,
+      "Showcase guide must stay out of the foreground",
+    );
+    assert(guideIsPresenting(chapter));
+    assert(!guideIsPresenting(chapter + 0.6));
+  }
   sampleJourney(11.55, p, target);
   assert(p.y < 6 && p.y > 2, "Exit descends in lift");
   sampleJourney(11.69, p, target);

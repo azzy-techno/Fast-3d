@@ -113,6 +113,40 @@ try {
     }
     assert(settled, `Camera must settle before capture: ${name}`);
     await delay(300);
+    if (
+      name === "service-corridor" ||
+      name === "electrical" ||
+      name === "mechanical"
+    ) {
+      const expected = name === "service-corridor" ? "standing" : "presenting";
+      let state;
+      for (let wait = 0; wait < 150; wait++) {
+        state = await page.evaluate(() => ({
+          ...document.querySelector("canvas").dataset,
+        }));
+        if (
+          state.guide === expected &&
+          (expected !== "presenting" || Number(state.guideAim) > 0.98)
+        )
+          break;
+        await delay(200);
+      }
+      assert.equal(
+        state.guide,
+        expected,
+        "Gestures occur only at showcase stops",
+      );
+      if (expected === "presenting") {
+        assert(
+          Number(state.guideCameraDistance) > 4,
+          "Guide stays out of the foreground",
+        );
+        assert(
+          Number(state.guideAim) > 0.98,
+          `Hand aims at the actual exhibit: ${JSON.stringify(state)}`,
+        );
+      }
+    }
     const result = await page
       ._client()
       .send("Page.captureScreenshot", { format: "png" });

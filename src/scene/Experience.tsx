@@ -106,7 +106,7 @@ function World({
     // moving the camera out through an interior wall on narrow screens.
     const offsetX = mobile
       ? 0
-      : (rtl ? 1 : -1) * (0.19 * outside + 0.09 * inside);
+      : (rtl ? 1 : -1) * (0.19 * outside + 0.03 * inside);
     const offsetY = mobile ? 0.19 * outside + 0.1 * inside : 0;
     const nextFov = fov + (mobile ? inside * 8 : 0);
     if (

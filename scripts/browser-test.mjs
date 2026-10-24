@@ -407,14 +407,14 @@ try {
   await click(".sound-button");
   await waitFor(
     page,
-    () => window.__audibleStarts > 0,
-    "opt-in audio playback",
+    () => window.__audibleStarts >= 2,
+    "opt-in chime and service ambience",
   );
   await delay(350);
   assert.equal(
     await page.evaluate(() => window.__audibleStarts),
-    1,
-    "Enabling sound plays one chime",
+    2,
+    "Enabling sound plays one chime and one service loop",
   );
   assert.equal(
     await page.evaluate(() =>
@@ -422,7 +422,46 @@ try {
     ),
     "true",
   );
+  for (const [i, name] of [
+    "electrical",
+    "mechanical",
+    "fabrication",
+    "civil",
+    "fire",
+    "it",
+    "manufacturing",
+    "industry",
+    "iiot",
+    "vision",
+  ].entries()) {
+    await travelTo(i + 2);
+    await waitFor(
+      page,
+      () => document.documentElement.dataset.soundscape !== "silent",
+      "service ambience selection",
+    );
+    assert.equal(
+      await page.evaluate(() => document.documentElement.dataset.soundscape),
+      name,
+    );
+  }
+  await travelTo(2.6);
+  await waitFor(
+    page,
+    () => document.documentElement.dataset.soundscape === "silent",
+    "silent corridor",
+  );
+  await travelTo(1);
+  await waitFor(
+    page,
+    () => document.documentElement.dataset.soundscape === "cooling",
+    "roof cooling ambience",
+  );
   await click(".sound-button");
+  assert.equal(
+    await page.evaluate(() => document.documentElement.dataset.soundscape),
+    "silent",
+  );
   assert.equal(
     await page.evaluate(() =>
       document.querySelector(".sound-button").getAttribute("aria-pressed"),
@@ -500,7 +539,7 @@ try {
     "Returning to 3D preserves the service chapter",
   );
   results.push(
-    "Single opt-in chime, scroll observer cleanup and ready-state chapter restoration",
+    "One opt-in chime plus service loop; all 11 soundscapes, silent corridors, mute, observer cleanup and chapter restoration",
   );
   for (const width of [768, 390, 320]) {
     await page.setViewport({

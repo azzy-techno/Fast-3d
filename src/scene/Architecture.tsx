@@ -460,7 +460,7 @@ export function Interior() {
     const floors: Part[] = [];
     for (let x = -11; x <= 11; x++)
       for (let z = -37; z <= 1; z++) {
-        if (Math.abs(x) < 2.5 && (Math.abs(z + 7) < 2.5 || z < -35)) continue;
+        if (Math.abs(x) < 2.5 && z < -35) continue;
         floors.push({ p: [x, 5.85, z], s: [1, 0.3, 1] });
       }
     const walls: Part[] = [],
@@ -574,8 +574,9 @@ export function Interior() {
             ref={(el) => {
               roomRefs.current[i] = el;
             }}
-            position={[room.x, 6.08, room.z - 0.35]}
-            scale={0.6}
+            name={`service-equipment-${room.index}`}
+            position={[room.x, 6.08, room.z - 0.55]}
+            scale={0.55}
           >
             <StaticInstances>
               <Equipment />

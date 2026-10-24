@@ -1,6 +1,7 @@
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
 import { Box, Cylinder } from "./Primitives";
+import { RooftopPlant } from "./RooftopPlant";
 import { Cooling } from "./Equipment";
 import { useSurface } from "./Exterior";
 import { useRef } from "react";
@@ -70,13 +71,7 @@ export function Building() {
       ))}
       <Box p={[0, 22.3, -1]} s={[34, 0.7, 21]} c="#d3d6cd" metal={0.1} />
       <Box p={[0, 22.8, -1]} s={[31.5, 0.3, 18.5]} c="#899b9c" />
-      <ExteriorSurfaces
-        texture="roof-flat"
-        surfaces={[
-          { ...groundSurface([0, 22.96, -1], [31.5, 18.5]), repeat: [1, 1] },
-          { ...groundSurface([0, 10.71, -23], [32, 25]), repeat: [1, 1] },
-        ]}
-      />
+      <RooftopPlant />
       <ExteriorSurfaces
         texture="facade-industrial"
         surfaces={[
