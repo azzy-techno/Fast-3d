@@ -445,6 +445,29 @@ export default function App() {
                   ))}
                 </ul>
               )}
+              {chapter.id === "cooling" && (
+                <details className="roof-scope">
+                  <summary>{t("Inside this service", "تفاصيل الخدمة")}</summary>
+                  <p>
+                    {t(
+                      "Survey → engineering & design → installation or retrofit → testing and handover.",
+                      "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
+                    )}
+                  </p>
+                  <p>
+                    {t(
+                      "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
+                      "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
+                    )}
+                  </p>
+                  <a href="https://fast-arabia.com/services/mechanical">
+                    {t(
+                      "Project references & full scope ↗",
+                      "المشاريع ونطاق العمل الكامل ↗",
+                    )}
+                  </a>
+                </details>
+              )}
               <a className="service-link" href={chapter.href}>
                 {t("Explore this service", "استكشف هذه الخدمة")}
                 {arrow}

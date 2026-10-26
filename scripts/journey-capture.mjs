@@ -180,6 +180,10 @@ try {
   await capture(0, "arrival");
   await capture(1, "roof");
   await capture(1.34, "roof-door");
+  await capture(1.4, "roof-lift-turn");
+  await capture(1.44, "roof-lift-descent");
+  await capture(1.85, "service-lift-turn");
+  await capture(1.88, "service-lift-descent");
   await capture(1.53, "workplace-entry");
   await capture(1.65, "offices");
   await capture(1.74, "office-corridor");

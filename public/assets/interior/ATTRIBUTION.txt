@@ -33,3 +33,5 @@ longer displayed; its animations remain the source of the offline retargeted mot
 
 Service ambience: original procedural sound designs generated for this project.
 See ../audio/README.txt and scripts/generate-service-sounds.py. No third-party recordings.
+
+2026-10-26 character styling: clean-shaven guide, blue workwear, original procedural hard hat and FAST logo badge. Pedestrian skin/clothing variants, procedural hair and backpacks. All variants retain the attributed Ready Player Me base mesh and shared retargeted motion.

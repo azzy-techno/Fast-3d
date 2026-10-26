@@ -1,3 +1,4 @@
+import { liftDoorOpen } from "./travelMotion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
@@ -347,20 +348,11 @@ export function Lift({
   useFrame(({ camera }) => {
     if (!panels.current) return;
     const progress = journeyState.progress;
-    const center = exit
-      ? progress < 11.55
-        ? 11.49
-        : 11.61
-      : roof
-        ? p[1] === 23
-          ? 1.3
-          : 1.54
-        : progress < 1.86
-          ? 1.8
-          : 1.96;
-    const open = Math.max(
-      0,
-      Math.min(1, 1 - Math.abs(progress - center) / (exit ? 0.065 : 0.19)),
+    if (roof && p[1] === 23 && cabin.current)
+      cabin.current.visible = progress < 1.36;
+    const open = liftDoorOpen(
+      progress,
+      exit ? "exit" : roof ? "roof" : "service",
     );
     if (cabin.current && exit)
       cabin.current.position.y =
@@ -369,7 +361,7 @@ export function Lift({
           : Math.max(0.25, Math.min(6, camera.position.y - 1.7));
     if (cabin.current && p[1] === 16) {
       if (roof) {
-        cabin.current.visible = progress >= 1.375;
+        cabin.current.visible = progress >= 1.36;
         cabin.current.position.y =
           progress < 1.48
             ? Math.max(16, Math.min(23, camera.position.y - 1.7))
@@ -385,6 +377,9 @@ export function Lift({
   });
   return (
     <group ref={cabin} position={p} name={roof ? "roof-lift" : "service-lift"}>
+      <Box p={[-1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
+      <Box p={[1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
+      <Box p={[0, 3.15, 1.75]} s={[3.7, 0.3, 0.16]} c="#717b79" />
       <Box p={[0, 1.65, -1.7]} s={[3.7, 3.3, 0.16]} c="#636f70" />
       <Box p={[-1.85, 1.65, 0]} s={[0.16, 3.3, 3.6]} c="#717b79" />
       <Box p={[1.85, 1.65, 0]} s={[0.16, 3.3, 3.6]} c="#717b79" />
@@ -430,8 +425,8 @@ export function Lift({
         </group>
       ))}
       <group ref={panels} position={[0, 1.5, 1.75]}>
-        <Box p={[-0.63, 0, 0]} s={[1.25, 3, 0.06]} c="#899897" metal={0.6} />
-        <Box p={[0.63, 0, 0]} s={[1.25, 3, 0.06]} c="#899897" metal={0.6} />
+        <Box p={[-0.63, 0, 0]} s={[1.28, 3, 0.06]} c="#899897" metal={0.6} />
+        <Box p={[0.63, 0, 0.01]} s={[1.28, 3, 0.06]} c="#899897" metal={0.6} />
       </group>
       <Wayfinding
         text={

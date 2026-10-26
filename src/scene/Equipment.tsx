@@ -133,12 +133,71 @@ export function Cooling() {
               c="#97aeb9"
             />
           ))}
+          {/* Service panel seams, fasteners, access ladder and temperature gauge. */}
+          {[-1.42, 1.42].map((edge) => (
+            <group key={edge}>
+              <Box p={[edge, 1.7, 1.77]} s={[0.035, 2.5, 0.035]} c="#677d87" />
+              {[0.65, 1.3, 2, 2.7].map((y) => (
+                <Cylinder
+                  key={y}
+                  p={[edge, y, 1.8]}
+                  radius={0.035}
+                  height={0.035}
+                  r={[Math.PI / 2, 0, 0]}
+                  c="#e0e6e6"
+                />
+              ))}
+            </group>
+          ))}
+          <group position={[-1.56, 0, 0]}>
+            {[-0.38, 0.38].map((z) => (
+              <Pipe
+                key={z}
+                a={[0, 0.2, z]}
+                b={[0, 3.4, z]}
+                radius={0.035}
+                c="#abb9b9"
+              />
+            ))}
+            {Array.from({ length: 10 }, (_, n) => (
+              <Pipe
+                key={n}
+                a={[0, 0.3 + n * 0.3, -0.38]}
+                b={[0, 0.3 + n * 0.3, 0.38]}
+                radius={0.028}
+                c="#c8d0cd"
+              />
+            ))}
+          </group>
+          <group position={[1.05, 2.2, 1.87]}>
+            <Cylinder
+              radius={0.17}
+              height={0.08}
+              r={[Math.PI / 2, 0, 0]}
+              c="#455e68"
+            />
+            <Cylinder
+              p={[0, 0, 0.047]}
+              radius={0.135}
+              height={0.015}
+              r={[Math.PI / 2, 0, 0]}
+              c="#ede9da"
+              metal={0}
+            />
+            <Box
+              p={[0.035, 0.025, 0.06]}
+              s={[0.012, 0.14, 0.012]}
+              r={[0, 0, -0.65]}
+              c="#b84d3e"
+            />
+          </group>
           <Fan p={[0, 3.14, 0]} radius={1.25} />
           <Label text={`CT — 0${i + 1}`} p={[0, 2.77, 1.82]} />
           <Pipe a={[1.38, 1, 0]} b={[1.38, 1, 3.4]} radius={0.19} />
           <Valve p={[1.38, 1.1, 2.6]} />
         </group>
       ))}
+      <Label text="DESIGN / SUPPLY / RETROFIT" p={[0, 0.38, 4.1]} width={5} />
       <Pipe a={[-5.5, 1, 3.4]} b={[5.5, 1, 3.4]} radius={0.23} />
       <Pipe a={[-5.5, 1, 3.4]} b={[-5.5, 0, 3.4]} radius={0.23} />
       <Pipe a={[-5.7, 0, -3]} b={[-5.7, 0, 3]} c="#babfc3" radius={0.05} />

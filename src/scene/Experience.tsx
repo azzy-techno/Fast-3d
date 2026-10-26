@@ -222,8 +222,8 @@ function World({
       <Atmosphere mobile={mobile} />
       <group ref={shell}>
         <Building />
-        <RoofAccess />
       </group>
+      <RoofAccess />
       <Interior />
       <Reception />
       <Host />

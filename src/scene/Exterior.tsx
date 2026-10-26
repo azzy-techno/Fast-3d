@@ -1,3 +1,4 @@
+import { trafficPosition } from "./travelMotion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
@@ -490,6 +491,7 @@ function Pedestrian({ index }: { index: number }) {
     ],
     1.65 + (index % 4) * 0.055,
     index % 3 === 0,
+    index,
   );
   const root = useRef<Group>(null);
   const motion = useRef({
@@ -656,9 +658,7 @@ function Car({ index, parked = false }: { index: number; parked?: boolean }) {
   useFrame(({ clock }) => {
     if (root.current && !parked && exteriorVisible()) {
       const reverse = index % 2 === 0;
-      root.current.position.x =
-        ((clock.elapsedTime * (reverse ? 3 : -3) + index * 37 + 500) % 150) -
-        75;
+      root.current.position.x = trafficPosition(clock.elapsedTime, index);
       root.current.position.z = reverse ? 25 : 29;
       root.current.rotation.y = reverse ? Math.PI / 2 : -Math.PI / 2;
     }
@@ -742,9 +742,9 @@ export function Exterior({ mobile }: { mobile: boolean }) {
         texture="ground-asphalt"
         color="#b9b9bc"
         surfaces={[
-          groundSurface([-267, -0.31, -32], [466, 8]),
-          groundSurface([267, -0.31, -32], [466, 8]),
-          groundSurface([0, -0.31, -65], [1000, 8]),
+          groundSurface([-267, -0.025, -32], [466, 8]),
+          groundSurface([267, -0.025, -32], [466, 8]),
+          groundSurface([0, -0.025, -65], [1000, 8]),
           groundSurface([0, -0.025, 27], [1000, 9]),
           groundSurface([30, -0.03, 0], [8, 1000]),
           groundSurface([-31, -0.03, 0], [7, 1000]),
@@ -779,7 +779,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
       {Array.from({ length: mobile ? 3 : 6 }, (_, i) => (
         <Pedestrian key={i} index={mobile ? i + 2 : i} />
       ))}
-      {Array.from({ length: mobile ? 2 : 4 }, (_, i) => (
+      {Array.from({ length: mobile ? 8 : 14 }, (_, i) => (
         <Car key={i} index={i} />
       ))}
       {[0, 1, 2, 3].map((i) => (

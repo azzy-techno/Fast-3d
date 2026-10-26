@@ -1909,3 +1909,27 @@ footer p,
     font-size: 12px;
   }
 }
+
+.roof-scope {
+  margin: 1rem 0;
+  border-top: 1px solid #64818b66;
+  padding-top: 0.8rem;
+  color: #bed0d4;
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+.roof-scope summary {
+  cursor: pointer;
+  color: #ebf2ed;
+}
+.roof-scope p {
+  margin: 0.65rem 0;
+}
+.roof-scope a {
+  color: #9ad7e0;
+  text-underline-offset: 3px;
+}
+.roof-scope[open] {
+  max-height: 28vh;
+  overflow: auto;
+}
