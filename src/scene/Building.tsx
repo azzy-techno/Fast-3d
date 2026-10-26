@@ -23,35 +23,35 @@ export function Building() {
       <Box p={[0, -0.5, -8]} s={[53, 0.7, 63]} c="#a7a99f" metal={0} />
       <Box p={[0, -0.09, -8]} s={[49, 0.12, 59]} c="#aeb8b5" metal={0} />
       <Box p={[0, 0.05, 5]} s={[36, 0.35, 22]} c="#cad0cb" metal={0} />
-      <Box p={[0, 10.8, -1]} s={[32, 21.6, 19]} c="#264557" metal={0.6} />
+      <Box p={[0, 40.8, -1]} s={[32, 81.6, 19]} c="#264557" metal={0.6} />
       <ExteriorSurfaces
         texture="facade-tower-glass"
         glass
         surfaces={[
-          { p: [0, 10.85, 8.56], size: [32, 21.7], repeat: [2, 1.5] },
+          { p: [0, 40.85, 8.56], size: [32, 81.7], repeat: [2, 5.6] },
           {
-            p: [16.06, 10.85, -1],
-            size: [19, 21.7],
+            p: [16.06, 40.85, -1],
+            size: [19, 81.7],
             rotation: [0, Math.PI / 2, 0],
-            repeat: [19 / 16, 1.5],
+            repeat: [19 / 16, 5.6],
           },
           {
-            p: [-16.06, 10.85, -1],
-            size: [19, 21.7],
+            p: [-16.06, 40.85, -1],
+            size: [19, 81.7],
             rotation: [0, -Math.PI / 2, 0],
-            repeat: [19 / 16, 1.5],
+            repeat: [19 / 16, 5.6],
           },
         ]}
       />
-      {[0, 7, 14, 21.7].map((y) => (
+      {[0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 76, 81.7].map((y) => (
         <group key={y}>
           <Box p={[0, y, 8.9]} s={[33, 0.38, 0.9]} c="#d2d7d2" metal={0.2} />
           <Box p={[16.4, y, -1]} s={[0.7, 0.38, 20]} c="#d2d7d2" metal={0.2} />
           <Box p={[-16.4, y, -1]} s={[0.7, 0.38, 20]} c="#d2d7d2" metal={0.2} />
         </group>
       ))}
-      <mesh position={[-11, 11.1, 9.3]} castShadow receiveShadow>
-        <boxGeometry args={[4.8, 22.3, 1.5]} />
+      <mesh position={[-11, 41.1, 9.3]} castShadow receiveShadow>
+        <boxGeometry args={[4.8, 82.3, 1.5]} />
         <meshStandardMaterial
           color="#e1d0ae"
           map={stone}
@@ -63,14 +63,14 @@ export function Building() {
       {Array.from({ length: 13 }, (_, i) => (
         <Box
           key={i}
-          p={[-13.2 + i * 0.35, 11.2, 10.12]}
-          s={[0.08, 21.5, 0.2]}
+          p={[-13.2 + i * 0.35, 41.2, 10.12]}
+          s={[0.08, 81.5, 0.2]}
           c="#9d9f95"
           metal={0.1}
         />
       ))}
-      <Box p={[0, 22.3, -1]} s={[34, 0.7, 21]} c="#d3d6cd" metal={0.1} />
-      <Box p={[0, 22.8, -1]} s={[31.5, 0.3, 18.5]} c="#899b9c" />
+      <Box p={[0, 82.3, -1]} s={[34, 0.7, 21]} c="#d3d6cd" metal={0.1} />
+      <Box p={[0, 82.8, -1]} s={[31.5, 0.3, 18.5]} c="#899b9c" />
       <RooftopPlant />
       <ExteriorSurfaces
         texture="facade-industrial"
@@ -89,7 +89,7 @@ export function Building() {
           },
         ]}
       />
-      <group position={[0, 23, -1]} scale={0.8}>
+      <group position={[0, 83, -1]} scale={0.8}>
         <Cooling />
       </group>
       <Box p={[3, 6.7, 12]} s={[20, 0.45, 7]} c="#d7d9d0" metal={0.1} />
@@ -107,8 +107,8 @@ export function Building() {
       {[-0.5, 3, 6.5].map((x) => (
         <Box key={x} p={[x, 2.8, 9.15]} s={[0.09, 5.5, 0.1]} c="#bac9ce" />
       ))}
-      <Box p={[8, 18.3, 9.1]} s={[10, 3.6, 0.3]} c="#eff0e9" metal={0.05} />
-      <mesh position={[8, 18.3, 9.28]}>
+      <Box p={[8, 78.3, 9.1]} s={[10, 3.6, 0.3]} c="#eff0e9" metal={0.05} />
+      <mesh position={[8, 78.3, 9.28]}>
         <planeGeometry args={[8, 2.3]} />
         <meshBasicMaterial map={logo} transparent toneMapped={false} />
       </mesh>

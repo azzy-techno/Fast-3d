@@ -147,6 +147,17 @@ try {
         );
       }
     }
+    if (name === "electrical-lift")
+      assert.equal(
+        await page.evaluate(
+          () =>
+            getComputedStyle(
+              document.querySelector("#mechanical .chapter-copy"),
+            ).visibility,
+        ),
+        "hidden",
+        "Upcoming service copy stays hidden inside lift",
+      );
     const result = await page
       ._client()
       .send("Page.captureScreenshot", { format: "png" });
@@ -170,6 +181,7 @@ try {
   }
   await capture(0.61, "host-welcome");
   await capture(0.9, "host-follow");
+  await capture(11.445, "exit-corridor");
   await capture(11.55, "exit-lift");
   await capture(11.68, "reception-entry");
   await capture(11.69, "reception-premium");
@@ -189,6 +201,9 @@ try {
   await capture(1.74, "office-corridor");
   await capture(1.94, "systems-entry");
   await capture(2, "electrical");
+  await capture(2.2, "electrical-overview");
+  await capture(2.68, "electrical-lift");
+  await capture(3.0, "mechanical-landing");
   await capture(2.55, "service-corridor");
   await capture(3, "mechanical");
   await capture(8, "manufacturing");
@@ -196,6 +211,7 @@ try {
   await capture(1, "phone-host", true);
   await capture(11.86, "phone-farewell", true);
   await capture(2, "phone-electrical", true);
+  await capture(2.2, "phone-electrical-overview", true);
   await capture(1.65, "phone-offices", true);
 } finally {
   if (browser) await browser.close({ silent: true });

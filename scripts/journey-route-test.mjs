@@ -10,7 +10,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts"; export { Vector3 } from "three";',
+        'export * from "./src/scene/journey.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -23,6 +23,8 @@ try {
     sampleGuide,
     guideIsPresenting,
     serviceRooms,
+    stackLiftFloor,
+    stackDoorOpen,
     Vector3,
   } = await import(pathToFileURL(file));
   const p = new Vector3(),
@@ -45,20 +47,20 @@ try {
     if (n) {
       maxStep = Math.max(maxStep, p.distanceTo(previous));
       assert(
-        p.distanceTo(previous) < 0.9,
+        p.distanceTo(previous) < (progress > 11.89 ? 3 : 1.2),
         `Camera discontinuity at ${progress}`,
       );
     }
     if (progress >= 2 && progress <= 11.4) {
       assert(
-        p.y > 7.4 && p.y < 8.5,
+        p.y > 13.4 && p.y <= 69.01,
         `Camera outside service floor at ${progress}`,
       );
       assert(
         Math.abs(p.x) < 4.1,
         `Camera enters equipment envelope at ${progress}`,
       );
-      if (Math.abs(Math.abs(p.x) - 2.32) < 0.05) {
+      if (Math.abs(Math.abs(p.x) - 2.32) < 0.05 && p.z < -0.45) {
         const room = serviceRooms.find(
           (room) =>
             Math.sign(p.x) === room.side &&
@@ -79,6 +81,20 @@ try {
     previous.copy(p);
   }
   assert(doors > 10);
+  for (let chapter = 2; chapter < 11; chapter++)
+    for (let n = 0; n <= 100; n++) {
+      const at = chapter + 0.6 + (n * 0.16) / 100;
+      sampleJourney(at, p, target);
+      assert(
+        Math.abs(p.y - stackLiftFloor(at) - 1.7) < 1e-7,
+        "Camera stays inside descending cabin",
+      );
+      assert(
+        stackDoorOpen(at) < 1e-8,
+        "Lift stays sealed across the slab opening",
+      );
+    }
+
   const host = new Vector3(),
     hostTarget = new Vector3(),
     hostPrevious = new Vector3();
@@ -115,6 +131,7 @@ try {
       if (distance < minCameraClearance) worstCameraAt = n / 1000;
       minCameraClearance = Math.min(minCameraClearance, distance);
       for (const room of serviceRooms) {
+        if (Math.abs(host.y - room.y) > 3) continue;
         const dx = Math.max(0, Math.abs(host.x - room.x) - 3.3);
         const dz = Math.max(0, room.z - 3.15 - host.z, host.z - room.z - 1.65);
         const clearance = Math.hypot(dx, dz);
@@ -124,7 +141,7 @@ try {
     hostPrevious.copy(host);
   }
   assert(
-    hostMaxStep < 0.7,
+    hostMaxStep < 1.2,
     `Guide discontinuity at ${hostWorstAt}: ${hostMaxStep}`,
   );
   console.log({ minCameraClearance, minExhibitClearance, worstCameraAt });
@@ -136,6 +153,11 @@ try {
     minExhibitClearance > 0.32,
     "Guide body must clear equipment envelopes",
   );
+  assert.equal(
+    new Set(serviceRooms.map((r) => r.y)).size,
+    10,
+    "Every service occupies its own floor",
+  );
   for (let chapter = 2; chapter <= 11; chapter++) {
     sampleGuide(chapter, host, hostTarget);
     sampleGuide(chapter + 0.2, reverse, reverseTarget);
@@ -144,6 +166,11 @@ try {
       "Guide must stay in its bay throughout a showcase",
     );
     sampleJourney(chapter, p, target);
+    assert.equal(
+      p.y,
+      serviceRooms[chapter - 2].y + 2.05,
+      "Camera reaches the correct service level",
+    );
     assert(
       Math.hypot(host.x - p.x, host.z - p.z) > 4,
       "Showcase guide must stay out of the foreground",
@@ -152,7 +179,7 @@ try {
     assert(!guideIsPresenting(chapter + 0.6));
   }
   sampleJourney(11.55, p, target);
-  assert(p.y < 6 && p.y > 2, "Exit descends in lift");
+  assert(p.y < 12 && p.y > 2, "Exit descends in lift");
   sampleJourney(11.69, p, target);
   assert(p.y < 2.1 && p.z > -1, "Reception reached at walking height");
   sampleJourney(11.81, p, target);

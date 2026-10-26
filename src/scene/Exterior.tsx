@@ -745,9 +745,9 @@ export function Exterior({ mobile }: { mobile: boolean }) {
           groundSurface([-267, -0.025, -32], [466, 8]),
           groundSurface([267, -0.025, -32], [466, 8]),
           groundSurface([0, -0.025, -65], [1000, 8]),
-          groundSurface([0, -0.025, 27], [1000, 9]),
-          groundSurface([30, -0.03, 0], [8, 1000]),
-          groundSurface([-31, -0.03, 0], [7, 1000]),
+          groundSurface([0, -0.025, 27], [2400, 9]),
+          groundSurface([30, -0.03, 0], [8, 2400]),
+          groundSurface([-31, -0.03, 0], [7, 2400]),
         ]}
       />
       <ExteriorSurfaces

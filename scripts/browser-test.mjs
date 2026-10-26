@@ -199,6 +199,8 @@ try {
     [0.61, "host-welcome"],
     [1, "host-follow"],
     [2, "host-presenting"],
+    [2.2, "electrical-overview"],
+    [2.68, "inter-floor-lift"],
     [11.55, "exit-lift"],
     [11.69, "reception"],
     [11.86, "host-farewell"],
@@ -213,6 +215,16 @@ try {
       host.guidePosition.split(",").map(Number).every(Number.isFinite),
       "Guide must have a finite position",
     );
+    if (progress === 2)
+      assert(
+        Math.abs(Number(host.cameraHeight) - 68.05) < 0.05,
+        "Electrical floor reached at 66m plus eye height",
+      );
+    if (progress === 2.68)
+      assert(
+        Number(host.cameraHeight) > 61.7 && Number(host.cameraHeight) < 67.7,
+        "Camera descends between electrical and mechanical floors",
+      );
     if (progress < 0.7 || progress > 11.84) assert.equal(host.guide, "waving");
     if (progress === 11.69)
       assert.equal(Number(host.guidePosition.split(",")[1]), 0.25);

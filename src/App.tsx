@@ -171,7 +171,9 @@ export default function App() {
           copies.forEach((copy, index) => {
             const local = i + fraction - (index + 1);
             const opacity =
-              local < 0 ? 1 : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
+              local < 0
+                ? Math.max(0, Math.min(1, (local + 0.12) / 0.12))
+                : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
             copy.style.opacity = String(opacity);
             copy.style.visibility = opacity < 0.01 ? "hidden" : "visible";
           });
@@ -464,6 +466,34 @@ export default function App() {
                     {t(
                       "Project references & full scope ↗",
                       "المشاريع ونطاق العمل الكامل ↗",
+                    )}
+                  </a>
+                </details>
+              )}
+              {chapter.id === "electrical" && (
+                <details className="roof-scope">
+                  <summary>
+                    {t(
+                      "From installation to commissioning",
+                      "من التركيب إلى الاختبار والتشغيل",
+                    )}
+                  </summary>
+                  <p>
+                    {t(
+                      "LV panels and distribution boards. Smart RMUs. Transformer installation and alignment. LV/MV cable termination, jointing and testing.",
+                      "لوحات الجهد المنخفض والتوزيع، وحدات RMU الذكية، تركيب ومحاذاة المحولات، وإنهاء ووصل واختبار كابلات الجهد المنخفض والمتوسط.",
+                    )}
+                  </p>
+                  <p>
+                    {t(
+                      "FAST references: RMU replacements for CCS / SGCC; RMU replacement at DACO for Energia; cable pulling and testing for Al Hajry Overseas.",
+                      "من مشاريع فاست: استبدال وحدات RMU لصالح CCS / SGCC، واستبدالها في DACO لصالح Energia، وسحب واختبار الكابلات لصالح الهجري أوفرسيز.",
+                    )}
+                  </p>
+                  <a href="https://fast-arabia.com/services/electrical">
+                    {t(
+                      "See the full electrical scope ↗",
+                      "عرض نطاق الأعمال الكهربائية ↗",
                     )}
                   </a>
                 </details>

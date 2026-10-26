@@ -1933,3 +1933,9 @@ footer p,
   max-height: 28vh;
   overflow: auto;
 }
+
+/* Additional travel length for occupied floors and their enclosed lift stops. */
+.tour-view .chapter:not(#cooling) {
+  height: 180svh;
+  min-height: 1200px;
+}

@@ -170,7 +170,7 @@ export function Reception() {
   return (
     <>
       <group ref={lift}>
-        <Lift p={[0, 6, -37]} exit />
+        <Lift p={[0, 12, -37]} exit />
       </group>
       <group ref={root} name="ground-floor-reception">
         <StaticInstances>

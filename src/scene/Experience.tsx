@@ -97,8 +97,29 @@ function World({
     const cam = camera as PerspectiveCamera;
     if (mobile && outside > 0) {
       const scale =
-        1 + Math.max(0, (size.height / size.width) * 0.95 - 1) * outside;
+        1 +
+        Math.min(0.45, Math.max(0, (size.height / size.width) * 0.95 - 1)) *
+          outside;
       vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
+    }
+    // Portrait framing follows the transformer/commissioning area during the
+    // electrical overview; the camera stays in the open front visitor aisle.
+    if (mobile && p > 2.06 && p < 2.36) {
+      const ease = (a: number, b: number) => {
+        const n = Math.max(0, Math.min(1, (p - a) / (b - a)));
+        return n * n * (3 - 2 * n);
+      };
+      const weight = ease(2.06, 2.18) * (1 - ease(2.23, 2.36));
+      vectors.p.set(
+        vectors.p.x + (2.5 - vectors.p.x) * weight,
+        vectors.p.y + (69 - vectors.p.y) * weight,
+        vectors.p.z + (5.8 - vectors.p.z) * weight,
+      );
+      vectors.target.set(
+        vectors.target.x + (7 - vectors.target.x) * weight,
+        vectors.target.y + (67.3 - vectors.target.y) * weight,
+        vectors.target.z + (-4 - vectors.target.z) * weight,
+      );
     }
     camera.position.copy(vectors.p);
     camera.lookAt(vectors.target);
@@ -149,14 +170,16 @@ function World({
     }
     if (scene.fog instanceof Fog) {
       scene.fog.color.copy(vectors.interior).lerp(vectors.exterior, outside);
-      scene.fog.near = 35 + outside * 90;
-      scene.fog.far = 100 + outside * 250;
+      scene.fog.near = 35 + outside * 165;
+      scene.fog.far = 100 + outside * 400;
     }
     if (scene.background instanceof Color)
       scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
     if (shell.current) shell.current.visible = p < 1.38 || p > 11.825;
-    if (city.current) city.current.visible = p < 1.9 || p > 11.6;
+    if (city.current) city.current.visible = true;
     gl.domElement.dataset.journey = p.toFixed(4);
+    gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
+    gl.domElement.dataset.towerHeight = "83";
     if (warmed.current && !ready.current) {
       ready.current = true;
       gl.domElement.dataset.ready = "true";
@@ -171,16 +194,16 @@ function World({
       <hemisphereLight ref={hemisphere} args={["#d4e6eb", "#82745e", 0.85]} />
       <directionalLight
         ref={sun}
-        position={[-40, 45, 35]}
+        position={[-60, 120, 65]}
         intensity={2.6}
         color="#ffdfb1"
         castShadow
         shadow-mapSize={mobile ? [1024, 1024] : [2048, 2048]}
         shadow-camera-left={-55}
         shadow-camera-right={55}
-        shadow-camera-top={60}
-        shadow-camera-bottom={-60}
-        shadow-camera-far={170}
+        shadow-camera-top={110}
+        shadow-camera-bottom={-100}
+        shadow-camera-far={260}
         shadow-bias={-0.0004}
         shadow-normalBias={0.025}
       />
@@ -262,7 +285,7 @@ export default function Experience({
         ref={canvasRef}
         dpr={mobile ? 1 : enhanced ? [1, 1.25] : 1}
         shadows
-        camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 450 }}
+        camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 1000 }}
         gl={{
           antialias: true,
           alpha: false,

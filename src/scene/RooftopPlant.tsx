@@ -3,7 +3,7 @@ import { StaticInstances } from "./StaticInstances";
 /** Real geometry for the roof: no image containing painted equipment/shadows. */
 export function RooftopPlant() {
   return (
-    <group name="modeled-rooftop-plant" position={[0, 23, 0]}>
+    <group name="modeled-rooftop-plant" position={[0, 83, 0]}>
       <StaticInstances>
         <Box
           p={[0, -0.04, -1]}

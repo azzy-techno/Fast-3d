@@ -6,10 +6,11 @@ const result = await build({
   write: false,
   format: "esm",
 });
-const { liftDoorOpen, trafficPosition } = await import(
-  "data:text/javascript;base64," +
-    Buffer.from(result.outputFiles[0].text).toString("base64")
-);
+const { liftDoorOpen, trafficPosition, stackDoorOpen, stackLiftFloor } =
+  await import(
+    "data:text/javascript;base64," +
+      Buffer.from(result.outputFiles[0].text).toString("base64")
+  );
 for (const [kind, a, b] of [
   ["roof", 1.37, 1.48],
   ["service", 1.82, 1.9],
@@ -37,7 +38,7 @@ for (let index = 0; index < 14; index++) {
       d = x - previous;
     if (Math.abs(d) > 1)
       assert(
-        Math.abs(x) > 499 && Math.abs(previous) > 499,
+        Math.abs(x) > 999 && Math.abs(previous) > 999,
         "Cars wrap beyond visible horizon",
       );
     else
@@ -50,4 +51,20 @@ for (let index = 0; index < 14; index++) {
 }
 console.log(
   "PASS: sealed lift travel, continuous doors, constant traffic speed, wraps outside visible horizon",
+);
+
+for (let chapter = 2; chapter < 11; chapter++) {
+  const from = 66 - (chapter - 2) * 6,
+    to = from - 6;
+  assert.equal(stackLiftFloor(chapter + 0.6), from);
+  assert(Math.abs(stackLiftFloor(chapter + 0.76) - to) < 1e-8);
+  for (let k = 1; k < 100; k++)
+    assert.equal(
+      stackDoorOpen(chapter + 0.6 + (0.16 * k) / 100),
+      0,
+      "Stacked lift sealed during travel",
+    );
+}
+console.log(
+  "PASS: all nine inter-floor descents reach the correct levels with closed doors",
 );

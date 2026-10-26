@@ -32,11 +32,13 @@ export function JourneyGuide({
         p < 0.7
           ? "CITY / ARRIVAL"
           : p < 1.43
-            ? "03 / ROOF"
+            ? "ROOF / 83 M"
             : p < 1.85
-              ? "02 / WORKPLACE"
+              ? "12 / WORKPLACE"
               : p < 11.6
-                ? "01 / SYSTEMS"
+                ? `${Math.max(2, 13 - Math.round(p))
+                    .toString()
+                    .padStart(2, "0")} / SERVICE FLOOR`
                 : p < 11.83
                   ? "G / RECEPTION"
                   : "CITY / FAREWELL";
@@ -132,7 +134,7 @@ export function JourneyGuide({
       >
         <div className="plan-title">
           <span>{rtl ? "أنت هنا" : "YOU ARE HERE"}</span>
-          <span>FAST / 01</span>
+          <span>FAST / TOWER</span>
         </div>
         <div className="plan-drawing">
           <svg
@@ -140,47 +142,42 @@ export function JourneyGuide({
             role="img"
             aria-label={
               rtl
-                ? "غرف الخدمات على جانبي الممر"
-                : "Service rooms connected by a central corridor"
+                ? "طوابق الخدمات المتصلة بالمصعد"
+                : "Service floors connected by an enclosed lift"
             }
           >
             <path
-              d="M16 16H144V196H16Z M70 16V196 M90 16V196"
+              d="M16 16H144V196H16Z M118 16V196"
               fill="none"
               stroke="currentColor"
               strokeWidth="0.7"
             />
-            {[0, 1, 2, 3, 4].map((row) => (
+            {Array.from({ length: 10 }, (_, row) => (
               <g key={row}>
                 <path
-                  d={`M16 ${52 + row * 36}H70 M90 ${52 + row * 36}H144`}
+                  d={`M16 ${34 + row * 18}H118`}
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="0.7"
+                  strokeWidth=".7"
                 />
-                {[0, 1].map((side) => (
-                  <rect
-                    key={side}
-                    x={side ? 95 : 21}
-                    y={21 + row * 36}
-                    width="44"
-                    height="25"
-                    rx="1"
-                    fill={
-                      active === row * 2 + side + 2 ? "#91d8da" : "#789ca41c"
-                    }
-                  />
-                ))}
+                <rect
+                  x="21"
+                  y={20 + row * 18}
+                  width="92"
+                  height="12"
+                  rx="1"
+                  fill={active === row + 2 ? "#91d8da" : "#789ca41c"}
+                />
               </g>
             ))}
             <path
-              d="M80 26V184"
+              d="M130 26V184"
               fill="none"
               stroke="#96d8d8"
               strokeWidth="1"
               strokeDasharray="2 4"
             />
-            <circle ref={marker} cx="80" cy="28" r="3.5" fill="#e1c69b" />
+            <circle ref={marker} cx="130" cy="28" r="3.5" fill="#e1c69b" />
           </svg>
           <ol>
             {chapters.slice(1).map((chapter, i) => (
@@ -192,7 +189,7 @@ export function JourneyGuide({
                   }}
                   aria-current={active === i + 2 ? "location" : undefined}
                 >
-                  <span>{String(i + 1).padStart(2, "0")}</span>
+                  <span>{String(11 - i).padStart(2, "0")}</span>
                   {rtl ? chapter.ar : chapter.title}
                 </button>
               </li>

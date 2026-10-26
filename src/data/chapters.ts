@@ -31,14 +31,14 @@ export const chapters: Chapter[] = [
     imageAlt: "Industrial mechanical and cooling systems from FAST",
     href: `${site}/services/mechanical#scope`,
     color: "#64c8e0",
-    origin: [0, 23, 0],
+    origin: [0, 83, 0],
   },
   {
     id: "electrical",
     title: "Electrical",
     ar: "المقاولات الكهربائية",
-    place: "The power behind it all",
-    placeAr: "الطاقة وراء كل شيء",
+    place: "Level 11 / Power infrastructure",
+    placeAr: "الطابق 11 / البنية التحتية للطاقة",
     description:
       "From the first connection to final commissioning. Electrical systems designed, installed and tested for the demands of industrial facilities.",
     descriptionAr:
@@ -52,7 +52,7 @@ export const chapters: Chapter[] = [
     imageAlt: "FAST electrical installation and engineering",
     href: `${site}/services/electrical`,
     color: "#e4b45d",
-    origin: [-8, 15, 0],
+    origin: [-6.6, 66, -4],
   },
   {
     id: "mechanical",
@@ -73,7 +73,7 @@ export const chapters: Chapter[] = [
     imageAlt: "Mechanical equipment and piping systems supplied by FAST",
     href: `${site}/services/mechanical`,
     color: "#68b5dc",
-    origin: [8, 8, 0],
+    origin: [6.6, 60, -4],
   },
   {
     id: "fabrication",
@@ -90,7 +90,7 @@ export const chapters: Chapter[] = [
     imageAlt: "Steel fabrication work from the FAST fabrication yard",
     href: `${site}/services/fabrication`,
     color: "#e6a06b",
-    origin: [-8, 3, -14],
+    origin: [-6.6, 54, -4],
   },
   {
     id: "civil",
@@ -107,7 +107,7 @@ export const chapters: Chapter[] = [
     imageAlt: "FAST civil and structural construction work",
     href: `${site}/services/civil`,
     color: "#60c4b2",
-    origin: [0, -5, 0],
+    origin: [6.6, 48, -4],
   },
   {
     id: "fire",
@@ -124,7 +124,7 @@ export const chapters: Chapter[] = [
     imageAlt: "Fire protection systems installed by FAST",
     href: `${site}/services/fire-protection`,
     color: "#e97566",
-    origin: [10, 3, 1],
+    origin: [-6.6, 42, -4],
   },
   {
     id: "it",
@@ -145,7 +145,7 @@ export const chapters: Chapter[] = [
     imageAlt: "FAST IT and low-current infrastructure",
     href: `${site}/services/it-services`,
     color: "#8da9ef",
-    origin: [-8, 15, -14],
+    origin: [6.6, 36, -4],
   },
   {
     id: "manufacturing",
@@ -166,7 +166,7 @@ export const chapters: Chapter[] = [
     imageAlt: "Industrial automation and production capabilities from FAST",
     href: `${site}/services/industrial-automation`,
     color: "#5ec5dc",
-    origin: [2, 3, -29],
+    origin: [-6.6, 30, -4],
   },
   {
     id: "industry",
@@ -183,7 +183,7 @@ export const chapters: Chapter[] = [
     imageAlt: "Digital engineering and industrial systems from FAST",
     href: `${site}/services/industrial-automation#scope`,
     color: "#79d2d5",
-    origin: [0, 14, -29],
+    origin: [6.6, 24, -4],
   },
   {
     id: "iiot",
@@ -204,7 +204,7 @@ export const chapters: Chapter[] = [
     imageAlt: "FAST digital engineering and asset information capabilities",
     href: `${site}/services/industrial-automation#scope`,
     color: "#6ed6bf",
-    origin: [10, 7, -29],
+    origin: [-6.6, 18, -4],
   },
   {
     id: "vision",
@@ -226,7 +226,7 @@ export const chapters: Chapter[] = [
       "Industrial automation environment representing FAST computer vision services",
     href: `${site}/services/industrial-automation#projects`,
     color: "#95d9a9",
-    origin: [-9, 3, -29],
+    origin: [6.6, 12, -4],
   },
 ];
 export const destinations = [

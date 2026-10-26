@@ -1,3 +1,5 @@
+import { ServiceFloors } from "./ServiceFloors";
+import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
 import { liftDoorOpen } from "./travelMotion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -14,10 +16,8 @@ import {
 } from "three";
 import { Box, Cylinder, Screen } from "./Primitives";
 import { assetUrl } from "../lib/assets";
-import { chapters, type Point } from "../data/chapters";
-import { journeyState, serviceRooms } from "./journey";
-import { equipment } from "./Equipment";
-import { SystemAnimation } from "./SystemAnimation";
+import { type Point } from "../data/chapters";
+import { journeyState } from "./journey";
 import { StaticInstances } from "./StaticInstances";
 import { WorkplaceDetails } from "./PremiumInterior";
 import { InteriorFloor } from "./InteriorFloor";
@@ -338,42 +338,51 @@ export function Lift({
   p,
   roof = false,
   exit = false,
+  elevation = 0,
+  stack = false,
 }: {
   p: Point;
   roof?: boolean;
   exit?: boolean;
+  elevation?: number;
+  stack?: boolean;
 }) {
   const panels = useRef<Group>(null),
     cabin = useRef<Group>(null);
   useFrame(({ camera }) => {
     if (!panels.current) return;
     const progress = journeyState.progress;
-    if (roof && p[1] === 23 && cabin.current)
+    if (roof && p[1] === 83 && cabin.current)
       cabin.current.visible = progress < 1.36;
-    const open = liftDoorOpen(
-      progress,
-      exit ? "exit" : roof ? "roof" : "service",
-    );
+    const open = stack
+      ? stackDoorOpen(progress)
+      : liftDoorOpen(progress, exit ? "exit" : roof ? "roof" : "service");
     if (cabin.current && exit)
       cabin.current.position.y =
         progress < 11.53
-          ? 6
-          : Math.max(0.25, Math.min(6, camera.position.y - 1.7));
+          ? 12
+          : Math.max(0.25, Math.min(12, camera.position.y - 1.7 - elevation));
     if (cabin.current && p[1] === 16) {
       if (roof) {
         cabin.current.visible = progress >= 1.36;
         cabin.current.position.y =
           progress < 1.48
-            ? Math.max(16, Math.min(23, camera.position.y - 1.7))
+            ? Math.max(16, Math.min(23, camera.position.y - 1.7 - elevation))
             : 16;
-      } else
+      } else {
+        cabin.current.visible = progress < 1.96;
         cabin.current.position.y =
           progress > 1.82
-            ? Math.max(6, Math.min(16, camera.position.y - 1.7))
+            ? Math.max(6, Math.min(16, camera.position.y - 1.7 - elevation))
             : 16;
+      }
     }
-    panels.current.children[0].position.x = -0.63 - open * 1.25;
-    panels.current.children[1].position.x = 0.63 + open * 1.25;
+    if (stack && cabin.current) {
+      cabin.current.position.y = stackLiftFloor(progress);
+      cabin.current.visible = progress >= 1.96 && progress <= 11.4;
+    }
+    panels.current.children[0].position.x = -0.63 - open * 1.55;
+    panels.current.children[1].position.x = 0.63 + open * 1.55;
   });
   return (
     <group ref={cabin} position={p} name={roof ? "roof-lift" : "service-lift"}>
@@ -392,20 +401,22 @@ export function Lift({
             ? "WELCOME / RECEPTION"
             : roof
               ? "THE WORKPLACE"
-              : "SYSTEMS GALLERY"
+              : "ENGINEERING FLOORS"
         }
         sub={
           exit
-            ? "FAST / LEVEL 01 → GROUND FLOOR"
+            ? "FAST / LEVEL 02 → GROUND FLOOR"
             : roof
-              ? "FAST / LEVEL 03 → LEVEL 02"
-              : "FAST / LEVEL 02 → LEVEL 01"
+              ? "FAST / ROOF → LEVEL 12"
+              : stack
+                ? "FAST / VERTICAL JOURNEY"
+                : "FAST / LEVEL 12 → LEVEL 11"
         }
         p={[0, 2.2, -1.6]}
         width={2.8}
       />
       <Wayfinding
-        text={exit ? "G" : roof ? "02" : "01"}
+        text={exit ? "G" : stack ? "↓" : roof ? "12" : "11"}
         sub="DESTINATION"
         p={[1.75, 1.75, 0]}
         rotation={[0, -Math.PI / 2, 0]}
@@ -433,8 +444,10 @@ export function Lift({
           exit
             ? "RECEPTION / G"
             : roof
-              ? "ROOF ACCESS / 03"
-              : "SERVICE GALLERY / 01"
+              ? "ROOF ACCESS / 83 M"
+              : stack
+                ? "ENGINEERING FLOORS"
+                : "ELECTRICAL / 11"
         }
         p={[0, 3, 1.86]}
         width={3}
@@ -444,145 +457,27 @@ export function Lift({
 }
 
 export function RoofAccess() {
-  return <Lift p={[11, 23, -5]} roof />;
+  return <Lift p={[11, 83, -5]} roof />;
 }
 
 export function Interior() {
-  const office = useRef<Group>(null),
-    services = useRef<Group>(null);
-  const roomRefs = useRef<(Group | null)[]>([]);
-  const geometry = useMemo(() => {
-    const floors: Part[] = [];
-    for (let x = -11; x <= 11; x++)
-      for (let z = -37; z <= 1; z++) {
-        if (Math.abs(x) < 2.5 && z < -35) continue;
-        floors.push({ p: [x, 5.85, z], s: [1, 0.3, 1] });
-      }
-    const walls: Part[] = [],
-      trim: Part[] = [],
-      lights: Part[] = [],
-      wood: Part[] = [];
-    walls.push({ p: [-6.9, 10.1, -18], s: [9.2, 0.2, 39], c: "#d8d6ca" });
-    walls.push({ p: [6.9, 10.1, -18], s: [9.2, 0.2, 39], c: "#d8d6ca" });
-    walls.push({ p: [0, 10.1, -1.5], s: [4.6, 0.2, 6], c: "#d8d6ca" });
-    walls.push({ p: [0, 10.1, -21.5], s: [4.6, 0.2, 24], c: "#d8d6ca" });
-    for (const x of [-11.4, 11.4])
-      walls.push({ p: [x, 8, -18], s: [0.18, 4, 39], c: "#a7b3ad" });
-    for (const x of [-1.8, 1.8]) {
-      lights.push({ p: [x, 9.94, -18], s: [0.08, 0.025, 38] });
-      lights.push({ p: [x, 6.06, -18], s: [0.035, 0.02, 38] });
-    }
-    serviceRooms.forEach(({ x, z, side, index }) => {
-      walls.push({
-        p: [x, 8, z - 3.6],
-        s: [8.8, 4, 0.14],
-        c: index >= 7 ? "#50656a" : "#aeb5ac",
-      });
-      // The side entrance is a real, 1.8 m wide opening; the camera passes through it.
-      walls.push({
-        p: [side * 2.32, 6.3, z - 0.8],
-        s: [0.12, 0.6, 5.5],
-        c: "#b1b6aa",
-      });
-      trim.push({ p: [side * 2.32, 8.1, z + 1.6], s: [0.07, 4.2, 0.07] });
-      trim.push({ p: [side * 2.32, 8.1, z + 3.5], s: [0.07, 4.2, 0.07] });
-      trim.push({ p: [side * 2.32, 9.95, z], s: [0.07, 0.08, 7.1] });
-      for (const dz of [-3.45, -1.8, 0])
-        trim.push({ p: [side * 2.32, 8.2, z + dz], s: [0.05, 3.6, 0.05] });
-      lights.push({ p: [x, 9.94, z], s: [6.8, 0.025, 0.07] });
-      for (let dx = -3.6; dx < 3.6; dx += 0.22)
-        wood.push({
-          p: [x + dx, 8.65, z - 3.49],
-          s: [0.055, 2.6, 0.1],
-          c: index >= 7 ? "#53656a" : "#8c836d",
-        });
-    });
-    return { floors, walls, trim, lights, wood };
-  }, []);
-  useFrame(({ camera }) => {
-    const p = journeyState.progress;
-    if (office.current) office.current.visible = p > 1.27 && p < 2.06;
-    if (services.current) services.current.visible = p > 1.73 && p < 11.615;
-    roomRefs.current.forEach((room, i) => {
-      if (room)
-        room.visible =
-          p > 1.73 &&
-          p < 11.615 &&
-          Math.abs(serviceRooms[i].z - camera.position.z) < 17;
-    });
+  const office = useRef<Group>(null);
+  useFrame(() => {
+    if (office.current)
+      office.current.visible =
+        journeyState.progress > 1.27 && journeyState.progress < 2.06;
   });
   return (
     <group name="connected-building-interior">
-      <group ref={office}>
+      <group ref={office} position={[0, 60, 0]}>
         <StaticInstances>
           <OfficeFloor />
         </StaticInstances>
-        <Lift p={[11, 16, -5]} roof />
-        <Lift p={[0, 16, -7]} />
+        <Lift p={[11, 16, -5]} roof elevation={60} />
+        <Lift p={[0, 16, -7]} elevation={60} />
       </group>
-      <group ref={services}>
-        <InteriorFloor />
-        <ArchitectureBatch items={geometry.floors} color="#b5b5a7" />
-        <ArchitectureBatch items={geometry.walls} />
-        <ArchitectureBatch items={geometry.trim} color="#667b7b" metal={0.4} />
-        <ArchitectureBatch items={geometry.lights} color="#e7f1dc" glow />
-        <ArchitectureBatch items={geometry.wood} />
-        {serviceRooms.map(({ x, z, side, index }) => (
-          <group key={index}>
-            <Glass
-              p={[side * 2.32, 8.22, z - 0.95]}
-              s={[5.1, 3.2]}
-              rotation={Math.PI / 2}
-            />
-            <Wayfinding
-              text={`${String(index).padStart(2, "0")} / ${chapters[index].title.toUpperCase()}`}
-              sub="FAST / SYSTEMS GALLERY"
-              p={[x, 9.35, z - 3.36]}
-              width={5.6}
-            />
-            <Wayfinding
-              text={chapters[index].title.toUpperCase()}
-              sub={`0${Math.floor((index - 1) / 2) + 1} / SYSTEMS`}
-              p={[side * 2.25, 9.4, z]}
-              rotation={[0, (-side * Math.PI) / 2, 0]}
-              width={3.5}
-            />
-          </group>
-        ))}
-        {[0, -14.4, -28.8].map((z, i) => (
-          <Wayfinding
-            key={z}
-            text={i < 2 ? "SYSTEMS GALLERY →" : "CONNECTED OPERATIONS →"}
-            sub="FOLLOW THE LIGHT / LEVEL 01"
-            p={[0, 9.5, z - 2]}
-            width={3}
-          />
-        ))}
-        <Planter p={[1.5, 6, -36]} />
-        <Planter p={[-1.5, 6, 0.5]} />
-      </group>
-      {serviceRooms.map((room, i) => {
-        const Equipment = equipment[room.index];
-        return (
-          <group
-            key={room.index}
-            ref={(el) => {
-              roomRefs.current[i] = el;
-            }}
-            name={`service-equipment-${room.index}`}
-            position={[room.x, 6.08, room.z - 0.55]}
-            scale={0.55}
-          >
-            <StaticInstances>
-              <Equipment />
-            </StaticInstances>
-            <SystemAnimation
-              index={room.index}
-              color={chapters[room.index].color}
-            />
-          </group>
-        );
-      })}
+      <ServiceFloors />
+      <Lift p={[0, 66, -7]} stack />
     </group>
   );
 }

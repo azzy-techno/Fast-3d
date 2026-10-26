@@ -1,19 +1,27 @@
+import { serviceLevel } from "./towerLayout";
 import { Vector3 } from "three";
 import type { Point } from "../data/chapters";
 
 export const serviceRooms = Array.from({ length: 10 }, (_, i) => ({
   index: i + 1,
   x: i % 2 === 0 ? -6.6 : 6.6,
-  z: -4 - Math.floor(i / 2) * 7.2,
+  z: -4,
+  y: serviceLevel(i),
   side: i % 2 === 0 ? -1 : 1,
 }));
 export const journeyState = { progress: 0, section: "arrival" };
 type Shot = { at: number; p: Point; target: Point; fov: number };
 const frames: Shot[] = [];
 const shot = (at: number, p: Point, target: Point, fov = 62) =>
-  frames.push({ at, p, target, fov });
-shot(0, [49, 29, 67], [0, 10, -5], 42);
-shot(0.22, [47, 30, 63], [0, 11, -4], 42);
+  frames.push({
+    at,
+    p: at >= 0.55 && at < 2 ? [p[0], p[1] + 60, p[2]] : p,
+    target:
+      at >= 0.55 && at < 2 ? [target[0], target[1] + 60, target[2]] : target,
+    fov,
+  });
+shot(0, [115, 80, 160], [0, 40, -5], 42);
+shot(0.22, [108, 82, 150], [0, 43, -4], 42);
 shot(0.55, [15, 27, 14], [8, 24, 5], 48);
 shot(0.7, [11, 25.1, 10], [8, 24.1, 5], 54);
 shot(0.86, [10, 25.05, 9], [3, 24.2, -1], 58);
@@ -35,39 +43,39 @@ shot(1.9, [0, 7.7, -7], [0, 7.7, 0], 66);
 shot(1.95, [0, 7.7, -1], [-6.6, 7.5, -4], 66);
 for (let i = 0; i < serviceRooms.length; i++) {
   const room = serviceRooms[i],
-    next = serviceRooms[i + 1];
-  const at = i + 2;
-  const p: Point = [room.side * 3.5, 8.05, room.z + 3.2];
+    next = serviceRooms[i + 1],
+    at = i + 2,
+    y = room.y;
+  const p: Point = [room.side * 3.5, y + 2.05, room.z + 3.2];
   const target: Point = [
     room.x + (room.side < 0 ? 1.2 : 0),
-    7.45,
+    y + 1.45,
     room.z - 0.6,
   ];
   shot(at, p, target, 74);
-  shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
+  if (i === 0) shot(at + 0.2, [0, y + 3, 7.5], [0, y + 1.5, -4], 80);
+  else shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
   if (next) {
+    shot(at + 0.38, [room.side * 2.1, y + 1.7, -0.9], [0, y + 1.6, -3], 68);
+    shot(at + 0.46, [0, y + 1.7, -0.9], [0, y + 1.7, -7], 66);
+    shot(at + 0.54, [0, y + 1.7, -7], [0, y + 1.7, -11], 66);
+    shot(at + 0.6, [0, y + 1.7, -7], [3, y + 1.7, -7], 66);
+    shot(at + 0.76, [0, next.y + 1.7, -7], [2, next.y + 1.7, -2], 66);
+    shot(at + 0.84, [0, next.y + 1.7, -0.9], [next.x, next.y + 1.5, -4], 68);
     shot(
-      at + 0.38,
-      [room.side * 2.1, 7.7, room.z + 3.1],
-      [0, 7.6, room.z + 1],
-      68,
-    );
-    shot(at + 0.51, [0, 7.7, room.z + 3.1], [0, 7.6, next.z - 2], 68);
-    shot(at + 0.68, [0, 7.7, next.z + 3.1], [next.x, 7.5, next.z], 68);
-    shot(
-      at + 0.84,
-      [next.side * 2.1, 7.7, next.z + 3.1],
-      [next.x, 7.5, next.z - 0.6],
+      at + 0.94,
+      [next.side * 2.1, next.y + 1.7, -0.9],
+      [next.x, next.y + 1.5, -4.6],
       68,
     );
   }
 }
 // Enter the rear lift, descend to ground, then walk the reception approach.
-shot(11.4, [2.1, 7.7, -29.7], [0, 7.7, -35], 68);
-shot(11.44, [0, 7.7, -32], [0, 7.7, -38], 68);
-shot(11.49, [0, 7.7, -34], [0, 7.7, -40], 66);
-shot(11.53, [0, 7.7, -37], [0, 7.7, -41], 66);
-shot(11.55, [0, 5.2, -37], [4, 5.2, -37], 66);
+shot(11.4, [2.1, 13.7, -0.9], [0, 13.7, -35], 68);
+shot(11.44, [0, 13.7, -6], [0, 13.7, -38], 68);
+shot(11.49, [0, 13.7, -34], [0, 13.7, -40], 66);
+shot(11.53, [0, 13.7, -37], [0, 13.7, -41], 66);
+shot(11.55, [0, 8.2, -37], [4, 8.2, -37], 66);
 shot(11.58, [0, 1.95, -37], [3, 1.95, -32], 66);
 shot(11.61, [0, 1.95, -31], [0, 1.8, -26], 66);
 shot(11.65, [0, 1.95, -11], [-4, 1.8, -3], 66);
@@ -78,8 +86,8 @@ shot(11.77, [3, 1.95, 8], [3, 1.6, 16], 62);
 shot(11.81, [3, 1.95, 13], [3, 1.6, 20], 60);
 shot(11.85, [6, 2.2, 22], [3, 1.3, 18], 54);
 shot(11.89, [9, 4.5, 27], [3, 1.2, 18], 50);
-shot(11.94, [22, 16, 38], [1, 9, 1], 46);
-shot(12, [40, 32, 47], [0, 8, -9], 42);
+shot(11.94, [70, 60, 95], [1, 35, 1], 46);
+shot(12, [115, 85, 150], [0, 38, -9], 42);
 
 // Shape-preserving cubic Hermite interpolation: continuous velocity, no spline
 // overshoot through a wall, and deterministic forward/reverse scrubbing.
@@ -170,13 +178,13 @@ export function journeyBeat(progress: number) {
     ];
   if (progress < 7.5)
     return [
-      "06 / THE SERVICE GALLERY",
-      "Follow the connections.",
-      "Power, water, structure and protection — one continuous system.",
+      "06 / THE ENGINEERING FLOORS",
+      "One floor. One discipline.",
+      "Descend through power, water, structure and protection. Each floor reveals another system.",
     ];
   if (progress < 11.4)
     return [
-      "07 / THE INTELLIGENT FLOOR",
+      "07 / THE INTELLIGENT FLOORS",
       "From infrastructure to intelligence.",
       "Connected equipment becomes insight. Insight becomes action.",
     ];
@@ -222,8 +230,8 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     return;
   }
   if (p <= 0.7) {
-    position.set(8, 23, 5);
-    facing.set(12, 24, 12);
+    position.set(8, 83, 5);
+    facing.set(12, 84, 12);
     return;
   }
   if (p >= 11.84) {
@@ -252,15 +260,15 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   sampleJourney(p, arcP, arcTarget);
   const floor =
     p < 1.375
-      ? 23
+      ? 83
       : p < 1.48
-        ? Math.max(16, arcP.y - 1.7)
+        ? Math.max(76, arcP.y - 1.7)
         : p < 1.82
-          ? 16
+          ? 76
           : p < 1.9
-            ? Math.max(6, arcP.y - 1.7)
+            ? Math.max(66, arcP.y - 1.7)
             : p < 11.53
-              ? 6
+              ? 12
               : p < 11.58
                 ? Math.max(0.25, arcP.y - 1.7)
                 : 0.25;
@@ -271,13 +279,13 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     const weight = smooth(0.7, 0.86) * (1 - smooth(1.14, 1.28));
     sampleJourney(1, arcP, arcTarget);
     arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.8).add(arcP);
-    arcTarget.y = 23;
+    arcTarget.y = 83;
     position.lerp(arcTarget, weight);
-    if (p >= 0.86 && p <= 1.14) facing.set(0, 24.5, -1);
+    if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }
   if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
   if (p < 0.86)
-    position.lerp(new Vector3(8, 23, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
+    position.lerp(new Vector3(8, 83, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
 }
 
 // The guide uses the front visitor aisle and the outer presentation bay.
@@ -301,28 +309,33 @@ type GuideKey = { at: number; p: Point; room: number };
 const guideKeys: GuideKey[] = [];
 const guideKey = (at: number, p: Point, room: number) =>
   guideKeys.push({ at, p, room });
-guideKey(1.9, [0.65, 6, -7.85], 0);
-guideKey(1.92, [0.65, 6, -3], 0);
-guideKey(1.94, [-2.1, 6, -1.95], 0);
+guideKey(1.9, [0.65, 66, -7.85], 0);
+guideKey(1.92, [0.65, 66, -3], 0);
+guideKey(1.94, [-2.1, 66, -1.95], 0);
 for (let i = 0; i < serviceRooms.length; i++) {
   const room = serviceRooms[i],
     next = serviceRooms[i + 1],
-    at = i + 2;
+    at = i + 2,
+    y = room.y;
   const bay = room.side < 0 ? -2.85 : presentationX,
     parkZ = room.side < 0 ? -1.5 : 0.6;
-  guideKey(at - (i === 0 ? 0.045 : 0.1), [bay, 6, room.z + 2.05], i);
-  guideKey(at - (i === 0 ? 0.02 : 0.04), [bay, 6, room.z + parkZ], i);
-  guideKey(at + 0.28, [bay, 6, room.z + parkZ], i);
-  guideKey(at + (next ? 0.38 : 0.35), [bay, 6, room.z + 2.05], i);
-  guideKey(at + (next ? 0.54 : 0.44), [room.side * 2.1, 6, room.z + 2.05], i);
+  guideKey(at - (i === 0 ? 0.045 : 0.1), [bay, y, room.z + 2.05], i);
+  guideKey(at - (i === 0 ? 0.02 : 0.04), [bay, y, room.z + parkZ], i);
+  guideKey(at + 0.28, [bay, y, room.z + parkZ], i);
+  guideKey(at + 0.36, [bay, y, room.z + 2.05], i);
+  guideKey(at + (next ? 0.42 : 0.4), [room.side * 2.1, y, room.z + 2.05], i);
   if (next) {
-    guideKey(at + 0.62, [room.side * 1.3, 6, room.z + 2.05], i);
-    guideKey(at + 0.72, [room.side * 1.3, 6, next.z + 2.05], i + 1);
-    guideKey(at + 0.78, [next.side * 2.1, 6, next.z + 2.05], i + 1);
+    guideKey(at + 0.48, [1.15, y, -3], i);
+    guideKey(at + 0.54, [1.15, y, -7.85], i);
+    guideKey(at + 0.6, [1.15, y, -7.85], i);
+    guideKey(at + 0.76, [1.15, next.y, -7.85], i + 1);
+    guideKey(at + 0.78, [1.15, next.y, -3], i + 1);
+    guideKey(at + 0.82, [next.side * 2.1, next.y, -1.95], i + 1);
   } else {
-    guideKey(11.48, [0.65, 6, -33.5], i);
-    guideKey(11.51, [0.65, 6, -35.2], i);
-    guideKey(11.53, [0.65, 6, -37.85], i);
+    guideKey(11.44, [1.15, y, -5], i);
+    guideKey(11.48, [1.15, y, -33.5], i);
+    guideKey(11.51, [0.65, y, -35.2], i);
+    guideKey(11.53, [0.65, y, -37.85], i);
   }
 }
 export function guideExhibit(p: number) {
@@ -347,7 +360,7 @@ function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
   const focus = exhibitFocus[b.room];
   facing.set(
     room.x + focus[0] * 0.55,
-    6.08 + focus[1] * 0.55,
+    room.y + 0.08 + focus[1] * 0.55,
     room.z - 0.55 + focus[2] * 0.55,
   );
 }

@@ -16,7 +16,7 @@ export function Atmosphere({ mobile }: { mobile: boolean }) {
         return a - Math.floor(a);
       };
       positions[i * 3] = random(i + 1) * 28 - 14;
-      positions[i * 3 + 1] = random(i + 221) * 4 + 16;
+      positions[i * 3 + 1] = random(i + 221) * 4 + 76;
       positions[i * 3 + 2] = random(i + 443) * 16 - 8;
     }
     return positions;
@@ -66,7 +66,7 @@ export function Atmosphere({ mobile }: { mobile: boolean }) {
           />
           <Cloud
             seed={21}
-            position={[-2.8, 28, -1]}
+            position={[-2.8, 88, -1]}
             bounds={[0.4, 1.5, 0.5]}
             segments={mobile ? 4 : 8}
             volume={1.8}
@@ -78,7 +78,7 @@ export function Atmosphere({ mobile }: { mobile: boolean }) {
           />
           <Cloud
             seed={22}
-            position={[2.8, 28, -1]}
+            position={[2.8, 88, -1]}
             bounds={[0.4, 1.5, 0.5]}
             segments={mobile ? 4 : 8}
             volume={1.8}
