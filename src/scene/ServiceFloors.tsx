@@ -1,151 +1,15 @@
+import { ElectricalDetails } from "./ElectricalDetails";
 import { InteriorFloor } from "./InteriorFloor";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
-import { Box, Cylinder, Pipe, Screen } from "./Primitives";
+import { Box } from "./Primitives";
 import { StaticInstances } from "./StaticInstances";
 import { Wayfinding, Planter, ImportedFurniture } from "./Architecture";
 import { serviceRooms, journeyState } from "./journey";
 import { chapters } from "../data/chapters";
 import { equipment } from "./Equipment";
 import { SystemAnimation } from "./SystemAnimation";
-
-function ElectricalDetails() {
-  return (
-    <group name="electrical-installation-and-testing">
-      {/* RMU bays: visible isolator handles, protection relays and cable terminations. */}
-      <group position={[-12, 0, -5]}>
-        <Box p={[0, 0.12, 0]} s={[3, 0.24, 2.1]} c="#68777c" />
-        {[-0.95, 0, 0.95].map((x, i) => (
-          <group key={x}>
-            <Box
-              p={[x, 1.35, 0]}
-              s={[0.9, 2.45, 1.55]}
-              c="#abb7b8"
-              metal={0.45}
-            />
-            <Screen
-              p={[x, 2.05, 0.79]}
-              s={[0.52, 0.35, 0.03]}
-              color="#97c9b5"
-            />
-            <Cylinder
-              p={[x, 1.3, 0.82]}
-              radius={0.12}
-              height={0.05}
-              r={[Math.PI / 2, 0, 0]}
-              c="#263e45"
-            />
-            <Box
-              p={[x, 1.3, 0.86]}
-              s={[0.3, 0.055, 0.035]}
-              r={[0, 0, i === 1 ? 0.6 : 0]}
-              c="#d5ae58"
-            />
-            <Pipe
-              a={[x, 0.25, 0.1]}
-              b={[x, 0, 0.1]}
-              radius={0.065}
-              c={["#aa7948", "#414c51", "#7a8589"][i]}
-            />
-          </group>
-        ))}
-        <Wayfinding
-          text="SMART RMU"
-          sub="INSTALLATION / TESTING / COMMISSIONING"
-          p={[0, 3, -0.7]}
-          width={3.4}
-        />
-      </group>
-      {/* Cable ladder and supported, separated LV/MV routes. */}
-      {[-8.5, -7.9].map((z) => (
-        <Box
-          key={z}
-          p={[-7, 4.6, z]}
-          s={[14, 0.13, 0.045]}
-          c="#8b9d9e"
-          metal={0.7}
-        />
-      ))}
-      {Array.from({ length: 32 }, (_, i) => (
-        <Box
-          key={i}
-          p={[-13.8 + i * 0.44, 4.55, -8.2]}
-          s={[0.04, 0.04, 0.65]}
-          c="#acb9b8"
-        />
-      ))}
-      {[-8.35, -8.18, -8.01].map((z, i) => (
-        <Pipe
-          key={z}
-          a={[-13.5, 4.66, z]}
-          b={[-0.4, 4.66, z]}
-          radius={0.04}
-          c={["#a86d45", "#39464b", "#9faaa5"][i]}
-        />
-      ))}
-      {/* Inspection bench and a demonstrator transformer across the visitor aisle. */}
-      <group position={[7, 0, -4]}>
-        <Box p={[0, 0.15, 0]} s={[3.4, 0.3, 2.8]} c="#9ca5a0" />
-        <Box p={[0, 1.2, 0]} s={[2.6, 1.9, 1.9]} c="#617e86" metal={0.55} />
-        {[-1.45, 1.45].flatMap((x) =>
-          Array.from({ length: 10 }, (_, i) => (
-            <Box
-              key={`${x}-${i}`}
-              p={[x, 1.25, -0.8 + i * 0.18]}
-              s={[0.35, 1.75, 0.06]}
-              c="#8eaaa9"
-              metal={0.6}
-            />
-          )),
-        )}
-        {[-0.8, 0, 0.8].map((x) => (
-          <group key={x}>
-            <Cylinder
-              p={[x, 2.45, 0]}
-              radius={0.12}
-              height={0.7}
-              c="#b1a78f"
-              metal={0}
-            />
-            {[0, 1, 2, 3].map((i) => (
-              <Cylinder
-                key={i}
-                p={[x, 2.2 + i * 0.14, 0]}
-                radius={0.2}
-                height={0.04}
-                c="#c0b49d"
-                metal={0}
-              />
-            ))}
-          </group>
-        ))}
-        <Wayfinding
-          text="TRANSFORMERS"
-          sub="INSTALLATION / ALIGNMENT / TERMINATIONS"
-          p={[0, 3.7, -5.9]}
-          width={4.6}
-        />
-      </group>
-      <group position={[5, 0, 0]}>
-        <Box p={[0, 0.9, 0]} s={[4, 0.12, 1.2]} c="#b5a487" metal={0} />
-        {[-1.7, 1.7].map((x) => (
-          <Box key={x} p={[x, 0.45, 0]} s={[0.08, 0.9, 1]} c="#52656a" />
-        ))}
-        <Box p={[-0.9, 1.15, 0]} s={[0.75, 0.38, 0.5]} c="#d4ae4e" />
-        <Screen p={[-0.9, 1.2, 0.26]} s={[0.48, 0.2, 0.02]} color="#bad6bf" />
-        <Box p={[0.5, 1.05, 0]} s={[0.6, 0.18, 0.4]} c="#446b78" />
-        <Box p={[0, 0.6, 0.57]} s={[3.3, 0.65, 0.08]} c="#1c3843" metal={0.1} />
-        <Wayfinding
-          text="VERIFY. COMMISSION. HAND OVER."
-          sub="RMU TESTING / CABLE TESTING / DOCUMENTATION"
-          p={[0, 0.6, 0.62]}
-          width={3.1}
-        />
-      </group>
-    </group>
-  );
-}
 
 function ServiceFloor({ index }: { index: number }) {
   const root = useRef<Group>(null),

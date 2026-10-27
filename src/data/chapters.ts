@@ -40,13 +40,13 @@ export const chapters: Chapter[] = [
     place: "Level 11 / Power infrastructure",
     placeAr: "الطابق 11 / البنية التحتية للطاقة",
     description:
-      "From the first connection to final commissioning. Electrical systems designed, installed and tested for the demands of industrial facilities.",
+      "Power, control and the systems around them. Explore 16 self-delivered capabilities across electrical contracting, electrical automation and LV / ELV infrastructure.",
     descriptionAr:
-      "تصميم وتركيب واختبار وتشغيل الأنظمة الكهربائية للمنشآت الصناعية.",
+      "الطاقة والتحكم والأنظمة المساندة. استكشف 16 قدرة ننفذها بفرقنا في المقاولات الكهربائية والأتمتة والبنية التحتية للجهد المنخفض والمنخفض جداً.",
     capabilities: [
-      "LV / MV systems",
-      "Transformers",
-      "Testing & commissioning",
+      "Electrical contracting",
+      "Electrical automation",
+      "LV & ELV infrastructure",
     ],
     image: "electrical.webp",
     imageAlt: "FAST electrical installation and engineering",

@@ -109,7 +109,7 @@ function World({
         const n = Math.max(0, Math.min(1, (p - a) / (b - a)));
         return n * n * (3 - 2 * n);
       };
-      const weight = ease(2.06, 2.18) * (1 - ease(2.23, 2.36));
+      const weight = ease(2.06, 2.18) * (1 - ease(2.22, 2.28));
       vectors.p.set(
         vectors.p.x + (2.5 - vectors.p.x) * weight,
         vectors.p.y + (69 - vectors.p.y) * weight,

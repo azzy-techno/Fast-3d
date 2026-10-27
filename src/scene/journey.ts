@@ -53,8 +53,13 @@ for (let i = 0; i < serviceRooms.length; i++) {
     room.z - 0.6,
   ];
   shot(at, p, target, 74);
-  if (i === 0) shot(at + 0.2, [0, y + 3, 7.5], [0, y + 1.5, -4], 80);
-  else shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
+  if (i === 0) {
+    shot(at + 0.2, [0, y + 3, 7.5], [0, y + 1.5, -4], 80);
+    // Reveal metering, generator connections and the lighting/fan display
+    // from the clear front aisle before returning to the lift landing.
+    shot(at + 0.28, [8, y + 3, 5.8], [12, y + 1.8, -4], 76);
+  } else
+    shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
   if (next) {
     shot(at + 0.38, [room.side * 2.1, y + 1.7, -0.9], [0, y + 1.6, -3], 68);
     shot(at + 0.46, [0, y + 1.7, -0.9], [0, y + 1.7, -7], 66);

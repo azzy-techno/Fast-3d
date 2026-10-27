@@ -186,11 +186,14 @@ try {
       scrollTo(0, a + (b - a) * (progress - index));
     }, progress);
     const start = Date.now();
-    while (Date.now() - start < 20000) {
+    while (Date.now() - start < 60000) {
       const rendered = await page.evaluate(() =>
         Number(document.querySelector("canvas")?.dataset.journey),
       );
-      if (Math.abs(rendered - progress) < 0.015) return;
+      // The eye-height assertion at electrical needs a fully settled landing;
+      // the wider tolerance elsewhere accommodates the damped camera tail.
+      if (Math.abs(rendered - progress) < (progress === 2 ? 0.002 : 0.015))
+        return;
       await delay(150);
     }
     throw new Error(`Route did not settle at ${progress}`);
@@ -413,6 +416,39 @@ try {
     "Electrical",
   );
   await shot("desktop-electrical");
+  await click(".electrical-scope > summary");
+  const scopeItems = [];
+  for (let category = 0; category < 3; category++) {
+    await click(`.scope-categories button:nth-child(${category + 1})`);
+    scopeItems.push(
+      ...(await page.evaluate(() =>
+        [...document.querySelectorAll("#electrical-scope-content li")].map(
+          (li) => li.textContent,
+        ),
+      )),
+    );
+    await waitFor(
+      page,
+      () => {
+        const img = document.querySelector("#electrical-scope-content img");
+        return img.complete && img.naturalWidth > 0;
+      },
+      "FAST scope photo loads",
+    );
+  }
+  assert.equal(
+    scopeItems.length,
+    16,
+    "All 16 capabilities are accessible across three categories",
+  );
+  assert(scopeItems[8].includes("Generator termination"));
+  assert(scopeItems[10].includes("power factor"));
+  assert(scopeItems[15].includes("Industrial fan"));
+  await shot("desktop-electrical-scope");
+  await click(".electrical-scope > summary");
+  results.push(
+    "All 16 electrical capabilities, category selection and three FAST source photos",
+  );
   results.push(
     "Modal focus/escape/return, smooth menu jump, forward and reverse scrolling",
   );
@@ -581,6 +617,16 @@ try {
       await shot("mobile-workplace");
       await travelTo(2);
       await shot("mobile-electrical");
+      await click(".electrical-scope > summary");
+      await click(".scope-categories button:nth-child(1)");
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+        true,
+      );
+      await shot("mobile-electrical-scope");
+      await click(".electrical-scope > summary");
       await click(".plan-toggle");
       assert.equal(
         await page.evaluate(

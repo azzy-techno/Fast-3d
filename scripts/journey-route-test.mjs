@@ -57,9 +57,30 @@ try {
         `Camera outside service floor at ${progress}`,
       );
       assert(
-        Math.abs(p.x) < 4.1,
+        Math.abs(p.x) < (p.z > -0.45 ? 15.3 : 4.1),
         `Camera enters equipment envelope at ${progress}`,
       );
+      // The electrical reveal can use the open front aisle. Verify the actual
+      // added exhibit footprints rather than assuming a corridor-only camera.
+      if (progress < 2.46) {
+        const exhibits = [
+          [-14, -10, -6.2, -3.8], // RMUs
+          [-14, -7, 0.5, 2.7], // pillars and cable-jointing bench
+          [5.3, 8.7, -5.4, -2.6], // transformer
+          [3, 7, -0.6, 0.6], // commissioning bench
+          [9.3, 14.3, -9.2, -7.9], // metering wall
+          [10.1, 14.9, -5.4, -3.4], // generator and DB
+          [9, 14.4, -1.2, 1.6], // lighting/fan display
+        ];
+        for (const [x0, x1, z0, z1] of exhibits) {
+          const dx = Math.max(x0 - p.x, 0, p.x - x1);
+          const dz = Math.max(z0 - p.z, 0, p.z - z1);
+          assert(
+            Math.hypot(dx, dz) > 0.35,
+            `Camera clips electrical exhibit at ${progress}`,
+          );
+        }
+      }
       if (Math.abs(Math.abs(p.x) - 2.32) < 0.05 && p.z < -0.45) {
         const room = serviceRooms.find(
           (room) =>

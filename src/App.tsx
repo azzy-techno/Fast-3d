@@ -1,3 +1,4 @@
+import { ElectricalScope } from "./components/ElectricalScope";
 import {
   Component,
   lazy,
@@ -470,34 +471,7 @@ export default function App() {
                   </a>
                 </details>
               )}
-              {chapter.id === "electrical" && (
-                <details className="roof-scope">
-                  <summary>
-                    {t(
-                      "From installation to commissioning",
-                      "من التركيب إلى الاختبار والتشغيل",
-                    )}
-                  </summary>
-                  <p>
-                    {t(
-                      "LV panels and distribution boards. Smart RMUs. Transformer installation and alignment. LV/MV cable termination, jointing and testing.",
-                      "لوحات الجهد المنخفض والتوزيع، وحدات RMU الذكية، تركيب ومحاذاة المحولات، وإنهاء ووصل واختبار كابلات الجهد المنخفض والمتوسط.",
-                    )}
-                  </p>
-                  <p>
-                    {t(
-                      "FAST references: RMU replacements for CCS / SGCC; RMU replacement at DACO for Energia; cable pulling and testing for Al Hajry Overseas.",
-                      "من مشاريع فاست: استبدال وحدات RMU لصالح CCS / SGCC، واستبدالها في DACO لصالح Energia، وسحب واختبار الكابلات لصالح الهجري أوفرسيز.",
-                    )}
-                  </p>
-                  <a href="https://fast-arabia.com/services/electrical">
-                    {t(
-                      "See the full electrical scope ↗",
-                      "عرض نطاق الأعمال الكهربائية ↗",
-                    )}
-                  </a>
-                </details>
-              )}
+              {chapter.id === "electrical" && <ElectricalScope rtl={rtl} />}
               <a className="service-link" href={chapter.href}>
                 {t("Explore this service", "استكشف هذه الخدمة")}
                 {arrow}

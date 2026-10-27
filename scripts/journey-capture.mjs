@@ -158,6 +158,31 @@ try {
         "hidden",
         "Upcoming service copy stays hidden inside lift",
       );
+    if (name.endsWith("electrical-scope")) {
+      await page.evaluate(() =>
+        document.querySelector(".electrical-scope > summary").click(),
+      );
+      await delay(250);
+      const bounds = await page.evaluate(() => {
+        const scope = document
+          .querySelector(".electrical-scope")
+          .getBoundingClientRect();
+        const footer = document
+          .querySelector(".tour-controls")
+          .getBoundingClientRect();
+        return {
+          top: scope.top,
+          bottom: scope.bottom,
+          footer: footer.top,
+          overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        };
+      });
+      assert(
+        bounds.top > 84 && bounds.bottom < bounds.footer,
+        `Scope fits between navigation and footer: ${JSON.stringify(bounds)}`,
+      );
+      assert.equal(bounds.overflow, false);
+    }
     const result = await page
       ._client()
       .send("Page.captureScreenshot", { format: "png" });
@@ -178,6 +203,10 @@ try {
         () => document.querySelector("canvas")?.dataset.journey,
       ),
     );
+    if (name.endsWith("electrical-scope"))
+      await page.evaluate(() =>
+        document.querySelector(".electrical-scope > summary").click(),
+      );
   }
   await capture(0.61, "host-welcome");
   await capture(0.9, "host-follow");
@@ -201,7 +230,9 @@ try {
   await capture(1.74, "office-corridor");
   await capture(1.94, "systems-entry");
   await capture(2, "electrical");
+  await capture(2, "electrical-scope");
   await capture(2.2, "electrical-overview");
+  await capture(2.28, "electrical-infrastructure");
   await capture(2.68, "electrical-lift");
   await capture(3.0, "mechanical-landing");
   await capture(2.55, "service-corridor");
@@ -211,7 +242,28 @@ try {
   await capture(1, "phone-host", true);
   await capture(11.86, "phone-farewell", true);
   await capture(2, "phone-electrical", true);
+  await capture(2, "phone-electrical-scope", true);
   await capture(2.2, "phone-electrical-overview", true);
+  await capture(2.28, "phone-electrical-infrastructure", true);
+  if (process.env.JOURNEY_CHECK_RETURN) {
+    await page.evaluate(() => document.querySelector(".plan-toggle").click());
+    await page.evaluate(() =>
+      document.querySelector(".plan-drawing li:first-child button").click(),
+    );
+    for (let i = 0; i < 150; i++) {
+      if (
+        await page.evaluate(
+          () =>
+            Math.abs(
+              scrollY - document.getElementById("electrical").offsetTop,
+            ) < 8,
+        )
+      )
+        break;
+      await delay(200);
+    }
+    await capture(0, "return-arrival", true);
+  }
   await capture(1.65, "phone-offices", true);
 } finally {
   if (browser) await browser.close({ silent: true });

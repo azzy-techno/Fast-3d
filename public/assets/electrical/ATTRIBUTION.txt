@@ -1,0 +1,11 @@
+FAST O&M electrical project photographs
+
+Source: FAST O&M's existing public website, supplied as references by the user.
+Downloaded 2026-10-27 for the FAST homepage redesign.
+
+contracting.webp: https://fast-arabia.com/assets/img/elec-scope-1.webp
+automation.webp: https://fast-arabia.com/assets/img/elec-scope-2.webp
+installation.webp: https://fast-arabia.com/assets/img/elec-scope-4.webp
+
+These are project portfolio photographs, not photographs of the conceptual
+3D service floor. Ownership remains with FAST/the original rights holders.

@@ -1934,6 +1934,146 @@ footer p,
   overflow: auto;
 }
 
+.electrical-scope {
+  margin: 1rem 0;
+  border-block: 1px solid #e4b45d55;
+  font-size: 0.78rem;
+  color: #d6e1e3;
+  line-height: 1.55;
+}
+.electrical-scope > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  cursor: pointer;
+  color: #f4eee2;
+  list-style: none;
+}
+.electrical-scope > summary::-webkit-details-marker {
+  display: none;
+}
+.electrical-scope summary small {
+  display: none;
+  font-size: 0.62rem;
+  color: #b4c6cd;
+  margin-top: 0.2rem;
+}
+.electrical-scope[open] summary small {
+  display: block;
+}
+.scope-count {
+  color: #e4b45d;
+  font-variant-numeric: tabular-nums;
+}
+.electrical-scope-body {
+  max-height: min(22svh, 240px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #b89a61 #132a35;
+  padding: 0 0.8rem 1rem 0;
+}
+[dir="rtl"] .electrical-scope-body {
+  padding: 0 0 1rem 0.8rem;
+}
+.scope-categories {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.scope-categories button {
+  flex: 1;
+  border: 1px solid #6c828e;
+  border-radius: 5px;
+  background: #132a35;
+  color: #dae4e7;
+  padding: 0.65rem 0.5rem;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  min-height: 64px;
+}
+.scope-categories button > span {
+  display: block;
+  color: #e4b45d;
+  font-size: 0.65rem;
+}
+.scope-categories button[aria-pressed="true"] {
+  border-color: #e4b45d;
+  background: #34413d;
+  color: #fff;
+}
+.electrical-scope h3 {
+  color: #f4eee2;
+  font-size: 0.88rem;
+  margin: 0 0 0.65rem;
+}
+.electrical-scope ol {
+  padding: 0;
+  margin: 0 0 1rem;
+  list-style: none;
+}
+.electrical-scope li {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #94b6c022;
+}
+.electrical-scope li > span {
+  color: #e4b45d;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.electrical-scope figure {
+  margin: 0;
+}
+.electrical-scope img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.electrical-scope figcaption,
+.scope-source {
+  font-size: 0.68rem;
+  color: #b4c6cd;
+  margin-top: 0.45rem;
+}
+.electrical-scope a {
+  color: #efc77d;
+  text-underline-offset: 3px;
+}
+.electrical-scope :focus-visible {
+  outline: 2px solid #e4b45d;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .tour-view .chapter-copy:has(.electrical-scope[open]) {
+    position: fixed;
+    top: 130px;
+    inset-inline-start: var(--page);
+    width: calc(100% - var(--page) * 2);
+    margin-inline-start: 0;
+    z-index: 12;
+  }
+  .tour-view
+    .chapter-copy:has(.electrical-scope[open])
+    :is(.chapter-kicker, .chapter-description, .capabilities) {
+    display: none;
+  }
+  .tour-view .electrical-scope[open] .electrical-scope-body {
+    max-height: max(100px, calc(100svh - 570px));
+  }
+  .electrical-scope-body {
+    max-height: 25svh;
+  }
+  .scope-categories button {
+    font-size: 0.68rem;
+  }
+}
+
 /* Additional travel length for occupied floors and their enclosed lift stops. */
 .tour-view .chapter:not(#cooling) {
   height: 180svh;
