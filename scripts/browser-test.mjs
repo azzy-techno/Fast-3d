@@ -201,9 +201,9 @@ try {
   for (const [progress, name] of [
     [0.61, "host-welcome"],
     [1, "host-follow"],
-    [2, "host-presenting"],
+    [2, "electrical-lobby"],
     [2.2, "electrical-overview"],
-    [2.68, "inter-floor-lift"],
+    [2.906, "inter-floor-lift"],
     [11.55, "exit-lift"],
     [11.69, "reception"],
     [11.86, "host-farewell"],
@@ -223,7 +223,7 @@ try {
         Math.abs(Number(host.cameraHeight) - 68.05) < 0.05,
         "Electrical floor reached at 66m plus eye height",
       );
-    if (progress === 2.68)
+    if (progress === 2.906)
       assert(
         Number(host.cameraHeight) > 61.7 && Number(host.cameraHeight) < 67.7,
         "Camera descends between electrical and mechanical floors",
@@ -238,7 +238,7 @@ try {
   results.push(
     "Rigged rooftop host, service gestures, descending exit lift, reception, grounded farewell and reverse route",
   );
-  for (const progress of [1.34, 1.65, 1.84, 1.94, 2.55, 1.65]) {
+  for (const progress of [1.34, 1.65, 1.84, 1.94, 2.858, 1.65]) {
     await travelTo(progress);
     assert.equal(
       await page.evaluate(
@@ -249,7 +249,7 @@ try {
       true,
     );
     if (progress === 1.65) await shot("desktop-workplace");
-    if (progress === 2.55) await shot("desktop-service-corridor");
+    if (progress === 2.858) await shot("desktop-service-corridor");
   }
   const furniture = await page.evaluate(() =>
     performance
@@ -493,7 +493,7 @@ try {
       name,
     );
   }
-  await travelTo(2.6);
+  await travelTo(2.9);
   await waitFor(
     page,
     () => document.documentElement.dataset.soundscape === "silent",

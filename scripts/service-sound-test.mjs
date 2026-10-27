@@ -73,7 +73,8 @@ try {
   for (let n = 2; n <= 11; n++)
     assert.equal(soundForProgress(n), soundNames[n - 1]);
   assert.equal(soundForProgress(1), "cooling");
-  assert.equal(soundForProgress(2.6), null);
+  assert.equal(soundForProgress(2.6), "electrical");
+  assert.equal(soundForProgress(2.9), null);
   assert.equal(soundForProgress(11.7), null);
   engine.setEnabled(true);
   document.hidden = true;

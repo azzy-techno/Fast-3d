@@ -1,3 +1,4 @@
+import { ElectricalTour } from "./components/ElectricalTour";
 import { ElectricalScope } from "./components/ElectricalScope";
 import {
   Component,
@@ -172,9 +173,13 @@ export default function App() {
           copies.forEach((copy, index) => {
             const local = i + fraction - (index + 1);
             const opacity =
-              local < 0
-                ? Math.max(0, Math.min(1, (local + 0.12) / 0.12))
-                : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
+              index === 1 && local >= 0
+                ? Math.max(0, Math.min(1, (0.035 - local) / 0.012))
+                : index === 2 && local < -0.025
+                  ? 0
+                  : local < 0
+                    ? Math.max(0, Math.min(1, (local + 0.12) / 0.12))
+                    : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
             copy.style.opacity = String(opacity);
             copy.style.visibility = opacity < 0.01 ? "hidden" : "visible";
           });
@@ -293,12 +298,24 @@ export default function App() {
       )}
       <div className="scene-scrim" aria-hidden="true" />
       {!list && !loading && (
-        <JourneyGuide
-          rtl={rtl}
-          jump={jump}
-          cinematic={cinematic}
-          setCinematic={setCinematic}
-        />
+        <>
+          <ElectricalTour
+            rtl={rtl}
+            onSelect={(at) => {
+              const start = document.getElementById("electrical")!.offsetTop;
+              const end = document.getElementById("mechanical")!.offsetTop;
+              const y = start + (end - start) * (at - 2);
+              if (lenis.current) lenis.current.scrollTo(y, { duration: 1.8 });
+              else window.scrollTo({ top: y, behavior: "auto" });
+            }}
+          />
+          <JourneyGuide
+            rtl={rtl}
+            jump={jump}
+            cinematic={cinematic}
+            setCinematic={setCinematic}
+          />
+        </>
       )}
       <header className="header">
         <a

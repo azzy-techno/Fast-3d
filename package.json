@@ -52,6 +52,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "test:browser": "node scripts/browser-test.mjs",
     "test:journey": "node scripts/journey-route-test.mjs",
+    "test:electrical": "node scripts/electrical-tour-test.mjs",
+    "test:electrical:browser": "node scripts/electrical-browser-test.mjs",
     "test:sound": "node scripts/service-sound-test.mjs"
   }
 }

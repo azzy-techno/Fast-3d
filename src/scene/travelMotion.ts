@@ -1,3 +1,4 @@
+import { electricalLiftProgress } from "./electricalTour";
 import { serviceLevel } from "./towerLayout";
 /** Deterministic motion shared by forward/reverse scroll and regression checks. */
 export function liftDoorOpen(
@@ -20,6 +21,7 @@ export function trafficPosition(seconds: number, index: number) {
 }
 
 export function stackLiftFloor(p: number) {
+  p = electricalLiftProgress(p);
   const i = Math.max(0, Math.min(9, Math.floor(p) - 2));
   const t = Math.max(0, Math.min(1, (p - (i + 2 + 0.6)) / 0.16));
   return (
@@ -28,6 +30,7 @@ export function stackLiftFloor(p: number) {
   );
 }
 export function stackDoorOpen(p: number) {
+  p = electricalLiftProgress(p);
   if (p < 2 || p >= 11) return 1;
   const t = p - Math.floor(p);
   const ease = (a: number, b: number) => {

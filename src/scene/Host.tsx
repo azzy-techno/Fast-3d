@@ -72,6 +72,13 @@ export function Host() {
         : presentingHere
           ? state.delta.copy(state.face).sub(state.p)
           : state.delta.set(Math.sin(state.angle), 0, Math.cos(state.angle));
+    if (!walking && presentingHere && p >= 2 && p < 2.735) {
+      // Stand side-on between the visitor and the exhibit, so the presenting
+      // arm is visible instead of disappearing behind the engineer's torso.
+      state.a.copy(state.face).sub(state.p).setY(0).normalize();
+      state.b.copy(camera.position).sub(state.p).setY(0).normalize();
+      direction.copy(state.a).add(state.b);
+    }
     if (direction.lengthSq() > 0.000001) {
       const desired = Math.atan2(direction.x, direction.z);
       state.angle +=
@@ -113,6 +120,8 @@ export function Host() {
       bone.quaternion.slerp(state.q, weight);
       bone.updateMatrixWorld(true);
     };
+    // A previous station's aim must not masquerade as a settled new gesture.
+    delete gl.domElement.dataset.guideAim;
     if (state.wave > 0.01) {
       aim("RightArm", "RightForeArm", -0.7, 0.48, 0.1, state.wave);
       aim(

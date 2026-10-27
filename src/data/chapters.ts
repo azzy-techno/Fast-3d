@@ -37,12 +37,12 @@ export const chapters: Chapter[] = [
     id: "electrical",
     title: "Electrical",
     ar: "المقاولات الكهربائية",
-    place: "Level 11 / Power infrastructure",
-    placeAr: "الطابق 11 / البنية التحتية للطاقة",
+    place: "Level 11 / 16 guided stations",
+    placeAr: "الطابق 11 / 16 محطة إرشادية",
     description:
-      "Power, control and the systems around them. Explore 16 self-delivered capabilities across electrical contracting, electrical automation and LV / ELV infrastructure.",
+      "Step into a 62 × 64 m electrical exhibition. Follow your FAST engineer through all 16 capabilities, from power installations to automation, lighting and industrial fans.",
     descriptionAr:
-      "الطاقة والتحكم والأنظمة المساندة. استكشف 16 قدرة ننفذها بفرقنا في المقاولات الكهربائية والأتمتة والبنية التحتية للجهد المنخفض والمنخفض جداً.",
+      "ادخل معرضاً كهربائياً بمساحة 62 × 64 متراً. اتبع مهندس فاست عبر 16 محطة، من تركيبات الطاقة إلى الأتمتة والإنارة والمراوح الصناعية.",
     capabilities: [
       "Electrical contracting",
       "Electrical automation",

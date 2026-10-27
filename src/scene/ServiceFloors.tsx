@@ -1,4 +1,4 @@
-import { ElectricalDetails } from "./ElectricalDetails";
+import { ElectricalFloor } from "./ElectricalFloor";
 import { InteriorFloor } from "./InteriorFloor";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -214,7 +214,6 @@ function ServiceFloor({ index }: { index: number }) {
             ))}
           </group>
         )}
-        {index === 0 && <ElectricalDetails />}
       </StaticInstances>
       <mesh position={[0, 2.7, 8.42]}>
         <planeGeometry args={[31, 5.4]} />
@@ -277,9 +276,13 @@ function ServiceFloor({ index }: { index: number }) {
 export function ServiceFloors() {
   return (
     <group name="stacked-service-floors">
-      {serviceRooms.map((_, i) => (
-        <ServiceFloor key={i} index={i} />
-      ))}
+      {serviceRooms.map((_, i) =>
+        i === 0 ? (
+          <ElectricalFloor key={i} />
+        ) : (
+          <ServiceFloor key={i} index={i} />
+        ),
+      )}
     </group>
   );
 }

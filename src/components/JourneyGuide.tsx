@@ -35,13 +35,15 @@ export function JourneyGuide({
             ? "ROOF / 83 M"
             : p < 1.85
               ? "12 / WORKPLACE"
-              : p < 11.6
-                ? `${Math.max(2, 13 - Math.round(p))
-                    .toString()
-                    .padStart(2, "0")} / SERVICE FLOOR`
-                : p < 11.83
-                  ? "G / RECEPTION"
-                  : "CITY / FAREWELL";
+              : p < 2.929 && p >= 1.85
+                ? "11 / ELECTRICAL EXHIBITION"
+                : p < 11.6
+                  ? `${Math.max(2, 13 - Math.round(p))
+                      .toString()
+                      .padStart(2, "0")} / SERVICE FLOOR`
+                  : p < 11.83
+                    ? "G / RECEPTION"
+                    : "CITY / FAREWELL";
       setFloor((previous) => (previous === floor ? previous : floor));
       if (root.current)
         root.current.dataset.phase =
@@ -50,7 +52,8 @@ export function JourneyGuide({
       const visible =
         (p > 1.22 && p < 1.96) ||
         (p > 11.4 && p < 11.94) ||
-        (p > 2 && p < 11.5 && local > 0.38 && local < 0.84);
+        (p >= 3 && p < 11.5 && local > 0.38 && local < 0.84) ||
+        (p > 2.84 && p < 2.97);
       if (copy.current) copy.current.style.opacity = visible ? "1" : "0";
       if (marker.current)
         marker.current.setAttribute(

@@ -31,6 +31,22 @@ The deployment-base TypeScript/Vite build, 12,001-sample journey route checks, a
 
 ## Electrical floor approval preview
 
+### Expanded guided exhibition (2026-10-27)
+
+The electrical floor now has a dedicated conceptual exhibition footprint of 62 × 64.4 m, over six times the former shared service-floor area. Sixteen separate display bays sit in four rows with wide perimeter aisles and a central promenade. The other service floors retain their existing layouts; this is an authored interior experience, not an as-built survey of a FAST property.
+
+Each capability has a numbered 3D display, a bilingual tour card and a stationary presentation stop. The engineer walks the complete serpentine route and points at a modeled component in each display, including elevated lighting fixtures. Camera and guide paths are authored separately. After station 16, both follow the perimeter aisle back to the lift; the first inter-floor descent now occurs near progress 2.882–2.929. The shared lift timing functions remap that interval, preserving the remaining floors' choreography.
+
+The chapter spans 2,400 viewport-height units (at least 18,000 px), with Previous, Next and direct numbered navigation. The electrical soundscape continues through the exhibition and fades before lift travel. The introduction gives way to a compact station card; the mechanical card remains hidden until the next landing.
+
+The point target is an explicit component surface for each display, rather than a shared room centre. Gesture diagnostics reset every frame so a previous station's arm pose cannot make a new stop pass prematurely.
+
+Validation for the expanded floor: the production build, full 16-stop browser walkthrough (including Next/Previous/direct selection, mobile layout, WCAG A/AA and return to the lift), 5,301 electrical route samples, 12,001 general journey samples, sound lifecycle and lift/traffic checks pass. The electrical route's minimum horizontal guide/camera separation is 1.15 m, with at least 0.50 m clearance from exhibit footprints. Final presentation framing turns the guide partly toward the visitor while retaining world-space pointing at the equipment.
+
+`npm run test:electrical` checks all 16 stationary holds, equipment focus points, camera separation, all bay footprints and the delayed lift alignment over 5,301 samples. `npm run test:electrical:browser` exercises each stop using the actual Next control, checks pointing/clearance diagnostics, phone layout, accessibility, reverse navigation and departure. The general journey, sound and travel-motion checks have also been updated for the longer electrical chapter. Captures are written to `artifacts/electrical-tour/`.
+
+The earlier preview notes below describe the preceding, smaller version.
+
 Source: https://fast-arabia.com/services/electrical (reviewed 2026-10-26).
 
 The electrical floor is level 11 at 66 m. The scroll starts beside the LV panels, pulls back to reveal the RMU bays, cable ladder, transformer and commissioning bench, then returns to the enclosed lift. Model details include switching handles, relay displays, cable routes, transformer cooling fins and bushings, work surfaces and testing instruments. These are conceptual educational models, not live measurements or an as-built installation.

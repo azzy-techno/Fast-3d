@@ -116,9 +116,13 @@ try {
     if (
       name === "service-corridor" ||
       name === "electrical" ||
-      name === "mechanical"
+      name === "mechanical" ||
+      name.includes("electrical-stop-")
     ) {
-      const expected = name === "service-corridor" ? "standing" : "presenting";
+      const expected =
+        name === "service-corridor" || name === "electrical"
+          ? "standing"
+          : "presenting";
       let state;
       for (let wait = 0; wait < 150; wait++) {
         state = await page.evaluate(() => ({
@@ -233,15 +237,23 @@ try {
   await capture(2, "electrical-scope");
   await capture(2.2, "electrical-overview");
   await capture(2.28, "electrical-infrastructure");
-  await capture(2.68, "electrical-lift");
+  await capture(2.906, "electrical-lift");
+  for (let i = 0; i < 16; i++)
+    await capture(
+      2.051 + i * 0.044,
+      `electrical-stop-${String(i + 1).padStart(2, "0")}`,
+    );
+  await capture(2.208, "electrical-walk");
   await capture(3.0, "mechanical-landing");
-  await capture(2.55, "service-corridor");
+  await capture(2.858, "service-corridor");
   await capture(3, "mechanical");
   await capture(8, "manufacturing");
   await capture(10, "iiot");
   await capture(1, "phone-host", true);
   await capture(11.86, "phone-farewell", true);
   await capture(2, "phone-electrical", true);
+  await capture(2.051, "phone-electrical-stop-01", true);
+  await capture(2.711, "phone-electrical-stop-16", true);
   await capture(2, "phone-electrical-scope", true);
   await capture(2.2, "phone-electrical-overview", true);
   await capture(2.28, "phone-electrical-infrastructure", true);

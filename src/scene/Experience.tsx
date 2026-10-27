@@ -1,3 +1,4 @@
+import { electricalStationAt } from "./electricalTour";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -89,7 +90,9 @@ function World({
       (requested - progress.current) * (1 - Math.exp(-Math.min(dt, 0.1) * 13));
     const p = progress.current;
     journeyState.progress = p;
-    const fov = sampleJourney(p, vectors.p, vectors.target);
+    const fov =
+      sampleJourney(p, vectors.p, vectors.target) +
+      (mobile && p >= 2 && p < 2.84 ? 12 : 0);
     const inside =
       Math.min(1, Math.max(0, (p - 1.3) / 0.13)) *
       (1 - Math.min(1, Math.max(0, (p - 11.77) / 0.08)));
@@ -101,25 +104,6 @@ function World({
         Math.min(0.45, Math.max(0, (size.height / size.width) * 0.95 - 1)) *
           outside;
       vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
-    }
-    // Portrait framing follows the transformer/commissioning area during the
-    // electrical overview; the camera stays in the open front visitor aisle.
-    if (mobile && p > 2.06 && p < 2.36) {
-      const ease = (a: number, b: number) => {
-        const n = Math.max(0, Math.min(1, (p - a) / (b - a)));
-        return n * n * (3 - 2 * n);
-      };
-      const weight = ease(2.06, 2.18) * (1 - ease(2.22, 2.28));
-      vectors.p.set(
-        vectors.p.x + (2.5 - vectors.p.x) * weight,
-        vectors.p.y + (69 - vectors.p.y) * weight,
-        vectors.p.z + (5.8 - vectors.p.z) * weight,
-      );
-      vectors.target.set(
-        vectors.target.x + (7 - vectors.target.x) * weight,
-        vectors.target.y + (67.3 - vectors.target.y) * weight,
-        vectors.target.z + (-4 - vectors.target.z) * weight,
-      );
     }
     camera.position.copy(vectors.p);
     camera.lookAt(vectors.target);
@@ -180,6 +164,9 @@ function World({
     gl.domElement.dataset.journey = p.toFixed(4);
     gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
     gl.domElement.dataset.towerHeight = "83";
+    gl.domElement.dataset.electricalStation = String(
+      electricalStationAt(p)?.number ?? 0,
+    );
     if (warmed.current && !ready.current) {
       ready.current = true;
       gl.domElement.dataset.ready = "true";

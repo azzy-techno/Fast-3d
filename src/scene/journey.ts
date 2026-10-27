@@ -1,3 +1,10 @@
+import {
+  electricalCameraKeys,
+  electricalDepartureAt,
+  sampleElectricalGuide,
+  electricalPresenting,
+  ELECTRICAL_END,
+} from "./electricalTour";
 import { serviceLevel } from "./towerLayout";
 import { Vector3 } from "three";
 import type { Point } from "../data/chapters";
@@ -40,7 +47,7 @@ shot(1.82, [0, 17.7, -7], [0, 17.7, -11], 66);
 shot(1.85, [0, 14, -7], [4, 14, -7], 66);
 shot(1.88, [0, 9, -7], [3, 9, -2], 66);
 shot(1.9, [0, 7.7, -7], [0, 7.7, 0], 66);
-shot(1.95, [0, 7.7, -1], [-6.6, 7.5, -4], 66);
+shot(1.95, [0, 7.7, -1], [0, 7.5, 8], 66);
 for (let i = 0; i < serviceRooms.length; i++) {
   const room = serviceRooms[i],
     next = serviceRooms[i + 1],
@@ -52,23 +59,35 @@ for (let i = 0; i < serviceRooms.length; i++) {
     y + 1.45,
     room.z - 0.6,
   ];
-  shot(at, p, target, 74);
   if (i === 0) {
-    shot(at + 0.2, [0, y + 3, 7.5], [0, y + 1.5, -4], 80);
-    // Reveal metering, generator connections and the lighting/fan display
-    // from the clear front aisle before returning to the lift landing.
-    shot(at + 0.28, [8, y + 3, 5.8], [12, y + 1.8, -4], 76);
-  } else
+    for (const key of electricalCameraKeys)
+      shot(key.at, key.camera, key.target, 70);
+  } else {
+    shot(at, p, target, 74);
     shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
+  }
+  const departure = (value: number) =>
+    i === 0 ? electricalDepartureAt(value) : value;
   if (next) {
-    shot(at + 0.38, [room.side * 2.1, y + 1.7, -0.9], [0, y + 1.6, -3], 68);
-    shot(at + 0.46, [0, y + 1.7, -0.9], [0, y + 1.7, -7], 66);
-    shot(at + 0.54, [0, y + 1.7, -7], [0, y + 1.7, -11], 66);
-    shot(at + 0.6, [0, y + 1.7, -7], [3, y + 1.7, -7], 66);
-    shot(at + 0.76, [0, next.y + 1.7, -7], [2, next.y + 1.7, -2], 66);
-    shot(at + 0.84, [0, next.y + 1.7, -0.9], [next.x, next.y + 1.5, -4], 68);
+    if (i !== 0)
+      shot(at + 0.38, [room.side * 2.1, y + 1.7, -0.9], [0, y + 1.6, -3], 68);
+    if (i !== 0) shot(at + 0.46, [0, y + 1.7, -0.9], [0, y + 1.7, -7], 66);
+    shot(departure(at + 0.54), [0, y + 1.7, -7], [0, y + 1.7, -11], 66);
+    shot(departure(at + 0.6), [0, y + 1.7, -7], [3, y + 1.7, -7], 66);
     shot(
-      at + 0.94,
+      departure(at + 0.76),
+      [0, next.y + 1.7, -7],
+      [2, next.y + 1.7, -2],
+      66,
+    );
+    shot(
+      departure(at + 0.84),
+      [0, next.y + 1.7, -0.9],
+      [next.x, next.y + 1.5, -4],
+      68,
+    );
+    shot(
+      departure(at + 0.94),
       [next.side * 2.1, next.y + 1.7, -0.9],
       [next.x, next.y + 1.5, -4.6],
       68,
@@ -230,6 +249,10 @@ export function routeDistance(p: number) {
   return arc[i] + (arc[Math.min(12000, i + 1)] - arc[i]) * (n - i);
 }
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
+  if (p >= 1.94 && p <= ELECTRICAL_END) {
+    sampleElectricalGuide(p, position, facing);
+    return;
+  }
   if (p >= 1.9 && p <= 11.53) {
     sampleServiceGuide(p, position, facing);
     return;
@@ -324,18 +347,32 @@ for (let i = 0; i < serviceRooms.length; i++) {
     y = room.y;
   const bay = room.side < 0 ? -2.85 : presentationX,
     parkZ = room.side < 0 ? -1.5 : 0.6;
-  guideKey(at - (i === 0 ? 0.045 : 0.1), [bay, y, room.z + 2.05], i);
-  guideKey(at - (i === 0 ? 0.02 : 0.04), [bay, y, room.z + parkZ], i);
-  guideKey(at + 0.28, [bay, y, room.z + parkZ], i);
-  guideKey(at + 0.36, [bay, y, room.z + 2.05], i);
-  guideKey(at + (next ? 0.42 : 0.4), [room.side * 2.1, y, room.z + 2.05], i);
+  if (i !== 0) {
+    guideKey(
+      i === 1 ? electricalDepartureAt(at - 0.1) : at - 0.1,
+      [bay, y, room.z + 2.05],
+      i,
+    );
+    guideKey(
+      i === 1 ? electricalDepartureAt(at - 0.04) : at - 0.04,
+      [bay, y, room.z + parkZ],
+      i,
+    );
+    guideKey(at + 0.28, [bay, y, room.z + parkZ], i);
+    guideKey(at + 0.36, [bay, y, room.z + 2.05], i);
+    guideKey(at + (next ? 0.42 : 0.4), [room.side * 2.1, y, room.z + 2.05], i);
+  } else {
+    guideKey(ELECTRICAL_END, [1.15, y, -3], i);
+  }
+  const departure = (value: number) =>
+    i === 0 ? electricalDepartureAt(value) : value;
   if (next) {
-    guideKey(at + 0.48, [1.15, y, -3], i);
-    guideKey(at + 0.54, [1.15, y, -7.85], i);
-    guideKey(at + 0.6, [1.15, y, -7.85], i);
-    guideKey(at + 0.76, [1.15, next.y, -7.85], i + 1);
-    guideKey(at + 0.78, [1.15, next.y, -3], i + 1);
-    guideKey(at + 0.82, [next.side * 2.1, next.y, -1.95], i + 1);
+    guideKey(departure(at + 0.48), [1.15, y, -3], i);
+    guideKey(departure(at + 0.54), [1.15, y, -7.85], i);
+    guideKey(departure(at + 0.6), [1.15, y, -7.85], i);
+    guideKey(departure(at + 0.76), [1.15, next.y, -7.85], i + 1);
+    guideKey(departure(at + 0.78), [1.15, next.y, -3], i + 1);
+    guideKey(departure(at + 0.82), [next.side * 2.1, next.y, -1.95], i + 1);
   } else {
     guideKey(11.44, [1.15, y, -5], i);
     guideKey(11.48, [1.15, y, -33.5], i);
@@ -371,6 +408,7 @@ function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
 }
 
 export function guideIsPresenting(p: number) {
+  if (p >= 1.94 && p < ELECTRICAL_END) return electricalPresenting(p);
   if (p >= 0.86 && p <= 1.14) return true;
   const at = Math.round(p);
   return (
