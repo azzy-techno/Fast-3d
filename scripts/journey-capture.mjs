@@ -235,6 +235,7 @@ try {
   await capture(1.94, "systems-entry");
   await capture(2, "electrical");
   await capture(2, "electrical-scope");
+  await capture(2.018, "electrical-direct-entry");
   await capture(2.2, "electrical-overview");
   await capture(2.28, "electrical-infrastructure");
   await capture(2.906, "electrical-lift");

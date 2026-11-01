@@ -30,6 +30,20 @@ const camera = new Vector3(),
   old = new Vector3();
 let minCamera = Infinity,
   minEquipment = Infinity;
+// Entry must use the outside of bay 01, never the central aisle beside 02.
+let enteredFirstRow = false;
+for (let n = 10000; n <= 10225; n++) {
+  const p = n / 5000;
+  sampleGuide(p, guide, face);
+  sampleJourney(p, camera, target);
+  assert(target.x < -15, "Entry camera introduces station 01, not station 02");
+  if (!enteredFirstRow && guide.z >= 5.5) {
+    assert(guide.x < -26, "First-row approach must be outside station 01");
+    enteredFirstRow = true;
+  }
+  if (p < electricalStations[0].at) assert(!guideIsPresenting(p));
+}
+assert(enteredFirstRow, "Entry reaches the first row");
 for (let n = 9700; n <= 15000; n++) {
   const p = n / 5000;
   sampleJourney(p, camera, target);

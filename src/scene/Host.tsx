@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
 import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
+import { electricalStationAt } from "./electricalTour";
 import {
   journeyState,
   routeDistance,
@@ -28,6 +29,8 @@ export function Host() {
       angle: 0,
       phase: 0,
       wave: 1,
+      presentation: 0,
+      presentationTime: 0,
       up: new Vector3(0, 1, 0),
     }),
     [],
@@ -65,6 +68,33 @@ export function Host() {
       Math.min(dt, 0.1),
     );
     const presentingHere = guideIsPresenting(p);
+    const electrical = p >= 2 && p < 2.735 && presentingHere;
+    const settled = electrical && state.walking < 0.2;
+    state.presentation = MathUtils.damp(
+      state.presentation,
+      settled ? 1 : 0,
+      5,
+      Math.min(dt, 0.1),
+    );
+    state.presentationTime = settled ? state.presentationTime + dt : 0;
+    // Each stop gets its own explanatory rhythm. Feet stay planted while the
+    // upper body turns, nods and uses an open supporting hand.
+    const rhythm =
+      state.presentationTime * 1.6 +
+      (electricalStationAt(p)?.number ?? 0) * 0.7;
+    const emphasis = (Math.sin(rhythm) + 1) / 2;
+    const gestureWeight = state.presentation;
+    if (gestureWeight > 0.001) {
+      rig.bones
+        .get("Spine2")
+        ?.rotateY(Math.sin(rhythm * 0.45) * 0.045 * gestureWeight);
+      rig.bones
+        .get("Head")
+        ?.rotateY(Math.sin(rhythm * 0.6) * 0.19 * gestureWeight);
+      rig.bones
+        .get("Head")
+        ?.rotateX(Math.sin(rhythm * 1.4) * 0.055 * gestureWeight);
+    }
     const direction = waving
       ? state.delta.copy(camera.position).sub(state.p)
       : walking
@@ -149,7 +179,16 @@ export function Host() {
         dy = state.direction.y,
         dz = state.direction.z;
       const presenting = 1 - state.walking;
-      aim("RightArm", "RightForeArm", dx, dy - 0.25, dz, presenting);
+      // Vary the elbow's emphasis while keeping the forearm aimed at the
+      // actual equipment surface, including overhead lighting fixtures.
+      aim(
+        "RightArm",
+        "RightForeArm",
+        dx,
+        dy - 0.25 - emphasis * 0.22 * gestureWeight,
+        dz,
+        presenting,
+      );
       const elbow = rig.bones.get("RightForeArm")!;
       elbow.getWorldPosition(state.a);
       state.direction
@@ -174,6 +213,38 @@ export function Host() {
         .normalize()
         .dot(state.direction)
         .toFixed(4);
+    }
+    if (gestureWeight > 0.001) {
+      aim(
+        "LeftArm",
+        "LeftForeArm",
+        0.55,
+        -0.65 + emphasis * 0.28,
+        0.5,
+        gestureWeight,
+      );
+      aim(
+        "LeftForeArm",
+        "LeftHand",
+        0.32 + emphasis * 0.3,
+        0.2 + emphasis * 0.35,
+        0.85,
+        gestureWeight,
+      );
+      rig.bones
+        .get("LeftHand")
+        ?.rotateZ((-0.5 + emphasis * 0.25) * gestureWeight);
+      rig.bones
+        .get("RightHand")
+        ?.rotateY(Math.sin(rhythm) * 0.12 * gestureWeight);
+      root.current.updateMatrixWorld(true);
+      rig.bones.get("LeftHand")?.getWorldPosition(state.a);
+      gl.domElement.dataset.guidePresentationHand = state.a
+        .toArray()
+        .map((n) => n.toFixed(4))
+        .join(",");
+    } else {
+      delete gl.domElement.dataset.guidePresentationHand;
     }
     state.b.set(state.p.x, state.p.y + 1, state.p.z).project(camera);
     gl.domElement.dataset.guideScreen = [state.b.x, state.b.y]

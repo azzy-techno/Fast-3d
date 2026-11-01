@@ -31,6 +31,16 @@ The deployment-base TypeScript/Vite build, 12,001-sample journey route checks, a
 
 ## Electrical floor approval preview
 
+### Entry and presentation refinement (2026-11-01)
+
+The engineer now approaches station 01 along the entrance aisle and the left perimeter, instead of crossing the central aisle beside station 02 and doubling back. The camera looks toward station 01 throughout this approach. All sixteen numbered stops and the return to the lift retain their order. The entry regression checks the first crossing into the exhibit row on the outside of bay 01; full route checks now find at least 1.30 m clearance from electrical exhibit footprints.
+
+Solid full-height bay backboards have been replaced with open graphite metal portals, warm inset light strips, shallow stone bases and narrow fin screens. Compact overhead labels leave the hall visible through the displays. The same instancing system batches these repeated elements.
+
+Electrical presentations now layer a moving supporting hand, varied elbow emphasis, subtle upper-body turns and head nods onto the standing pose. The right forearm continues to point at the actual equipment surface. Gestures ease in after walking settles and fade back into walking; feet remain planted at presentation stops. A live browser check measures supporting-hand movement while checking that equipment pointing stays aligned.
+
+Validation: production build, 5,301 electrical route samples, 12,001 whole-journey samples, all lift/traffic checks and the complete sixteen-stop browser walkthrough pass. The browser observes 0.103 m of supporting-hand movement while the pointing alignment stays above 0.98, then verifies mobile layout, accessible controls, reverse navigation and lift departure.
+
 ### Expanded guided exhibition (2026-10-27)
 
 The electrical floor now has a dedicated conceptual exhibition footprint of 62 × 64.4 m, over six times the former shared service-floor area. Sixteen separate display bays sit in four rows with wide perimeter aisles and a central promenade. The other service floors retain their existing layouts; this is an authored interior experience, not an as-built survey of a FAST property.

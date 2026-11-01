@@ -108,6 +108,33 @@ try {
     );
     if ([1, 4, 11, 14, 16].includes(stop)) await screenshot(`stop-${stop}`);
     console.log(`PASS stop ${stop}: guide presents beside equipment`);
+    if (stop === initialStop) {
+      // Observe the live skeleton over time while the camera and feet hold.
+      // The supporting hand should move, while the pointing arm stays on target.
+      const hands = [];
+      for (let i = 0; i < 40; i++) {
+        const pose = await page.evaluate(() => ({
+          hand: document.querySelector("canvas").dataset.guidePresentationHand,
+          aim: document.querySelector("canvas").dataset.guideAim,
+        }));
+        if (pose.hand) {
+          hands.push(pose.hand.split(",").map(Number));
+          assert(
+            Number(pose.aim) > 0.98,
+            "Pointing stays aimed during presentation",
+          );
+        }
+        await delay(150);
+      }
+      assert(hands.length > 5, "Supporting gesture is rendered");
+      const excursion = Math.max(
+        ...hands.map((p) => Math.hypot(...p.map((v, i) => v - hands[0][i]))),
+      );
+      assert(excursion > 0.04, `Supporting hand must animate: ${excursion}`);
+      console.log(
+        `PASS live presentation gesture: ${excursion.toFixed(3)} m movement`,
+      );
+    }
     if (stop < 16)
       await page.evaluate(() =>
         document

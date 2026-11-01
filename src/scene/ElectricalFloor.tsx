@@ -74,21 +74,54 @@ export function ElectricalFloor() {
             position={[s.x, 0, s.z]}
             name={`electrical-station-${s.number}`}
           >
-            <Box p={[0, 0.08, 0]} s={[9, 0.16, 5]} c="#68878e" />
+            {/* Open gallery portals keep the equipment in silhouette and let
+                visitors see through the hall, instead of sixteen solid walls. */}
+            <Box p={[0, 0.08, 0]} s={[9, 0.16, 5]} c="#45565e" metal={0.3} />
+            <Box p={[0, 0.12, 2.48]} s={[8.8, 0.035, 0.035]} c="#d4bd88" glow />
+            {[-4.35, 4.35].map((x) => (
+              <group key={x}>
+                <Box
+                  p={[x, 2.35, -2.4]}
+                  s={[0.12, 4.7, 0.18]}
+                  c="#33444b"
+                  metal={0.65}
+                />
+                <Box
+                  p={[x, 2.4, -2.29]}
+                  s={[0.025, 3.8, 0.025]}
+                  c="#d8c99d"
+                  glow
+                />
+              </group>
+            ))}
             <Box
-              p={[0, 2.3, -2.4]}
-              s={[9, 4.6, 0.16]}
-              c={i < 10 ? "#426572" : i < 13 ? "#356d70" : "#51695c"}
+              p={[0, 4.68, -2.4]}
+              s={[8.82, 0.12, 0.18]}
+              c="#33444b"
+              metal={0.65}
             />
-            <Box p={[0, 4.65, -2.3]} s={[9.1, 0.08, 0.25]} c="#e3c889" glow />
+            <Box p={[0, 4.6, -2.32]} s={[8.5, 0.025, 0.06]} c="#e3c889" glow />
+            {/* A shallow stone base and a small fin screen anchor the bay;
+                the middle remains open behind each installation. */}
+            <Box p={[0, 0.36, -2.35]} s={[8.6, 0.4, 0.25]} c="#b9b4a4" />
+            {[0, 1, 2, 3, 4].map((fin) => (
+              <Box
+                key={fin}
+                p={[-4.05 + fin * 0.18, 2.1, -2.35]}
+                s={[0.065, 3.05, 0.22]}
+                c="#a3957d"
+                metal={0.25}
+              />
+            ))}
             <group position={[0, 0.16, 0]}>
               <ElectricalStationModel index={i} />
             </group>
             <Wayfinding
               text={`${String(s.number).padStart(2, "0")} / ${s.title.toUpperCase()}`}
               sub={s.category.toUpperCase()}
-              p={[0, 4.05, -2.25]}
+              p={[0, 4.15, -2.25]}
               width={8.5}
+              height={1}
             />
           </group>
         ))}

@@ -76,6 +76,7 @@ export function Wayfinding({
   p,
   rotation = [0, 0, 0],
   width = 2.4,
+  height = width / 4,
   dark = true,
 }: {
   text: string;
@@ -83,30 +84,31 @@ export function Wayfinding({
   p: Point;
   rotation?: Point;
   width?: number;
+  height?: number;
   dark?: boolean;
 }) {
   const map = useMemo(() => {
     const c = document.createElement("canvas");
     c.width = 1024;
-    c.height = 256;
+    c.height = Math.max(64, Math.round((1024 * height) / width));
     const ctx = c.getContext("2d")!;
     ctx.fillStyle = dark ? "#17313c" : "#ded9ca";
-    ctx.fillRect(0, 0, 1024, 256);
+    ctx.fillRect(0, 0, 1024, c.height);
     ctx.fillStyle = dark ? "#7ecbd6" : "#335b66";
-    ctx.fillRect(40, 40, 5, 175);
-    ctx.font = "500 20px sans-serif";
-    ctx.fillText(sub, 75, 78);
+    ctx.fillRect(40, c.height * 0.156, 5, c.height * 0.684);
+    ctx.font = `500 ${Math.min(20, c.height * 0.14)}px sans-serif`;
+    ctx.fillText(sub, 75, c.height * 0.305);
     ctx.fillStyle = dark ? "#f0ede3" : "#183640";
-    ctx.font = "500 52px sans-serif";
-    ctx.fillText(text, 72, 160, 880);
+    ctx.font = `500 ${Math.min(52, c.height * 0.3)}px sans-serif`;
+    ctx.fillText(text, 72, c.height * 0.625, 880);
     const texture = new CanvasTexture(c);
     texture.colorSpace = SRGBColorSpace;
     return texture;
-  }, [text, sub, dark]);
+  }, [text, sub, dark, width, height]);
   useEffect(() => () => map.dispose(), [map]);
   return (
     <mesh position={p} rotation={rotation}>
-      <planeGeometry args={[width, width / 4]} />
+      <planeGeometry args={[width, height]} />
       <meshBasicMaterial map={map} toneMapped={false} />
     </mesh>
   );

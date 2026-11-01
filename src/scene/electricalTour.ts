@@ -79,10 +79,13 @@ function key(at: number, camera: Point, guide: Point, target?: Point) {
 }
 key(1.94, [0, 1.7, -1], [-2.1, 0, -1.95]);
 key(1.96, [0, 1.7, -1], [-2.1, 0, 3]);
-key(1.98, [0, 1.7, -1], [2, 0, 3]);
-key(2, [0, 2.05, -0.9], [2, 0, 3]);
-key(2.015, [0, 2.2, 9], [2, 0, 12]);
-key(2.026, [0, 2.2, 16], [-17.8, 0, 12]);
+key(1.98, [0, 1.7, -1], [-2.1, 0, 3]);
+// Approach 01 along the entrance aisle and its outside edge. The former
+// central-aisle approach passed 02 before doubling back to the first display.
+key(2, [0, 2.05, -0.9], [-2.1, 0, 3], [-21, 1.45, 8.5]);
+key(2.014, [-18, 2.2, 1], [-24, 0, 3], [-21, 1.45, 8.5]);
+key(2.024, [-27, 2.2, 3], [-29, 0, 3], [-21, 1.45, 8.5]);
+key(2.035, [-27, 2.2, 16], [-29, 0, 11.8], [-21, 1.45, 8.5]);
 for (const [i, s] of electricalStations.entries()) {
   const camera: Point = [s.x + 3.8, 2.2, s.z + 8];
   const guide: Point = [s.x + 3.2, 0, s.z + 3.8];
