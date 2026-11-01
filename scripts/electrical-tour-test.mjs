@@ -5,7 +5,7 @@ const out = "/tmp/fast-electrical-tour-check.mjs";
 await build({
   stdin: {
     contents:
-      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export {Vector3} from "three";',
+      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export {Vector3,PerspectiveCamera} from "three";',
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -22,6 +22,7 @@ const {
   stackLiftFloor,
   stackDoorOpen,
   Vector3,
+  PerspectiveCamera,
 } = await import(pathToFileURL(out));
 const camera = new Vector3(),
   target = new Vector3(),
@@ -36,7 +37,8 @@ for (let n = 10000; n <= 10225; n++) {
   const p = n / 5000;
   sampleGuide(p, guide, face);
   sampleJourney(p, camera, target);
-  assert(target.x < -15, "Entry camera introduces station 01, not station 02");
+  if (p >= 2.014)
+    assert(target.x < -15, "Entry camera follows the approach to station 01");
   if (!enteredFirstRow && guide.z >= 5.5) {
     assert(guide.x < -26, "First-row approach must be outside station 01");
     enteredFirstRow = true;
@@ -44,6 +46,27 @@ for (let n = 10000; n <= 10225; n++) {
   if (p < electricalStations[0].at) assert(!guideIsPresenting(p));
 }
 assert(enteredFirstRow, "Entry reaches the first row");
+for (const [aspect, extraFov] of [
+  [1.44, 0],
+  [390 / 844, 20],
+]) {
+  const view = new PerspectiveCamera(70, aspect, 0.08, 1000);
+  for (let n = 10000; n <= 10225; n++) {
+    const p = n / 5000;
+    view.fov = sampleJourney(p, camera, target) + extraFov;
+    view.position.copy(camera);
+    view.lookAt(target);
+    view.updateMatrixWorld();
+    view.updateProjectionMatrix();
+    sampleGuide(p, guide, face);
+    guide.y += 1;
+    guide.project(view);
+    assert(
+      Math.abs(guide.x) < 0.9 && Math.abs(guide.y) < 0.9,
+      `Guide leaves entry framing at ${p}, aspect ${aspect}: ${guide.toArray()}`,
+    );
+  }
+}
 for (let n = 9700; n <= 15000; n++) {
   const p = n / 5000;
   sampleJourney(p, camera, target);

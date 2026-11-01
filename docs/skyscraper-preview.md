@@ -33,7 +33,7 @@ The deployment-base TypeScript/Vite build, 12,001-sample journey route checks, a
 
 ### Entry and presentation refinement (2026-11-01)
 
-The engineer now approaches station 01 along the entrance aisle and the left perimeter, instead of crossing the central aisle beside station 02 and doubling back. The camera looks toward station 01 throughout this approach. All sixteen numbered stops and the return to the lift retain their order. The entry regression checks the first crossing into the exhibit row on the outside of bay 01; full route checks now find at least 1.30 m clearance from electrical exhibit footprints.
+The engineer now approaches station 01 along the entrance aisle and the left perimeter, instead of crossing the central aisle beside station 02 and doubling back. The camera follows him through the turn before framing station 01. All sixteen numbered stops and the return to the lift retain their order. The entry regression checks the first crossing into the exhibit row on the outside of bay 01; full route checks now find at least 1.30 m clearance from electrical exhibit footprints.
 
 Solid full-height bay backboards have been replaced with open graphite metal portals, warm inset light strips, shallow stone bases and narrow fin screens. Compact overhead labels leave the hall visible through the displays. The same instancing system batches these repeated elements.
 
