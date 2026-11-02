@@ -1,6 +1,12 @@
 import { ServiceFloors } from "./ServiceFloors";
 import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
 import { liftDoorOpen } from "./travelMotion";
+import {
+  ELECTRICAL_EXIT,
+  ELECTRICAL_END,
+  inElectricalRearLift,
+} from "./electricalTour";
+import { useTour } from "../store";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
@@ -342,12 +348,14 @@ export function Lift({
   exit = false,
   elevation = 0,
   stack = false,
+  rear = false,
 }: {
   p: Point;
   roof?: boolean;
   exit?: boolean;
   elevation?: number;
   stack?: boolean;
+  rear?: boolean;
 }) {
   const panels = useRef<Group>(null),
     cabin = useRef<Group>(null);
@@ -356,9 +364,16 @@ export function Lift({
     const progress = journeyState.progress;
     if (roof && p[1] === 83 && cabin.current)
       cabin.current.visible = progress < 1.36;
-    const open = stack
-      ? stackDoorOpen(progress)
-      : liftDoorOpen(progress, exit ? "exit" : roof ? "roof" : "service");
+    if (rear && cabin.current)
+      cabin.current.visible =
+        progress > 1.73 &&
+        progress < ELECTRICAL_END &&
+        Math.abs(camera.position.y - 66) < 9;
+    const open = rear
+      ? 1
+      : stack
+        ? stackDoorOpen(progress)
+        : liftDoorOpen(progress, exit ? "exit" : roof ? "roof" : "service");
     if (cabin.current && exit)
       cabin.current.position.y =
         progress < 11.53
@@ -381,13 +396,25 @@ export function Lift({
     }
     if (stack && cabin.current) {
       cabin.current.position.y = stackLiftFloor(progress);
+      cabin.current.position.x = inElectricalRearLift(progress)
+        ? ELECTRICAL_EXIT.x
+        : p[0];
+      cabin.current.position.z = inElectricalRearLift(progress)
+        ? ELECTRICAL_EXIT.z
+        : p[2];
+      cabin.current.rotation.y = inElectricalRearLift(progress) ? Math.PI : 0;
       cabin.current.visible = progress >= 1.96 && progress <= 11.4;
     }
     panels.current.children[0].position.x = -0.63 - open * 1.55;
     panels.current.children[1].position.x = 0.63 + open * 1.55;
   });
   return (
-    <group ref={cabin} position={p} name={roof ? "roof-lift" : "service-lift"}>
+    <group
+      ref={cabin}
+      position={p}
+      rotation={[0, rear ? Math.PI : 0, 0]}
+      name={rear ? "electrical-exit-lift" : roof ? "roof-lift" : "service-lift"}
+    >
       <Box p={[-1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
       <Box p={[1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
       <Box p={[0, 3.15, 1.75]} s={[3.7, 0.3, 0.16]} c="#717b79" />
@@ -410,7 +437,7 @@ export function Lift({
             ? "FAST / LEVEL 02 → GROUND FLOOR"
             : roof
               ? "FAST / ROOF → LEVEL 12"
-              : stack
+              : stack || rear
                 ? "FAST / VERTICAL JOURNEY"
                 : "FAST / LEVEL 12 → LEVEL 11"
         }
@@ -430,6 +457,33 @@ export function Lift({
         c="#b8b7a6"
         metal={0.7}
       />
+      <group
+        position={[1.73, 1.45, 0.65]}
+        rotation={[0, -Math.PI / 2, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          useTour.getState().requestLift();
+        }}
+      >
+        <Box p={[0, 0, 0]} s={[0.4, 0.8, 0.035]} c="#213a43" metal={0.8} />
+        {Array.from({ length: 12 }, (_, i) => (
+          <mesh
+            key={i}
+            position={[
+              (i % 2) * 0.16 - 0.08,
+              0.3 - Math.floor(i / 2) * 0.12,
+              0.025,
+            ]}
+          >
+            <circleGeometry args={[0.045, 16]} />
+            <meshStandardMaterial
+              color="#e5c88b"
+              emissive="#b9954f"
+              emissiveIntensity={0.5}
+            />
+          </mesh>
+        ))}
+      </group>
       {[-1.73, 1.73].map((x) => (
         <group key={x}>
           <Box p={[x, 1.05, 0]} s={[0.06, 0.05, 2.9]} c="#b8b7a6" metal={0.7} />
@@ -447,8 +501,8 @@ export function Lift({
             ? "RECEPTION / G"
             : roof
               ? "ROOF ACCESS / 83 M"
-              : stack
-                ? "ENGINEERING FLOORS"
+              : stack || rear
+                ? "CHOOSE YOUR NEXT FLOOR"
                 : "ELECTRICAL / 11"
         }
         p={[0, 3, 1.86]}
@@ -480,6 +534,7 @@ export function Interior() {
       </group>
       <ServiceFloors />
       <Lift p={[0, 66, -7]} stack />
+      <Lift p={[ELECTRICAL_EXIT.x, 66, ELECTRICAL_EXIT.z]} rear />
     </group>
   );
 }

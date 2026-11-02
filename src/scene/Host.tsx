@@ -2,7 +2,8 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
 import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
-import { electricalStationAt } from "./electricalTour";
+import { electricalStationAt, ELECTRICAL_EXIT } from "./electricalTour";
+import { useTour } from "../store";
 import {
   journeyState,
   routeDistance,
@@ -31,6 +32,8 @@ export function Host() {
       wave: 1,
       presentation: 0,
       presentationTime: 0,
+      previousProgress: 0,
+      jumpVersion: 0,
       up: new Vector3(0, 1, 0),
     }),
     [],
@@ -39,6 +42,15 @@ export function Host() {
     if (!root.current) return;
     const p = journeyState.progress;
     sampleGuide(p, state.p, state.face);
+    const cut =
+      state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
+    if (cut || state.jumpVersion !== useTour.getState().jumpVersion) {
+      state.previous.copy(state.p);
+      state.walking = 0;
+      if (cut) state.angle += Math.PI;
+      state.jumpVersion = useTour.getState().jumpVersion;
+    }
+    state.previousProgress = p;
     const distance = state.initialized
       ? Math.hypot(state.p.x - state.previous.x, state.p.z - state.previous.z)
       : 0;

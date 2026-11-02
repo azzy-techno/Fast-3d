@@ -41,6 +41,7 @@ function World({
     initialized = useRef(false),
     warmed = useRef(false);
   const progress = useRef(useTour.getState().progress);
+  const jumpVersion = useRef(useTour.getState().jumpVersion);
   const sun = useRef<DirectionalLight>(null),
     hemisphere = useRef<HemisphereLight>(null),
     ambient = useRef<AmbientLight>(null),
@@ -80,9 +81,13 @@ function World({
   }, [gl, scene, camera]);
   useFrame((_, dt) => {
     const requested = useTour.getState().progress;
-    if (!initialized.current) {
+    if (
+      !initialized.current ||
+      jumpVersion.current !== useTour.getState().jumpVersion
+    ) {
       progress.current = requested;
       initialized.current = true;
+      jumpVersion.current = useTour.getState().jumpVersion;
     }
     // Smooth a single scalar, then sample the constrained route. Interpolating
     // camera positions independently would cut corners through corridor walls.
@@ -90,6 +95,7 @@ function World({
       (requested - progress.current) * (1 - Math.exp(-Math.min(dt, 0.1) * 13));
     const p = progress.current;
     journeyState.progress = p;
+    gl.domElement.dataset.jumpVersion = String(jumpVersion.current);
     const fov =
       sampleJourney(p, vectors.p, vectors.target) +
       (mobile && p >= 2 && p < 2.84 ? 12 : 0);
@@ -98,6 +104,12 @@ function World({
       (1 - Math.min(1, Math.max(0, (p - 11.77) / 0.08)));
     const outside = 1 - inside;
     const cam = camera as PerspectiveCamera;
+    if (mobile && p >= 1.94 && p < 2.014) {
+      // Read the whole entrance poster through the open lift doorway on phones.
+      const intro =
+        Math.min(1, (p - 1.94) / 0.06) * Math.min(1, (2.014 - p) / 0.014);
+      vectors.p.z -= 3.8 * Math.max(0, intro);
+    }
     if (mobile && outside > 0) {
       const scale =
         1 +

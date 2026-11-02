@@ -8,11 +8,13 @@ export function JourneyGuide({
   jump,
   cinematic,
   setCinematic,
+  openLift,
 }: {
   rtl: boolean;
   jump: (id: string) => void;
   cinematic: boolean;
   setCinematic: (value: boolean) => void;
+  openLift: () => void;
 }) {
   const root = useRef<HTMLDivElement>(null),
     copy = useRef<HTMLDivElement>(null),
@@ -92,6 +94,14 @@ export function JourneyGuide({
         </div>
       )}
       <div className="journey-toolbar">
+        <button
+          className="lift-toggle"
+          onClick={openLift}
+          aria-haspopup="dialog"
+        >
+          {rtl ? "اختر الطابق" : "Choose floor"}
+          <span aria-hidden="true">↕</span>
+        </button>
         <span className="floor-indicator">
           <i />
           {rtl ? "جولة داخل المبنى" : floor}

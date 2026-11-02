@@ -2,8 +2,11 @@ import {
   electricalCameraKeys,
   electricalDepartureAt,
   sampleElectricalGuide,
+  sampleElectricalCamera,
   electricalPresenting,
   ELECTRICAL_END,
+  inElectricalRearLift,
+  toElectricalRear,
 } from "./electricalTour";
 import { serviceLevel } from "./towerLayout";
 import { Vector3 } from "three";
@@ -61,7 +64,14 @@ for (let i = 0; i < serviceRooms.length; i++) {
   ];
   if (i === 0) {
     for (const key of electricalCameraKeys)
-      shot(key.at, key.camera, key.target, 70);
+      // Keep the departure spline in cabin-local coordinates; sampleJourney
+      // maps it to the rear doorway after interpolation.
+      shot(
+        key.at,
+        key.at === ELECTRICAL_END ? [0, y + 1.7, -0.9] : key.camera,
+        key.at === ELECTRICAL_END ? [0, y + 1.7, -7] : key.target,
+        70,
+      );
   } else {
     shot(at, p, target, 74);
     shot(at + 0.2, [p[0] + room.side * 0.12, p[1], p[2] - 0.12], target, 74);
@@ -160,12 +170,20 @@ export function sampleJourney(
   target: Vector3,
 ) {
   const p = Math.max(0, Math.min(12, progress));
+  if (p >= 2 && p <= ELECTRICAL_END) {
+    sampleElectricalCamera(p, position, target);
+    return 70;
+  }
   let i = 0;
   while (i < frames.length - 2 && p > frames[i + 1].at) i++;
   const t = (p - frames[i].at) / (frames[i + 1].at - frames[i].at);
   for (let axis = 0; axis < 3; axis++) {
     position.setComponent(axis, scalar(i, t, getters.p[axis]));
     target.setComponent(axis, scalar(i, t, getters.target[axis]));
+  }
+  if (inElectricalRearLift(p)) {
+    toElectricalRear(position);
+    toElectricalRear(target);
   }
   return scalar(i, t, getters.fov);
 }
@@ -255,6 +273,10 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   }
   if (p >= 1.9 && p <= 11.53) {
     sampleServiceGuide(p, position, facing);
+    if (inElectricalRearLift(p)) {
+      toElectricalRear(position);
+      toElectricalRear(facing);
+    }
     return;
   }
   if (p <= 0.7) {

@@ -2,10 +2,23 @@ import { create } from "zustand";
 export const useTour = create<{
   progress: number;
   active: number;
+  jumpVersion: number;
+  liftRequest: number;
+  requestLift: () => void;
+  teleport: (progress: number) => void;
   setProgress: (progress: number) => void;
 }>((set) => ({
   progress: 0,
   active: 0,
+  jumpVersion: 0,
+  liftRequest: 0,
+  requestLift: () => set((s) => ({ liftRequest: s.liftRequest + 1 })),
+  teleport: (progress) =>
+    set((s) => ({
+      progress,
+      active: Math.max(0, Math.min(12, Math.floor(progress + 0.1))),
+      jumpVersion: s.jumpVersion + 1,
+    })),
   setProgress: (progress) =>
     set({
       progress,

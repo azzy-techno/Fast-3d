@@ -10,7 +10,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts"; export { electricalDepartureAt } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
+        'export * from "./src/scene/journey.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -27,6 +27,9 @@ try {
     stackLiftFloor,
     stackDoorOpen,
     Vector3,
+    ELECTRICAL_EXIT,
+    inElectricalRearLift,
+    toElectricalRear,
   } = await import(pathToFileURL(file));
   const p = new Vector3(),
     target = new Vector3(),
@@ -46,6 +49,7 @@ try {
       `Degenerate look direction at ${progress}`,
     );
     if (n) {
+      if (progress === ELECTRICAL_EXIT.cut) toElectricalRear(previous);
       maxStep = Math.max(maxStep, p.distanceTo(previous));
       assert(
         p.distanceTo(previous) <
@@ -54,12 +58,15 @@ try {
       );
     }
     if (progress >= 2.84 && progress <= 11.4) {
+      const local = inElectricalRearLift(progress)
+        ? toElectricalRear(p.clone())
+        : p;
       assert(
         p.y > 13.4 && p.y <= 69.01,
         `Camera outside service floor at ${progress}`,
       );
       assert(
-        Math.abs(p.x) < (p.z > -0.45 ? 15.3 : 4.1),
+        Math.abs(local.x) < (local.z > -0.45 ? 15.3 : 4.1),
         `Camera enters equipment envelope at ${progress}`,
       );
       if (Math.abs(Math.abs(p.x) - 2.32) < 0.05 && p.z < -0.45) {
@@ -108,6 +115,7 @@ try {
     hostWorstAt = 0;
   for (let n = 0; n <= 12000; n++) {
     sampleGuide(n / 1000, host, hostTarget);
+    if (n / 1000 === ELECTRICAL_EXIT.cut) toElectricalRear(hostPrevious);
     assert([...host.toArray(), ...hostTarget.toArray()].every(Number.isFinite));
     if (n && host.distanceTo(hostPrevious) > hostMaxStep) {
       hostMaxStep = host.distanceTo(hostPrevious);

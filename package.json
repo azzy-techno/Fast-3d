@@ -54,6 +54,7 @@
     "test:journey": "node scripts/journey-route-test.mjs",
     "test:electrical": "node scripts/electrical-tour-test.mjs",
     "test:electrical:browser": "node scripts/electrical-browser-test.mjs",
-    "test:sound": "node scripts/service-sound-test.mjs"
+    "test:sound": "node scripts/service-sound-test.mjs",
+    "test:lift:browser": "node scripts/lift-browser-test.mjs"
   }
 }

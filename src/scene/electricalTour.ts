@@ -4,6 +4,17 @@ import { Vector3 } from "three";
 
 export const ELECTRICAL_Y = 66;
 export const ELECTRICAL_END = 2.84;
+export const ELECTRICAL_EXIT = { x: -21, z: 58, cut: 2.91 };
+// Two authored floor layouts meet inside a sealed, identically dressed cabin.
+// Camera, guide and cabin change coordinate space together, never in the hall.
+export function inElectricalRearLift(p: number) {
+  return p >= ELECTRICAL_END && p < ELECTRICAL_EXIT.cut;
+}
+export function toElectricalRear(v: Vector3) {
+  v.x = ELECTRICAL_EXIT.x - v.x;
+  v.z = ELECTRICAL_EXIT.z - (v.z + 7);
+  return v;
+}
 // Local equipment surfaces, including the 0.16 m presentation plinth.
 const focusPoints: Point[] = [
   [0, 2.71, 0.56],
@@ -78,11 +89,11 @@ function key(at: number, camera: Point, guide: Point, target?: Point) {
   });
 }
 key(1.94, [0, 1.7, -1], [-2.1, 0, -1.95]);
-key(1.96, [0, 1.7, -1], [-2.1, 0, 3]);
-key(1.98, [0, 1.7, -1], [-2.1, 0, 3]);
+key(1.96, [0, 1.7, -1], [-2.8, 0, 1.3]);
+key(1.98, [0, 1.7, -1], [-2.8, 0, 1.3]);
 // Approach 01 along the entrance aisle and its outside edge. The former
 // central-aisle approach passed 02 before doubling back to the first display.
-key(2, [0, 2.05, -0.9], [-2.1, 0, 3]);
+key(2, [0, 2.05, -3], [-2.8, 0, 1.3], [0, 2.3, 3.8]);
 key(2.014, [-18, 2.2, 1], [-24, 0, 3]);
 key(2.024, [-27, 2.2, 3], [-29, 0, 3]);
 key(2.035, [-27, 2.2, 16], [-29, 0, 11.8]);
@@ -98,11 +109,32 @@ for (const [i, s] of electricalStations.entries()) {
     key(s.end + 0.023, [side * 27, 2.2, s.z + 20], [side * 29, 0, s.z + 15.8]);
   }
 }
-key(2.74, [-27, 2.2, 52], [-29, 0, 47.8]);
-key(2.795, [-27, 2.2, -0.9], [-29, 0, -3]);
-key(2.825, [0, 1.7, -0.9], [1.15, 0, -3]);
-key(ELECTRICAL_END, [0, 1.7, -0.9], [1.15, 0, -3]);
+key(2.75, [-17.2, 2.2, 51], [-22.15, 0, 52], [-21, 2.2, 56.2]);
+key(2.8, [-21, 1.7, 51.9], [-22.15, 0, 54], [-21, 1.7, 58]);
+key(ELECTRICAL_END, [-21, 1.7, 51.9], [-22.15, 0, 54], [-21, 1.7, 58]);
 export const electricalCameraKeys = keys.filter((k) => k.at >= 2);
+export function sampleElectricalCamera(
+  p: number,
+  position: Vector3,
+  target: Vector3,
+) {
+  let i = 0;
+  while (i < keys.length - 2 && p > keys[i + 1].at) i++;
+  const a = keys[i],
+    b = keys[i + 1];
+  const t = Math.max(0, Math.min(1, (p - a.at) / (b.at - a.at)));
+  const u = t * t * (3 - 2 * t);
+  for (let axis = 0; axis < 3; axis++) {
+    position.setComponent(
+      axis,
+      a.camera[axis] + (b.camera[axis] - a.camera[axis]) * u,
+    );
+    target.setComponent(
+      axis,
+      a.target[axis] + (b.target[axis] - a.target[axis]) * u,
+    );
+  }
+}
 export function sampleElectricalGuide(
   p: number,
   position: Vector3,

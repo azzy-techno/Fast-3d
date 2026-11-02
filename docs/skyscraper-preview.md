@@ -31,6 +31,16 @@ The deployment-base TypeScript/Vite build, 12,001-sample journey route checks, a
 
 ## Electrical floor approval preview
 
+### Entrance, destination selection and rear lift (2026-11-02)
+
+Electrical now opens on a nine-metre branded introduction poster facing the arrival lift. The welcome card offers station 01, another service, and the existing full sixteen-capability scope with project images. Phone framing backs into the open entrance cabin so the whole poster fits. The sixteen equipment stations retain their guide stops.
+
+Choose floor opens a keyboard-accessible lift console with the roof, ten service floors and reception. The same destination transition is used by the services menu and floor-plan links. Doors close before the scroll position and camera route are reset; the doors only reopen after the destination frame is ready. Intermediate service floors are not shown. Physical cabin controls also open the selector, and a prompt appears during lift approaches. Visitors can keep scrolling for the continuous story.
+
+The electrical tour now finishes at a second lift beside station 16 at x −21, z 58. The guide proceeds into this rear vestibule instead of returning through the exhibition. The rear cabin has a real slab opening for descent. For continuous scrolling, a sealed-cabin scene cut joins the electrical exhibition and the next authored floor layout: camera, guide and cabin change coordinate space together at progress 2.91. This is a cinematic conceptual exhibition, not a surveyed elevator installation. Route tests check continuity in cabin coordinates at that cut, plus ordinary world-space continuity everywhere else.
+
+Validation includes the production build, 5,301 electrical route samples, 12,001 whole-journey samples and sealed-lift checks. The browser test exercises the introduction, twelve destination buttons, keyboard dismissal/focus return, accessibility, skipped-floor concealment, reverse selection, station 01, the rear exit, cabin transition, mobile layout and the reception shortcut. Run `npm run test:lift:browser`; `LIFT_DETAILS_ONLY=1` limits the rendered check to the introduction, mobile scope and destination controls.
+
 ### Entry and presentation refinement (2026-11-01)
 
 The engineer now approaches station 01 along the entrance aisle and the left perimeter, instead of crossing the central aisle beside station 02 and doubling back. The camera follows him through the turn before framing station 01. All sixteen numbered stops and the return to the lift retain their order. The entry regression checks the first crossing into the exhibit row on the outside of bay 01; full route checks now find at least 1.30 m clearance from electrical exhibit footprints.

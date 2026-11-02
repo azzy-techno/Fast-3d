@@ -7,6 +7,7 @@ import { Wayfinding, Planter } from "./Architecture";
 import { electricalStations, ELECTRICAL_Y } from "./electricalTour";
 import { ElectricalStationModel } from "./ElectricalExhibits";
 import { journeyState } from "./journey";
+import { ElectricalIntro } from "./ElectricalIntro";
 
 /** Dedicated 62 × 64 m exhibition floor. The lift core retains its real slab opening. */
 export function ElectricalFloor() {
@@ -48,7 +49,25 @@ export function ElectricalFloor() {
           <Box key={x} p={[x, 2.7, 21.8]} s={[0.25, 5.4, 64.4]} c="#9fb3b3" />
         ))}
         <Box p={[0, 2.7, -10.4]} s={[62, 5.4, 0.25]} c="#9fb3b3" />
-        <Box p={[0, 2.7, 54]} s={[62, 5.4, 0.25]} c="#b6c4bc" />
+        {/* Rear exit opening beside the final bay; no return to the entrance. */}
+        <Box p={[-27.15, 2.7, 54]} s={[7.7, 5.4, 0.25]} c="#b6c4bc" />
+        <Box p={[6.15, 2.7, 54]} s={[49.7, 5.4, 0.25]} c="#b6c4bc" />
+        <Box p={[-21, 4.65, 54]} s={[4.6, 1.5, 0.25]} c="#b6c4bc" />
+        {/* The cabin travels through a real slab opening, not through a floor. */}
+        <Box p={[-21, -0.16, 55.1]} s={[4.6, 0.32, 2.2]} c="#c0c6bc" />
+        <Box p={[-21, 5.44, 57.2]} s={[4.6, 0.32, 6.4]} c="#bcc7bf" />
+        {[-23.3, -18.7].map((x) => (
+          <Box key={x} p={[x, 2.7, 57.2]} s={[0.2, 5.4, 6.4]} c="#9fb3b3" />
+        ))}
+        <Box p={[-21, 2.7, 60.4]} s={[4.6, 5.4, 0.2]} c="#9fb3b3" />
+        <Wayfinding
+          text="NEXT DESTINATION"
+          sub="EXIT LIFT / CHOOSE YOUR FLOOR"
+          p={[-21, 4.15, 53.8]}
+          rotation={[0, Math.PI, 0]}
+          width={4.3}
+          height={0.8}
+        />
         {/* Sealed shaft, shared with all lower floors. */}
         {[-2.18, 2.18].map((x) => (
           <Box key={x} p={[x, 3, -7]} s={[0.18, 6, 4.6]} c="#879a9b" />
@@ -138,6 +157,7 @@ export function ElectricalFloor() {
           width={18}
         />
       </StaticInstances>
+      <ElectricalIntro />
       {[-29, 29].flatMap((x) =>
         [1, 25, 51].map((z) => (
           <Planter key={`${x}-${z}`} p={[x, 0, z]} scale={0.7} />

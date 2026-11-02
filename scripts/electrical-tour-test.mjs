@@ -23,6 +23,8 @@ const {
   stackDoorOpen,
   Vector3,
   PerspectiveCamera,
+  ELECTRICAL_EXIT,
+  toElectricalRear,
 } = await import(pathToFileURL(out));
 const camera = new Vector3(),
   target = new Vector3(),
@@ -51,7 +53,7 @@ for (const [aspect, extraFov] of [
   [390 / 844, 20],
 ]) {
   const view = new PerspectiveCamera(70, aspect, 0.08, 1000);
-  for (let n = 10000; n <= 10225; n++) {
+  for (let n = 10070; n <= 10225; n++) {
     const p = n / 5000;
     view.fov = sampleJourney(p, camera, target) + extraFov;
     view.position.copy(camera);
@@ -76,7 +78,7 @@ for (let n = 9700; n <= 15000; n++) {
   assert(distance > 1, `Guide/camera overlap ${p}: ${distance}`);
   if (p >= 2 && p <= 2.84) {
     assert(
-      Math.abs(guide.x) < 30.5 && guide.z < 53 && guide.z > -10,
+      Math.abs(guide.x) < 30.5 && guide.z < 54.1 && guide.z > -10,
       `Guide exits hall ${p}`,
     );
     assert(
@@ -99,9 +101,22 @@ for (let n = 9700; n <= 15000; n++) {
         );
       }
   }
+  if (p === ELECTRICAL_EXIT.cut) toElectricalRear(old);
   if (n > 9700)
     assert(camera.distanceTo(old) < 0.8, `Camera discontinuity ${p}`);
   old.copy(camera);
+}
+sampleJourney(2, camera, target);
+assert.equal(target.z, 3.8, "Electrical opens on the introduction poster");
+assert(camera.z < 0 && target.x === 0);
+let lastExitZ = 47.8;
+for (let n = 2718; n <= 2840; n++) {
+  sampleGuide(n / 1000, guide, face);
+  assert(
+    guide.z >= lastExitZ - 1e-7,
+    "Electrical exit must not retrace the gallery",
+  );
+  lastExitZ = guide.z;
 }
 for (const s of electricalStations) {
   sampleGuide(s.at + 0.001, guide, face);

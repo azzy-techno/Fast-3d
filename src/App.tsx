@@ -1,4 +1,6 @@
 import { ElectricalTour } from "./components/ElectricalTour";
+import { ElectricalWelcome } from "./components/ElectricalWelcome";
+import { LiftNavigator, LiftPrompt } from "./components/LiftNavigator";
 import { ElectricalScope } from "./components/ElectricalScope";
 import {
   Component,
@@ -66,6 +68,9 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(0);
   const [menu, setMenu] = useState(false);
+  const [liftOpen, setLiftOpen] = useState(false);
+  const [liftDestination, setLiftDestination] = useState<string | null>(null);
+  const liftRequest = useTour((s) => s.liftRequest);
   const [sound, setSound] = useState(false);
   const [failed, setFailed] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -83,6 +88,17 @@ export default function App() {
     setReady(true);
   }, []);
   const loading = !list && (!ready || loaded < 3);
+  const openLift = () => {
+    setMenu(false);
+    setLiftDestination(null);
+    setLiftOpen(true);
+  };
+  useEffect(() => {
+    if (liftRequest) openLift();
+  }, [liftRequest]);
+  useEffect(() => {
+    if (list) setLiftOpen(false);
+  }, [list]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,14 +148,14 @@ export default function App() {
     };
   }, [list, reduced]);
   useEffect(() => {
-    if (menu || loading) lenis.current?.stop();
+    if (menu || loading || liftOpen) lenis.current?.stop();
     else lenis.current?.start();
     const previous = document.body.style.overflow;
-    if (menu || loading) document.body.style.overflow = "hidden";
+    if (menu || loading || liftOpen) document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [menu, loading, list]);
+  }, [menu, loading, list, liftOpen]);
   useEffect(() => {
     if (menu && !dialog.current?.open) dialog.current?.showModal();
     if (!menu && dialog.current?.open) dialog.current?.close();
@@ -258,6 +274,11 @@ export default function App() {
   };
   const jump = (id: string) => {
     setMenu(false);
+    if (!list && !loading && chapters.some((c) => c.id === id)) {
+      setLiftDestination(id);
+      setLiftOpen(true);
+      return;
+    }
     const target = document.getElementById(id);
     if (!target) return;
     const y = Math.max(0, target.offsetTop);
@@ -266,6 +287,19 @@ export default function App() {
       lenis.current.scrollTo(y, { duration: 2.2, force: true });
     } else
       window.scrollTo({ top: y, behavior: reduced ? "instant" : "smooth" });
+  };
+  const scrollToProgress = (at: number, immediate = false) => {
+    const i = Math.min(11, Math.floor(at));
+    const a = document.getElementById(destinations[i])!.offsetTop;
+    const b =
+      i === 11
+        ? document.documentElement.scrollHeight - innerHeight
+        : document.getElementById(destinations[i + 1])!.offsetTop;
+    const y = a + (b - a) * (at - i);
+    if (lenis.current)
+      lenis.current.scrollTo(y, { immediate, force: true, duration: 1.8 });
+    else window.scrollTo({ top: y, behavior: "instant" });
+    if (immediate) useTour.getState().teleport(at);
   };
   const toggleView = () => {
     if (list) setReady(false);
@@ -299,21 +333,19 @@ export default function App() {
       <div className="scene-scrim" aria-hidden="true" />
       {!list && !loading && (
         <>
-          <ElectricalTour
+          <ElectricalWelcome
             rtl={rtl}
-            onSelect={(at) => {
-              const start = document.getElementById("electrical")!.offsetTop;
-              const end = document.getElementById("mechanical")!.offsetTop;
-              const y = start + (end - start) * (at - 2);
-              if (lenis.current) lenis.current.scrollTo(y, { duration: 1.8 });
-              else window.scrollTo({ top: y, behavior: "auto" });
-            }}
+            onEnter={() => scrollToProgress(2.05)}
+            onLift={openLift}
           />
+          <LiftPrompt rtl={rtl} onOpen={openLift} />
+          <ElectricalTour rtl={rtl} onSelect={scrollToProgress} />
           <JourneyGuide
             rtl={rtl}
             jump={jump}
             cinematic={cinematic}
             setCinematic={setCinematic}
+            openLift={openLift}
           />
         </>
       )}
@@ -488,7 +520,9 @@ export default function App() {
                   </a>
                 </details>
               )}
-              {chapter.id === "electrical" && <ElectricalScope rtl={rtl} />}
+              {chapter.id === "electrical" && list && (
+                <ElectricalScope rtl={rtl} />
+              )}
               <a className="service-link" href={chapter.href}>
                 {t("Explore this service", "استكشف هذه الخدمة")}
                 {arrow}
@@ -721,6 +755,16 @@ export default function App() {
           </a>
         </div>
       </dialog>
+      <LiftNavigator
+        open={liftOpen}
+        initialDestination={liftDestination}
+        rtl={rtl}
+        onClose={() => {
+          setLiftOpen(false);
+          setLiftDestination(null);
+        }}
+        onArrive={(at) => scrollToProgress(at, true)}
+      />
 
       <AnimatePresence>
         {loading && (
