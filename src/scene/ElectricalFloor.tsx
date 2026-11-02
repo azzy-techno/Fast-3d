@@ -8,6 +8,7 @@ import { electricalStations, ELECTRICAL_Y } from "./electricalTour";
 import { ElectricalStationModel } from "./ElectricalExhibits";
 import { journeyState } from "./journey";
 import { ElectricalIntro } from "./ElectricalIntro";
+import { ElectricalInterior } from "./ElectricalInterior";
 
 /** Dedicated 62 × 64 m exhibition floor. The lift core retains its real slab opening. */
 export function ElectricalFloor() {
@@ -31,7 +32,7 @@ export function ElectricalFloor() {
             <Box
               p={[0, y - 0.16, 24.65]}
               s={[62, 0.32, 58.7]}
-              c={y ? "#bcc7bf" : "#c0c6bc"}
+              c={y ? "#293b43" : "#b9b09d"}
               metal={0.12}
             />
             {[-16.65, 16.65].map((x) => (
@@ -46,9 +47,9 @@ export function ElectricalFloor() {
           </group>
         ))}
         {[-31, 31].map((x) => (
-          <Box key={x} p={[x, 2.7, 21.8]} s={[0.25, 5.4, 64.4]} c="#9fb3b3" />
+          <Box key={x} p={[x, 2.7, 21.8]} s={[0.25, 5.4, 64.4]} c="#c9c2b2" />
         ))}
-        <Box p={[0, 2.7, -10.4]} s={[62, 5.4, 0.25]} c="#9fb3b3" />
+        <Box p={[0, 2.7, -10.4]} s={[62, 5.4, 0.25]} c="#c9c2b2" />
         {/* Rear exit opening beside the final bay; no return to the entrance. */}
         <Box p={[-27.15, 2.7, 54]} s={[7.7, 5.4, 0.25]} c="#b6c4bc" />
         <Box p={[6.15, 2.7, 54]} s={[49.7, 5.4, 0.25]} c="#b6c4bc" />
@@ -77,10 +78,9 @@ export function ElectricalFloor() {
         {[-2, 2].map((x) => (
           <Box key={x} p={[x, 1.65, -4.8]} s={[0.5, 3.3, 0.18]} c="#a7b4b2" />
         ))}
-        {/* Full-width light ribbons, generous peripheral aisles and central promenade. */}
+        {/* Floor inlays mark the cross aisles and central promenade. */}
         {[3, 15, 27, 39, 51].map((z) => (
           <group key={z}>
-            <Box p={[0, 5.38, z]} s={[57, 0.05, 0.16]} c="#e4d7b7" glow />
             <Box p={[0, 0.018, z + 1]} s={[57, 0.015, 0.04]} c="#ba9d60" />
           </group>
         ))}
@@ -145,18 +145,15 @@ export function ElectricalFloor() {
           </group>
         ))}
         <Wayfinding
-          text="11 / THE ELECTRICAL EXHIBITION"
-          sub="16 CAPABILITIES / FOLLOW YOUR FAST ENGINEER"
-          p={[10, 4.1, -9.9]}
-          width={12}
-        />
-        <Wayfinding
           text="CONTRACTING / AUTOMATION / LV + ELV"
           sub="FAST O&M / ENGINEERING FLOORS"
           p={[0, 3, 53.7]}
+          rotation={[0, Math.PI, 0]}
           width={18}
+          height={1.3}
         />
       </StaticInstances>
+      <ElectricalInterior />
       <ElectricalIntro />
       {[-29, 29].flatMap((x) =>
         [1, 25, 51].map((z) => (

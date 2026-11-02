@@ -145,18 +145,25 @@ function World({
       );
       cam.updateProjectionMatrix();
     }
-    if (sun.current) sun.current.intensity = 2.6 * outside + 0.8 * inside;
+    const electricalLight =
+      Math.min(1, Math.max(0, (p - 1.96) / 0.04)) *
+      (1 - Math.min(1, Math.max(0, (p - 2.8) / 0.06)));
+    if (sun.current)
+      sun.current.intensity =
+        2.6 * outside + (0.8 - electricalLight * 0.4) * inside;
     if (ambient.current)
-      ambient.current.intensity = 0.36 * outside + 0.38 * inside;
+      ambient.current.intensity =
+        0.36 * outside + (0.38 - electricalLight * 0.15) * inside;
     if (hemisphere.current)
-      hemisphere.current.intensity = 0.85 * outside + 0.75 * inside;
+      hemisphere.current.intensity =
+        0.85 * outside + (0.75 - electricalLight * 0.2) * inside;
     if (localLight.current) {
       localLight.current.position.set(
         vectors.p.x,
         vectors.p.y + 1,
         vectors.p.z + 1,
       );
-      localLight.current.intensity = 32 * inside;
+      localLight.current.intensity = (32 - electricalLight * 10) * inside;
       localLight.current.target.position.set(
         vectors.target.x,
         vectors.target.y - 1.1,

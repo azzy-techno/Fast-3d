@@ -31,6 +31,18 @@ The deployment-base TypeScript/Vite build, 12,001-sample journey route checks, a
 
 ## Electrical floor approval preview
 
+### Complete interior fit-out (2026-11-02)
+
+The electrical floor now has a coordinated interior rather than a bare exhibition shell. Sixteen acoustic ceiling clouds have recessed perimeter lighting, downlights and supply diffusers. Duct spines, flanged joints, hangers, ladder cable trays, cable bundles and sprinkler branches occupy the ceiling void and leave the walking lanes clear. An acoustic timber canopy frames the introduction; the rear lift vestibule has continuous wall and ceiling finishes. Wall-side benches stay outside the guide's outer lane, beneath framed FAST project portfolio photographs.
+
+Limestone flooring, travertine wall panels and perforated acoustic surfaces use original, deterministic 512 px colour, normal and roughness maps. The nine compressed maps total roughly 220 KB and have no third-party material dependency; regenerate them with `node scripts/generate-electrical-materials.mjs`. Floor surfaces preserve both real lift shaft openings. Dark skirtings, warm metal inlays, wall fins, equipment pads and side lecterns establish a consistent visual hierarchy without restoring the solid walls behind individual exhibits.
+
+Equipment now includes bevelled painted housings, hinges, fasteners, controls, cable entries, bench drawers, an open maintenance cabinet and transformer fittings. The fan has a radial protective guard and a slowly turning demonstration rotor; reduced-motion preferences disable that rotation. The animated rotor opts out of static instancing.
+
+Repeated architectural parts and equipment fittings are instanced. Two additional spotlights follow the active bay with damped motion; only one adds a shadow map. Electrical-specific ambient/fill adjustments blend at the floor's entrance and exit. This is authored browser 3D, not a claim of game-engine ray-traced rendering or an as-built building model.
+
+Validation: the production build, 5,301 electrical route samples, 12,001 whole-journey samples, lift/traffic checks and the sixteen-stop browser walkthrough pass. The browser checks live presentation gestures, pointing at each exhibit, Next/Previous/direct selection, phone layout, WCAG A/AA and rear-lift departure. Rendered desktop and phone captures review the new finishes and ceiling. Repeated geometry is batched and the new materials add roughly 220 KB of downloads; software-rendered checks do not establish hardware frame rates.
+
 ### Entrance, destination selection and rear lift (2026-11-02)
 
 Electrical now opens on a nine-metre branded introduction poster facing the arrival lift. The welcome card offers station 01, another service, and the existing full sixteen-capability scope with project images. Phone framing backs into the open entrance cabin so the whole poster fits. The sixteen equipment stations retain their guide stops.
