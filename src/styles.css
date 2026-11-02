@@ -2215,6 +2215,14 @@ footer p,
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.electrical-welcome .scope-categories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.electrical-welcome .scope-categories button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .electrical-welcome h2 {
   font-size: 23px;
   line-height: 1.25;
