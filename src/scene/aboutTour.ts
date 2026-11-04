@@ -44,7 +44,7 @@ export const aboutItems: {
     note: r.detail || "Supplier portal registration",
     noteAr: r.arDetail || "تسجيل في بوابة الموردين",
     panel: "approvals" as const,
-    image: "fast-logo.png",
+    image: r.logo,
   })),
   ...partners.map((p) => ({
     title: p.name,

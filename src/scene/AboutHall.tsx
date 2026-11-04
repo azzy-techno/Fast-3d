@@ -315,7 +315,7 @@ function HallDisplay({
           height={0.65}
         />
         <Box p={[0, 0.09, 0.2]} s={[5.35, 0.18, 1.5]} c="#53696a" />
-        {isPartner && (
+        {!isCert && (
           <Box p={[0, 3.1, 0.12]} s={[4, 2.05, 0.06]} c="#f3f5ee" metal={0} />
         )}
       </StaticInstances>
@@ -342,10 +342,7 @@ function HallDisplay({
           />
         </group>
       )}
-      <mesh
-        position={[0, isCert ? 2.65 : isPartner ? 3.1 : 3.3, 0.18]}
-        onClick={open}
-      >
+      <mesh position={[0, isCert ? 2.65 : 3.1, 0.18]} onClick={open}>
         <planeGeometry args={[w, h]} />
         <meshBasicMaterial map={image} toneMapped={false} />
       </mesh>

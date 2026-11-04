@@ -409,6 +409,14 @@ export function AboutProjection({ rtl }: { rtl: boolean }) {
                       <span className="registration-index">
                         {String(i + 1).padStart(2, "0")}
                       </span>
+                      <img
+                        className="registration-logo"
+                        src={assetUrl(r.logo)}
+                        alt=""
+                        width="160"
+                        height="72"
+                        loading="lazy"
+                      />
                       <h4>{rtl ? r.ar : r.name}</h4>
                       <p>
                         {rtl

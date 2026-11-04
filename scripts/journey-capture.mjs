@@ -251,6 +251,9 @@ try {
   await capture(1.88, "service-lift-descent");
   await capture(1.53, "workplace-entry");
   await capture(1.535, "about-gallery");
+  await capture(1.53, "about-hologram");
+  await capture(1.57515, "about-aramco");
+  await capture(1.5804, "about-saudi-energy");
   await capture(1.65, "offices");
   await capture(1.74, "office-corridor");
   await capture(1.94, "systems-entry");

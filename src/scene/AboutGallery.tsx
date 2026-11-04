@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
 import {
   AdditiveBlending,
   CanvasTexture,
@@ -13,22 +12,16 @@ import {
 import { Box, Cylinder } from "./Primitives";
 import { Wayfinding } from "./Architecture";
 import { StaticInstances } from "./StaticInstances";
-import { assetUrl } from "../lib/assets";
 import { useTour } from "../store";
-import { aboutTabs, certifications, partners } from "../data/about";
+import { aboutTabs, partners } from "../data/about";
 import { journeyState } from "./journey";
 
 /** Executive gallery at level 12. All fittings stay outside the existing lift/guide lanes. */
 export function AboutGallery() {
-  const certs = useTexture(
-    certifications.map((c) =>
-      assetUrl(`about/certificates/iso-${c.code}.webp`),
-    ),
-  );
   return (
     <group position={[0, 16, 0]} name="about-fast-gallery">
       <StaticInstances>
-        {/* Warm stone and bronze backdrop to the certificate collection. */}
+        {/* Quiet stone and bronze backdrop keeps the hologram readable. */}
         <Box
           p={[6.4, 2.35, -10.18]}
           s={[9.9, 4.7, 0.14]}
@@ -43,42 +36,6 @@ export function AboutGallery() {
             c="#6e523b"
             metal={0.05}
           />
-        ))}
-        <Wayfinding
-          text="QUALITY. SAFETY. RESPONSIBILITY."
-          sub="FAST / CERTIFIED MANAGEMENT SYSTEMS"
-          p={[6.4, 4.08, -9.94]}
-          width={8}
-          height={0.7}
-        />
-        {certifications.map((c, i) => (
-          <group key={c.code} position={[3.7 + i * 2.7, 2.35, -9.96]}>
-            <Box s={[2.14, 2.96, 0.13]} c="#aa8753" metal={0.7} />
-            <Box
-              p={[0, 0, 0.08]}
-              s={[2.02, 2.84, 0.03]}
-              c="#f1ece0"
-              metal={0.05}
-            />
-            <mesh position={[0, 0.02, 0.105]}>
-              <planeGeometry args={[1.86, 2.63]} />
-              <meshBasicMaterial map={certs[i]} toneMapped={false} />
-            </mesh>
-            <Wayfinding
-              text={`ISO ${c.code}:${c.edition}`}
-              sub="FAST OPERATIONS & MAINTENANCE"
-              p={[0, -1.7, 0.11]}
-              width={2.1}
-              height={0.35}
-            />
-            <Box
-              p={[0, 1.63, 0.2]}
-              s={[2.3, 0.065, 0.38]}
-              c="#ad8f62"
-              metal={0.65}
-            />
-            <Box p={[0, 1.58, 0.25]} s={[2.15, 0.025, 0.28]} c="#ffe6b9" glow />
-          </group>
         ))}
         {/* Broad coffer and timber ceiling bays leave both lift openings unobstructed. */}
         <Box p={[6, 4.65, 0.3]} s={[6, 0.12, 5.6]} c="#2b383a" />

@@ -20,3 +20,8 @@ credential PDFs, retrieved 2026-11-04:
 https://fast-arabia.com/assets/downloads/FAST-OandM-LCGPA-Local-Content-Certificate.pdf?v=20261101
 https://fast-arabia.com/assets/downloads/FAST-OandM-Civil-Defense-Activity-License.pdf?v=20261101
 The full documents remain linked at their public source.
+
+Approvals / supplier registrations — updated 4 November 2026
+Source: user-supplied FAST_OM_2026_SA.pdf, physical page 5, Selected Supplier Portal Registrations.
+The 15 organization logo marks were extracted from that page, preserving their original colors and proportions: Saudi Aramco, Saudi Energy (SEC), Ma’aden, Hadeed, Petro Rabigh, Siemens Energy, SAP, L&T, EnergyTech, KFUPM, Savola, AMANA, Aujan, Tenaris and Petronash.
+Files: about/registrations/*.png. These marks identify the listed organizations; the relationship labels remain those documented by FAST.
