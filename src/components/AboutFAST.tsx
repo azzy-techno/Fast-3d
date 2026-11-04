@@ -34,7 +34,7 @@ export function AboutWelcome({
   onOpen: (panel: AboutPanel) => void;
   onContinue: () => void;
 }) {
-  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.735);
+  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.546);
   if (!visible) return null;
   return (
     <aside
@@ -71,9 +71,7 @@ export function AboutWelcome({
         ))}
       </div>
       <button className="about-continue" onClick={onContinue}>
-        {rtl
-          ? "متابعة إلى طوابق الخدمات"
-          : "Continue to the engineering floors"}{" "}
+        {rtl ? "ابدأ الجولة مع مهندس فاست" : "Start the guided presentation"}{" "}
         <span aria-hidden="true">↓</span>
       </button>
     </aside>
@@ -86,7 +84,8 @@ export function AboutProjection({ rtl }: { rtl: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null),
     body = useRef<HTMLDivElement>(null),
     opener = useRef<HTMLElement | null>(null);
-  const [selected, setSelected] = useState(partners[0].id);
+  const selected = useTour((s) => s.aboutPartner),
+    setSelected = useTour((s) => s.setAboutPartner);
   const [filter, setFilter] = useState("");
   const t = (en: string, ar: string) => (rtl ? ar : en);
   useEffect(() => {

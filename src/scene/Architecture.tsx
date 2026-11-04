@@ -1,3 +1,4 @@
+import { AboutHall } from "./AboutHall";
 import { ServiceFloors } from "./ServiceFloors";
 import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
 import { liftDoorOpen } from "./travelMotion";
@@ -20,13 +21,12 @@ import {
   SRGBColorSpace,
   Vector3,
 } from "three";
-import { Box, Cylinder, Screen } from "./Primitives";
+import { Box, Cylinder } from "./Primitives";
 import { assetUrl } from "../lib/assets";
 import { type Point } from "../data/chapters";
 import { journeyState } from "./journey";
 import { StaticInstances } from "./StaticInstances";
 import { AboutGallery } from "./AboutGallery";
-import { InteriorFloor } from "./InteriorFloor";
 
 export type Part = { p: Point; s: Point; c?: string; r?: Point };
 export function ArchitectureBatch({
@@ -194,126 +194,6 @@ export function Planter({ p, scale = 1 }: { p: Point; scale?: number }) {
     </group>
   );
 }
-function Desk({ p, rotation = 0 }: { p: Point; rotation?: number }) {
-  return (
-    <group position={p} rotation={[0, rotation, 0]}>
-      <Box p={[0, 0.78, 0]} s={[2.5, 0.08, 1.15]} c="#b7a386" metal={0} />
-      {[-1.05, 1.05].map((x) => (
-        <Box key={x} p={[x, 0.38, 0]} s={[0.06, 0.76, 0.85]} c="#36454a" />
-      ))}
-      <Screen p={[0, 1.25, -0.28]} s={[0.85, 0.49, 0.035]} color="#b1d6ca" />
-      <Box p={[0, 0.93, -0.29]} s={[0.04, 0.3, 0.04]} c="#263b42" />
-      <Box p={[0, 0.85, 0.1]} s={[0.55, 0.025, 0.2]} c="#33454a" />
-      <Box p={[0.8, 0.85, 0.15]} s={[0.28, 0.035, 0.38]} c="#e9e3d4" />
-      <Cylinder
-        p={[-0.8, 0.9, 0.1]}
-        radius={0.07}
-        height={0.14}
-        c="#e4dfce"
-        metal={0}
-      />
-      <Box p={[0, 0.45, 0.85]} s={[0.6, 0.1, 0.6]} c="#405655" />
-      <Box p={[0, 0.83, 1.14]} s={[0.6, 0.75, 0.07]} c="#405655" />
-      <Cylinder p={[0, 0.23, 0.85]} radius={0.035} height={0.45} c="#667277" />
-      <Box p={[0, 0.06, 0.85]} s={[0.65, 0.07, 0.07]} c="#36454a" />
-      <Box p={[0, 0.06, 0.85]} s={[0.07, 0.07, 0.65]} c="#36454a" />
-    </group>
-  );
-}
-function Glass({
-  p,
-  s,
-  rotation = 0,
-}: {
-  p: Point;
-  s: [number, number];
-  rotation?: number;
-}) {
-  return (
-    <mesh position={p} rotation={[0, rotation, 0]}>
-      <planeGeometry args={s} />
-      <meshStandardMaterial
-        color="#b7d9d7"
-        metalness={0.2}
-        roughness={0.2}
-        transparent
-        opacity={0.1}
-        depthWrite={false}
-        side={2}
-      />
-    </mesh>
-  );
-}
-function OfficeFloor() {
-  const structure = useMemo(() => {
-    const solid: Part[] = [
-      { p: [0, 18.4, -10.4], s: [31.5, 4.8, 0.2], c: "#b8b8ad" },
-      { p: [-15.6, 18.4, -1], s: [0.2, 4.8, 19], c: "#d4d2c7" },
-      { p: [15.6, 18.4, -1], s: [0.2, 4.8, 19], c: "#d4d2c7" },
-      { p: [-3.5, 20.8, -1], s: [24, 0.2, 19], c: "#e4e0d7" },
-      { p: [14.5, 20.8, -1], s: [2, 0.2, 19], c: "#e4e0d7" },
-      { p: [11, 20.8, 3], s: [5, 0.2, 11], c: "#e4e0d7" },
-      { p: [11, 20.8, -9], s: [5, 0.2, 3], c: "#e4e0d7" },
-    ];
-    // Slabs leave an actual opening for the descending service lift.
-    for (let x = -15; x <= 15; x++)
-      for (let z = -10; z <= 8; z++) {
-        const serviceShaft = Math.abs(x) < 2.5 && Math.abs(z + 7) < 2.5;
-        if (!serviceShaft)
-          solid.push({ p: [x, 15.85, z], s: [1, 0.3, 1], c: "#b5ada0" });
-      }
-    const trim: Part[] = [],
-      lights: Part[] = [],
-      wood: Part[] = [];
-    for (const x of [-2.5, 2.5])
-      for (const z of [-8, -4, 0, 3]) {
-        trim.push({ p: [x, 18.35, z], s: [0.045, 4.7, 0.045] });
-        trim.push({ p: [x, 16.2, z - 1.5], s: [0.06, 0.1, 3] });
-        trim.push({ p: [x, 20.65, z - 1.5], s: [0.06, 0.1, 3] });
-      }
-    for (const x of [-10, -5, 0, 6, 11])
-      lights.push({ p: [x, 20.64, -1], s: [0.08, 0.04, 15] });
-    for (let x = -13; x < -4; x += 0.24)
-      wood.push({ p: [x, 18.3, -9.9], s: [0.1, 4.6, 0.18] });
-    for (let x = -15; x <= 15; x += 2.5)
-      trim.push({ p: [x, 18.4, 8.4], s: [0.06, 4.8, 0.1] });
-    return { solid, trim, lights, wood };
-  }, []);
-  return (
-    <group name="furnished-office-floor">
-      <InteriorFloor office />
-      <ArchitectureBatch items={structure.solid} />
-      <ArchitectureBatch items={structure.trim} color="#747c76" metal={0.3} />
-      <ArchitectureBatch items={structure.lights} color="#ffebcb" glow />
-      <ArchitectureBatch items={structure.wood} color="#92775a" />
-      <Glass p={[-2.5, 18.3, -3.5]} s={[12, 4.6]} rotation={Math.PI / 2} />
-      <Glass p={[2.5, 18.3, -3.5]} s={[12, 4.6]} rotation={Math.PI / 2} />
-      <Glass p={[0, 18.4, 8.4]} s={[31, 4.8]} />
-      {[-12, -8, -4.5].flatMap((x) =>
-        [-6, -1].map((z) => <Desk key={`${x}-${z}`} p={[x, 16, z]} />),
-      )}
-      <ImportedFurniture kind="sofa" p={[-8, 16, 6.7]} rotation={Math.PI} />
-      <ImportedFurniture kind="chair" p={[-5.5, 16, 5.6]} rotation={-0.5} />
-      <Box p={[-8, 16.35, 4.7]} s={[1.6, 0.12, 0.8]} c="#a38a68" />
-      <Cylinder p={[-8, 16.16, 4.7]} radius={0.27} height={0.3} c="#5f6866" />
-      <Wayfinding
-        text="SYSTEMS GALLERY ↓"
-        sub="LEVEL 11 / SERVICE LIFT"
-        p={[0, 19.3, -10.25]}
-        width={3.4}
-      />
-      {[
-        [-13.5, 16, 6],
-        [3.5, 16, 6],
-        [13, 16, 6],
-        [-14, 16, -8],
-      ].map((p, i) => (
-        <Planter key={i} p={p as Point} scale={1.2} />
-      ))}
-    </group>
-  );
-}
-
 export function Lift({
   p,
   roof = false,
@@ -498,9 +378,7 @@ export function Interior() {
   return (
     <group name="connected-building-interior">
       <group ref={office} position={[0, 60, 0]}>
-        <StaticInstances>
-          <OfficeFloor />
-        </StaticInstances>
+        <AboutHall />
         <AboutGallery />
         <Lift p={[11, 16, -5]} roof elevation={60} />
         <Lift p={[0, 16, -7]} elevation={60} />

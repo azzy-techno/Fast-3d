@@ -53,7 +53,7 @@ export function JourneyGuide({
       const local = p % 1;
       const visible =
         (p > 1.22 && p < 1.51) ||
-        (p >= 1.735 && p < 1.96) ||
+        (p >= 1.74 && p < 1.96) ||
         (p > 11.4 && p < 11.94) ||
         (p >= 3 && p < 11.5 && local > 0.38 && local < 0.84) ||
         (p > 2.84 && p < 2.97);

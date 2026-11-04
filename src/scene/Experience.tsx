@@ -1,3 +1,4 @@
+import { aboutStationAt } from "./aboutTour";
 import { electricalStationAt } from "./electricalTour";
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -188,6 +189,7 @@ function World({
     gl.domElement.dataset.journey = p.toFixed(4);
     gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
     gl.domElement.dataset.towerHeight = "83";
+    gl.domElement.dataset.aboutStation = String(aboutStationAt(p)?.number ?? 0);
     gl.domElement.dataset.electricalStation = String(
       electricalStationAt(p)?.number ?? 0,
     );

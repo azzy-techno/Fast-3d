@@ -1,4 +1,11 @@
 import {
+  ABOUT_START,
+  ABOUT_END,
+  sampleAboutCamera,
+  sampleAboutGuide,
+  aboutPresenting,
+} from "./aboutTour";
+import {
   electricalCameraKeys,
   electricalDepartureAt,
   sampleElectricalGuide,
@@ -171,6 +178,10 @@ export function sampleJourney(
   target: Vector3,
 ) {
   const p = Math.max(0, Math.min(12, progress));
+  if (p >= ABOUT_START && p <= ABOUT_END) {
+    sampleAboutCamera(p, position, target);
+    return 64;
+  }
   if (p >= 2 && p <= ELECTRICAL_END) {
     sampleElectricalCamera(p, position, target);
     return 70;
@@ -268,6 +279,10 @@ export function routeDistance(p: number) {
   return arc[i] + (arc[Math.min(12000, i + 1)] - arc[i]) * (n - i);
 }
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
+  if (p >= ABOUT_START && p <= ABOUT_END) {
+    sampleAboutGuide(p, position, facing);
+    return;
+  }
   if (p >= 1.94 && p <= ELECTRICAL_END) {
     sampleElectricalGuide(p, position, facing);
     return;
@@ -335,7 +350,7 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }
   if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
-  if (p >= 1.56 && p <= 1.6) facing.set(5.3, 78, -3.7);
+
   if (p < 0.86)
     position.lerp(new Vector3(8, 83, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
 }
@@ -432,7 +447,7 @@ function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
 }
 
 export function guideIsPresenting(p: number) {
-  if (p >= 1.56 && p <= 1.6) return true;
+  if (p >= ABOUT_START && p <= ABOUT_END) return aboutPresenting(p);
   if (p >= 1.94 && p < ELECTRICAL_END) return electricalPresenting(p);
   if (p >= 0.86 && p <= 1.14) return true;
   const at = Math.round(p);

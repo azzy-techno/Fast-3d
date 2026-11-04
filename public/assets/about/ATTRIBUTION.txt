@@ -14,3 +14,9 @@ ISO 9001:2015 / CN-QMS-15252924
 ISO 14001:2015 / CN-EMS-15252925
 ISO 45001:2018 / CN-OH&SMS-15252926
 Printed expiry for each: 26 October 2027.
+
+Expanded hall: LCGPA and Civil Defense Salamah previews rendered from FAST's public
+credential PDFs, retrieved 2026-11-04:
+https://fast-arabia.com/assets/downloads/FAST-OandM-LCGPA-Local-Content-Certificate.pdf?v=20261101
+https://fast-arabia.com/assets/downloads/FAST-OandM-Civil-Defense-Activity-License.pdf?v=20261101
+The full documents remain linked at their public source.

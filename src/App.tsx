@@ -1,3 +1,11 @@
+import { Fragment } from "react";
+import {
+  journeyScrollStops,
+  progressAtScroll,
+  scrollAtProgress,
+  type ScrollStop,
+} from "./lib/journeyScroll";
+import { AboutTour } from "./components/AboutTour";
 import {
   AboutWelcome,
   AboutProjection,
@@ -174,31 +182,21 @@ export default function App() {
 
   useGSAP(
     () => {
-      let stops: number[] = [];
+      let stops: ScrollStop[] = [];
       const copies = Array.from(
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
       );
       const measure = () => {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        stops = destinations.map((id, i) =>
-          i === 12
-            ? max
-            : Math.max(0, document.getElementById(id)?.offsetTop ?? 0),
-        );
+        stops = journeyScrollStops();
       };
       const update = () => {
         if (!stops.length) return;
         const y = window.scrollY;
-        let i = 0;
-        while (i < stops.length - 2 && y >= stops[i + 1]) i++;
-        const fraction = Math.max(
-          0,
-          Math.min(1, (y - stops[i]) / Math.max(1, stops[i + 1] - stops[i])),
-        );
-        useTour.getState().setProgress(Math.min(12, i + fraction));
+        const progress = progressAtScroll(y, stops);
+        useTour.getState().setProgress(progress);
         if (!list)
           copies.forEach((copy, index) => {
-            const local = i + fraction - (index + 1);
+            const local = progress - (index + 1);
             const opacity =
               index === 1 && local >= 0
                 ? Math.max(0, Math.min(1, (0.035 - local) / 0.012))
@@ -304,13 +302,7 @@ export default function App() {
       window.scrollTo({ top: y, behavior: reduced ? "instant" : "smooth" });
   };
   const scrollToProgress = (at: number, immediate = false) => {
-    const i = Math.min(11, Math.floor(at));
-    const a = document.getElementById(destinations[i])!.offsetTop;
-    const b =
-      i === 11
-        ? document.documentElement.scrollHeight - innerHeight
-        : document.getElementById(destinations[i + 1])!.offsetTop;
-    const y = a + (b - a) * (at - i);
+    const y = scrollAtProgress(at);
     if (lenis.current)
       lenis.current.scrollTo(y, { immediate, force: true, duration: 1.8 });
     else window.scrollTo({ top: y, behavior: "instant" });
@@ -362,8 +354,9 @@ export default function App() {
           <AboutWelcome
             rtl={rtl}
             onOpen={showAbout}
-            onContinue={() => scrollToProgress(1.79)}
+            onContinue={() => scrollToProgress(1.5489)}
           />
+          <AboutTour rtl={rtl} onSelect={scrollToProgress} onOpen={showAbout} />
           <ElectricalWelcome
             rtl={rtl}
             onEnter={() => scrollToProgress(2.05)}
@@ -497,90 +490,110 @@ export default function App() {
 
         {list && <AboutList rtl={rtl} onOpen={showAbout} />}
         {chapters.map((chapter, i) => (
-          <section
-            className="chapter"
-            id={chapter.id}
-            key={chapter.id}
-            aria-labelledby={`${chapter.id}-title`}
-            data-chapter={i + 1}
-            style={{ "--chapter-color": chapter.color } as React.CSSProperties}
-          >
-            <div className="chapter-copy">
-              <p className="chapter-kicker">
-                {t("THE CONNECTED BUILDING", "المبنى المترابط")}
-                <span>{String(i + 1).padStart(2, "0")} / 11</span>
-              </p>
-              <h2 id={`${chapter.id}-title`}>
-                <a href={chapter.href}>
-                  {rtl ? chapter.ar : chapter.title}
-                  <span className="heading-arrow">{arrow}</span>
-                </a>
-              </h2>
-              <p className="chapter-place">
-                <span />
-                {rtl ? chapter.placeAr : chapter.place}
-              </p>
-              <p className="chapter-description">
-                {rtl ? chapter.descriptionAr : chapter.description}
-              </p>
-              {!rtl && (
-                <ul
-                  className="capabilities"
-                  aria-label={`${chapter.title} capabilities`}
-                >
-                  {chapter.capabilities.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-              {chapter.id === "cooling" && (
-                <details className="roof-scope">
-                  <summary>{t("Inside this service", "تفاصيل الخدمة")}</summary>
-                  <p>
-                    {t(
-                      "Survey → engineering & design → installation or retrofit → testing and handover.",
-                      "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
-                    )}
-                  </p>
-                  <p>
-                    {t(
-                      "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
-                      "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
-                    )}
-                  </p>
-                  <a href="https://fast-arabia.com/services/mechanical">
-                    {t(
-                      "Project references & full scope ↗",
-                      "المشاريع ونطاق العمل الكامل ↗",
-                    )}
+          <Fragment key={chapter.id}>
+            <section
+              className="chapter"
+              id={chapter.id}
+              key={chapter.id}
+              aria-labelledby={`${chapter.id}-title`}
+              data-chapter={i + 1}
+              style={
+                { "--chapter-color": chapter.color } as React.CSSProperties
+              }
+            >
+              <div className="chapter-copy">
+                <p className="chapter-kicker">
+                  {t("THE CONNECTED BUILDING", "المبنى المترابط")}
+                  <span>{String(i + 1).padStart(2, "0")} / 11</span>
+                </p>
+                <h2 id={`${chapter.id}-title`}>
+                  <a href={chapter.href}>
+                    {rtl ? chapter.ar : chapter.title}
+                    <span className="heading-arrow">{arrow}</span>
                   </a>
-                </details>
-              )}
-              {chapter.id === "electrical" && list && (
-                <ElectricalScope rtl={rtl} />
-              )}
-              <a className="service-link" href={chapter.href}>
-                {t("Explore this service", "استكشف هذه الخدمة")}
-                {arrow}
-              </a>
-              <figure className="source-photo">
-                <img
-                  src={assetUrl(chapter.image)}
-                  alt={chapter.imageAlt}
-                  loading="lazy"
-                  width="640"
-                  height="380"
+                </h2>
+                <p className="chapter-place">
+                  <span />
+                  {rtl ? chapter.placeAr : chapter.place}
+                </p>
+                <p className="chapter-description">
+                  {rtl ? chapter.descriptionAr : chapter.description}
+                </p>
+                {!rtl && (
+                  <ul
+                    className="capabilities"
+                    aria-label={`${chapter.title} capabilities`}
+                  >
+                    {chapter.capabilities.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                {chapter.id === "cooling" && (
+                  <details className="roof-scope">
+                    <summary>
+                      {t("Inside this service", "تفاصيل الخدمة")}
+                    </summary>
+                    <p>
+                      {t(
+                        "Survey → engineering & design → installation or retrofit → testing and handover.",
+                        "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
+                      )}
+                    </p>
+                    <p>
+                      {t(
+                        "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
+                        "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
+                      )}
+                    </p>
+                    <a href="https://fast-arabia.com/services/mechanical">
+                      {t(
+                        "Project references & full scope ↗",
+                        "المشاريع ونطاق العمل الكامل ↗",
+                      )}
+                    </a>
+                  </details>
+                )}
+                {chapter.id === "electrical" && list && (
+                  <ElectricalScope rtl={rtl} />
+                )}
+                <a className="service-link" href={chapter.href}>
+                  {t("Explore this service", "استكشف هذه الخدمة")}
+                  {arrow}
+                </a>
+                <figure className="source-photo">
+                  <img
+                    src={assetUrl(chapter.image)}
+                    alt={chapter.imageAlt}
+                    loading="lazy"
+                    width="640"
+                    height="380"
+                  />
+                  <figcaption>
+                    {t("From the FAST service portfolio.", "من خدمات FAST.")}
+                  </figcaption>
+                </figure>
+              </div>
+              <div className="chapter-location" aria-hidden="true">
+                <span>{i + 1} / 11</span>
+                <span>{t("Explore the building", "استكشف المبنى")}</span>
+              </div>
+            </section>
+            {!list && i === 0 && (
+              <>
+                <section
+                  id="about-hall"
+                  className="about-hall-scroll"
+                  aria-label={t("About FAST guided gallery", "جولة معرض فاست")}
                 />
-                <figcaption>
-                  {t("From the FAST service portfolio.", "من خدمات FAST.")}
-                </figcaption>
-              </figure>
-            </div>
-            <div className="chapter-location" aria-hidden="true">
-              <span>{i + 1} / 11</span>
-              <span>{t("Explore the building", "استكشف المبنى")}</span>
-            </div>
-          </section>
+                <div
+                  id="about-departure"
+                  className="about-departure-scroll"
+                  aria-hidden="true"
+                />
+              </>
+            )}
+          </Fragment>
         ))}
 
         <section

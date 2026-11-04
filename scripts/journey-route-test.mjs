@@ -10,7 +10,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
+        'export * from "./src/scene/journey.ts"; export {aboutStations,aboutPoint} from "./src/scene/aboutTour.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -19,6 +19,8 @@ try {
     outfile: file,
   });
   const {
+    aboutStations,
+    aboutPoint,
     electricalDepartureAt,
     sampleJourney,
     sampleGuide,
@@ -53,7 +55,11 @@ try {
       maxStep = Math.max(maxStep, p.distanceTo(previous));
       assert(
         p.distanceTo(previous) <
-          (progress > 11.89 || (progress >= 2 && progress < 2.84) ? 3 : 1.2),
+          (progress >= 1.53 && progress <= 1.74
+            ? 30
+            : progress > 11.89 || (progress >= 2 && progress < 2.84)
+              ? 3
+              : 1.2),
         `Camera discontinuity at ${progress}`,
       );
     }
@@ -90,23 +96,14 @@ try {
     previous.copy(p);
   }
   assert(doors > 10);
-  // The gallery reveal must hold still and keep both people outside its table.
-  sampleJourney(1.57, p, target);
-  sampleJourney(1.59, reverse, reverseTarget);
-  assert(
-    p.equals(reverse) && target.equals(reverseTarget),
-    "About gallery has a stationary viewing hold",
-  );
-  assert(guideIsPresenting(1.57), "The guide presents the gallery projector");
-  for (let n = 1510; n <= 1735; n++) {
-    sampleJourney(n / 1000, p, target);
-    sampleGuide(n / 1000, reverse, reverseTarget);
-    for (const person of [p, reverse]) {
-      assert(
-        Math.hypot(person.x - 5.3, person.z + 3.7) > 2.6,
-        "Gallery camera and guide clear the projection table",
-      );
-    }
+  for (const station of aboutStations) {
+    sampleJourney(station.at + 0.0003, p, target);
+    sampleJourney(station.end - 0.0003, reverse, reverseTarget);
+    assert(
+      p.equals(reverse) && target.equals(reverseTarget),
+      `About stop ${station.number} holds still`,
+    );
+    assert(guideIsPresenting(station.at + 0.0009));
   }
   for (let chapter = 2; chapter < 11; chapter++)
     for (let n = 0; n <= 100; n++) {
@@ -135,7 +132,11 @@ try {
     sampleGuide(n / 1000, host, hostTarget);
     if (n / 1000 === ELECTRICAL_EXIT.cut) toElectricalRear(hostPrevious);
     assert([...host.toArray(), ...hostTarget.toArray()].every(Number.isFinite));
-    if (n && host.distanceTo(hostPrevious) > hostMaxStep) {
+    if (
+      n &&
+      !(n / 1000 > 1.53 && n / 1000 < 1.741) &&
+      host.distanceTo(hostPrevious) > hostMaxStep
+    ) {
       hostMaxStep = host.distanceTo(hostPrevious);
       hostWorstAt = n / 1000;
     }

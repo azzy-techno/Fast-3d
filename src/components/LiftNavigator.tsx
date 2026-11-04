@@ -10,7 +10,7 @@ export const liftDestinations = [
     floor: i === 0 ? "R" : String(12 - i).padStart(2, "0"),
     at: i + 1,
   })),
-  { id: "about", title: "About FAST", ar: "عن فاست", floor: "12", at: 1.57 },
+  { id: "about", title: "About FAST", ar: "عن فاست", floor: "12", at: 1.535 },
   {
     id: "reception",
     title: "Reception & exit",

@@ -3,6 +3,8 @@ import type { AboutPanel } from "./data/about";
 export const useTour = create<{
   progress: number;
   aboutPanel: AboutPanel | null;
+  aboutPartner: string;
+  setAboutPartner: (id: string) => void;
   setAboutPanel: (panel: AboutPanel | null) => void;
   active: number;
   jumpVersion: number;
@@ -13,6 +15,8 @@ export const useTour = create<{
 }>((set) => ({
   progress: 0,
   aboutPanel: null,
+  aboutPartner: "meta-smart-factory",
+  setAboutPartner: (aboutPartner) => set({ aboutPartner }),
   setAboutPanel: (aboutPanel) => set({ aboutPanel }),
   active: 0,
   jumpVersion: 0,

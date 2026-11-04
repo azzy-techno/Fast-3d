@@ -116,7 +116,7 @@ try {
       Math.abs(
         (await page.evaluate(
           () => +document.querySelector("canvas").dataset.journey,
-        )) - 1.57,
+        )) - 1.535,
       ) < 0.003,
     );
     assert(
@@ -285,7 +285,7 @@ try {
     await wait(
       () =>
         !document.querySelector(".lift-dialog").open &&
-        Math.abs(+document.querySelector("canvas").dataset.journey - 1.57) <
+        Math.abs(+document.querySelector("canvas").dataset.journey - 1.535) <
           0.003,
       "return to about",
     );
@@ -301,7 +301,7 @@ try {
     await wait(
       () =>
         !document.querySelector(".lift-dialog").open &&
-        Math.abs(+document.querySelector("canvas").dataset.journey - 1.57) <
+        Math.abs(+document.querySelector("canvas").dataset.journey - 1.535) <
           0.003,
       "phone gallery",
     );

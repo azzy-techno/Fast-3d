@@ -113,7 +113,27 @@ try {
           ? document.documentElement.scrollHeight - innerHeight
           : document.getElementById(ids[i + 1]).offsetTop;
       window.__wanted = p;
-      scrollTo(0, a + (b - a) * (p - i));
+      const hall = document.getElementById("about-hall"),
+        departure = document.getElementById("about-departure");
+      const stops = [
+        { at: i, y: a },
+        { at: i + 1, y: b },
+      ];
+      if (i === 1 && hall && departure)
+        stops.splice(
+          1,
+          0,
+          { at: 1.53, y: hall.offsetTop },
+          { at: 1.74, y: departure.offsetTop },
+        );
+      let k = 0;
+      while (k < stops.length - 2 && p > stops[k + 1].at) k++;
+      scrollTo(
+        0,
+        stops[k].y +
+          ((stops[k + 1].y - stops[k].y) * (p - stops[k].at)) /
+            (stops[k + 1].at - stops[k].at),
+      );
     }, p);
     await wait(
       () =>

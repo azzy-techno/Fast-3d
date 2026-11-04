@@ -1,3 +1,4 @@
+import { aboutStationAt } from "./aboutTour";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
@@ -81,7 +82,8 @@ export function Host() {
     );
     const presentingHere = guideIsPresenting(p);
     const electrical = p >= 2 && p < 2.735 && presentingHere;
-    const settled = electrical && state.walking < 0.2;
+    const about = p >= 1.53 && p < 1.74 && presentingHere;
+    const settled = (electrical || about) && state.walking < 0.2;
     state.presentation = MathUtils.damp(
       state.presentation,
       settled ? 1 : 0,
@@ -93,7 +95,7 @@ export function Host() {
     // upper body turns, nods and uses an open supporting hand.
     const rhythm =
       state.presentationTime * 1.6 +
-      (electricalStationAt(p)?.number ?? 0) * 0.7;
+      (electricalStationAt(p)?.number ?? aboutStationAt(p)?.number ?? 0) * 0.7;
     const emphasis = (Math.sin(rhythm) + 1) / 2;
     const gestureWeight = state.presentation;
     if (gestureWeight > 0.001) {
@@ -114,7 +116,7 @@ export function Host() {
         : presentingHere
           ? state.delta.copy(state.face).sub(state.p)
           : state.delta.set(Math.sin(state.angle), 0, Math.cos(state.angle));
-    if (!walking && presentingHere && p >= 2 && p < 2.735) {
+    if (!walking && presentingHere && (electrical || about)) {
       // Stand side-on between the visitor and the exhibit, so the presenting
       // arm is visible instead of disappearing behind the engineer's torso.
       state.a.copy(state.face).sub(state.p).setY(0).normalize();
