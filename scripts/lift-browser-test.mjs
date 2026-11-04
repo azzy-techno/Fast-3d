@@ -160,7 +160,7 @@ try {
       await page.evaluate(
         () => document.querySelectorAll(".lift-floor-buttons button").length,
       ),
-      12,
+      13,
     );
     const axe = await fs.readFile("node_modules/axe-core/axe.min.js", "utf8");
     await page.evaluate((s) => (0, eval)(s), axe);

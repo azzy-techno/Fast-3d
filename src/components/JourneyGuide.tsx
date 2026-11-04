@@ -36,7 +36,7 @@ export function JourneyGuide({
           : p < 1.43
             ? "ROOF / 83 M"
             : p < 1.85
-              ? "12 / WORKPLACE"
+              ? "12 / ABOUT FAST"
               : p < 2.929 && p >= 1.85
                 ? "11 / ELECTRICAL EXHIBITION"
                 : p < 11.6
@@ -52,7 +52,8 @@ export function JourneyGuide({
           p > 1.22 && p < 1.96 ? "interlude" : "service";
       const local = p % 1;
       const visible =
-        (p > 1.22 && p < 1.96) ||
+        (p > 1.22 && p < 1.51) ||
+        (p >= 1.735 && p < 1.96) ||
         (p > 11.4 && p < 11.94) ||
         (p >= 3 && p < 11.5 && local > 0.38 && local < 0.84) ||
         (p > 2.84 && p < 2.97);
@@ -193,6 +194,17 @@ export function JourneyGuide({
             <circle ref={marker} cx="130" cy="28" r="3.5" fill="#e1c69b" />
           </svg>
           <ol>
+            <li>
+              <button
+                onClick={() => {
+                  jump("about");
+                  setMapOpen(false);
+                }}
+              >
+                <span>12</span>
+                {rtl ? "عن فاست" : "About FAST"}
+              </button>
+            </li>
             {chapters.slice(1).map((chapter, i) => (
               <li key={chapter.id}>
                 <button

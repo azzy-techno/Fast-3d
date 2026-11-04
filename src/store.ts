@@ -1,6 +1,9 @@
 import { create } from "zustand";
+import type { AboutPanel } from "./data/about";
 export const useTour = create<{
   progress: number;
+  aboutPanel: AboutPanel | null;
+  setAboutPanel: (panel: AboutPanel | null) => void;
   active: number;
   jumpVersion: number;
   liftRequest: number;
@@ -9,6 +12,8 @@ export const useTour = create<{
   setProgress: (progress: number) => void;
 }>((set) => ({
   progress: 0,
+  aboutPanel: null,
+  setAboutPanel: (aboutPanel) => set({ aboutPanel }),
   active: 0,
   jumpVersion: 0,
   liftRequest: 0,

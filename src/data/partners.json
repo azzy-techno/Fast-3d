@@ -1,0 +1,145 @@
+[
+  {
+    "id": "meta-smart-factory",
+    "name": "Meta Smart Factory",
+    "country": "Spain",
+    "description": "Industry 4.0 & smart manufacturing - MES, APS, SCP, OEE and IIoT integration.",
+    "arName": "ميتا سمارت فاكتوري",
+    "arCountry": "إسبانيا",
+    "arDescription": "الصناعة 4.0 والتصنيع الذكي - MES وAPS وSCP وOEE وتكامل إنترنت الأشياء.",
+    "url": "https://metasmartfactory.com/",
+    "logo": "about/partners/meta-smart-factory.png"
+  },
+  {
+    "id": "beasy",
+    "name": "BEASY",
+    "country": "United Kingdom",
+    "description": "Corrosion engineering & CP digital twin - physics-based predictive analytics.",
+    "arName": "بيزي",
+    "arCountry": "المملكة المتحدة",
+    "arDescription": "هندسة التآكل والتوأم الرقمي للحماية الكاثودية - تحليلات تنبّؤية فيزيائية.",
+    "url": "https://www.beasy.com/",
+    "logo": "about/partners/beasy.png"
+  },
+  {
+    "id": "greenovative",
+    "name": "Greenovative",
+    "country": "India",
+    "description": "AI-driven energy optimization, sustainability tracking and Net-Zero monitoring.",
+    "arName": "غرينوفيتيف",
+    "arCountry": "الهند",
+    "arDescription": "تحسين الطاقة بالذكاء الاصطناعي وتتبّع الاستدامة ومراقبة الحياد الكربوني.",
+    "url": "https://greenovative.com/",
+    "logo": "about/partners/greenovative.png"
+  },
+  {
+    "id": "automassist",
+    "name": "AutomAssist",
+    "country": "France",
+    "description": "AI operations platform connecting plant documents, PLC signals and ERP records.",
+    "arName": "أوتوم أسيست",
+    "arCountry": "فرنسا",
+    "arDescription": "منصة عمليات بالذكاء الاصطناعي تربط وثائق المصنع وإشارات PLC وسجلات ERP.",
+    "url": "https://www.automassist.ai/",
+    "logo": "about/partners/automassist.png"
+  },
+  {
+    "id": "greenoil-standard",
+    "name": "GreenOil Standard",
+    "country": "Denmark",
+    "description": "High-performance marine and industrial oil filtration systems.",
+    "arName": "غرين أويل ستاندرد",
+    "arCountry": "الدنمارك",
+    "arDescription": "أنظمة ترشيح زيوت بحرية وصناعية عالية الأداء.",
+    "url": "https://greenoilstandard.com/",
+    "logo": "about/partners/greenoil-standard.png"
+  },
+  {
+    "id": "advance-cooling-towers",
+    "name": "Advance Cooling Towers",
+    "country": "India",
+    "description": "CTI-certified cooling tower design and engineered systems.",
+    "arName": "أدفانس كولينج تاورز",
+    "arCountry": "الهند",
+    "arDescription": "تصميم أبراج تبريد معتمدة من CTI وأنظمة هندسية.",
+    "url": "https://advancecoolingtower.com/",
+    "logo": "about/partners/advance-cooling-towers.png"
+  },
+  {
+    "id": "ecosystem-informatics",
+    "name": "Ecosystem Informatics",
+    "country": "Canada",
+    "description": "AI-enabled air monitoring and data-intelligence platforms.",
+    "arName": "إيكوسيستم إنفورماتيكس",
+    "arCountry": "كندا",
+    "arDescription": "منصات مراقبة الهواء وذكاء البيانات بالذكاء الاصطناعي.",
+    "url": "https://www.ecosinfo.ai/",
+    "logo": "about/partners/ecosystem-informatics.png"
+  },
+  {
+    "id": "manwinwin",
+    "name": "ManWinWin Software",
+    "country": "Portugal",
+    "description": "CMMS maintenance-management software - asset registers, preventive maintenance, work orders and reliability KPIs.",
+    "arName": "مان وين وين",
+    "arCountry": "البرتغال",
+    "arDescription": "برنامج إدارة الصيانة المحوسبة (CMMS) - سجلات الأصول والصيانة الوقائية وأوامر العمل ومؤشرات الموثوقية.",
+    "url": "https://www.manwinwin.com/",
+    "logo": "about/partners/manwinwin.png"
+  },
+  {
+    "id": "vision-lasertechnik",
+    "name": "Vision Lasertechnik",
+    "country": "Germany",
+    "description": "Industrial laser technology - laser welding, marking and robotic automation, Industry 4.0 ready.",
+    "arName": "فيجن ليزرتكنيك",
+    "arCountry": "ألمانيا",
+    "arDescription": "تقنيات ليزر صناعية - لحام ووسم بالليزر وأتمتة روبوتية، جاهزة للصناعة 4.0.",
+    "url": "https://www.vision-lasertechnik.de/",
+    "logo": "about/partners/vision-lasertechnik.png"
+  },
+  {
+    "id": "vasista-engineering",
+    "name": "Vasista Engineering Solutions",
+    "country": "India",
+    "description": "Specialists in 3D scanning, BIM, digital twins and asset digitization.",
+    "arName": "فاسيستا إنجنيرنغ سولوشنز",
+    "arCountry": "الهند",
+    "arDescription": "متخصصون في المسح ثلاثي الأبعاد ونمذجة معلومات البناء والتوائم الرقمية ورقمنة الأصول.",
+    "url": "https://vasistaengineering.com/",
+    "logo": "about/partners/vasista-engineering.png"
+  },
+  {
+    "id": "godrej-infotech",
+    "name": "Godrej Infotech",
+    "country": "India",
+    "description": "Enterprise IT services - ERP implementation, software development and digital transformation.",
+    "arName": "جودريج إنفوتك",
+    "arCountry": "الهند",
+    "arDescription": "خدمات تقنية معلومات للمؤسسات - تطبيق أنظمة ERP وتطوير البرمجيات والتحوّل الرقمي.",
+    "url": "https://www.godrejinfotech.com/",
+    "logo": "about/partners/godrej-infotech.png"
+  },
+  {
+    "id": "meta-2i",
+    "name": "Meta 2i",
+    "country": "France",
+    "description": "MES software editor and integrator - shop-floor data capture, ERP integration and production performance.",
+    "arName": "ميتا 2i",
+    "arCountry": "فرنسا",
+    "arDescription": "مطوّر ومتكامل لبرمجيات أنظمة تنفيذ التصنيع (MES) - التقاط بيانات الإنتاج والتكامل مع أنظمة ERP وقياس أداء التصنيع.",
+    "url": "https://meta2i.com/",
+    "logo": "about/partners/meta-2i.png"
+  },
+  {
+    "id": "pct-group",
+    "name": "PCT Group Ltd",
+    "country": "United Arab Emirates",
+    "description": "Ex-rated hoists, cranes and winches, plus welding, cutting and power tool solutions since 1972. FAST is the authorized representative and partner for Saudi Arabia and Bahrain.",
+    "arName": "مجموعة PCT",
+    "arCountry": "الإمارات العربية المتحدة",
+    "arDescription": "مرافع ورافعات وونشات مقاومة للانفجار (Ex)، إضافة إلى حلول اللحام والقطع والأدوات الكهربائية منذ عام 1972. فاست هي الممثل المعتمد والشريك لمجموعة PCT في السعودية والبحرين.",
+    "url": "https://www.pctgroupme.com/",
+    "logo": "about/partners/pct-group.png"
+  }
+]

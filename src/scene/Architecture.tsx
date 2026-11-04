@@ -25,7 +25,7 @@ import { assetUrl } from "../lib/assets";
 import { type Point } from "../data/chapters";
 import { journeyState } from "./journey";
 import { StaticInstances } from "./StaticInstances";
-import { WorkplaceDetails } from "./PremiumInterior";
+import { AboutGallery } from "./AboutGallery";
 import { InteriorFloor } from "./InteriorFloor";
 
 export type Part = { p: Point; s: Point; c?: string; r?: Point };
@@ -282,7 +282,6 @@ function OfficeFloor() {
   return (
     <group name="furnished-office-floor">
       <InteriorFloor office />
-      <WorkplaceDetails />
       <ArchitectureBatch items={structure.solid} />
       <ArchitectureBatch items={structure.trim} color="#747c76" metal={0.3} />
       <ArchitectureBatch items={structure.lights} color="#ffebcb" glow />
@@ -293,40 +292,13 @@ function OfficeFloor() {
       {[-12, -8, -4.5].flatMap((x) =>
         [-6, -1].map((z) => <Desk key={`${x}-${z}`} p={[x, 16, z]} />),
       )}
-      <group position={[6.4, 16, -5]}>
-        <Box p={[0, 0.8, 0]} s={[3, 0.12, 5]} c="#9a8164" metal={0} />
-        <Box p={[0, 0.4, 0]} s={[0.45, 0.8, 3]} c="#394d51" />
-        {[-1.2, 1.2].flatMap((z) =>
-          [-2, 2].map((x) => (
-            <ImportedFurniture
-              key={`${x}-${z}`}
-              kind="chair"
-              p={[x, 0, z]}
-              rotation={x > 0 ? -Math.PI / 2 : Math.PI / 2}
-            />
-          )),
-        )}
-        <Wayfinding
-          text="THE BOARDROOM"
-          sub="COLLABORATION / STRATEGY / DELIVERY"
-          p={[0, 3, -5.25]}
-          width={4}
-          dark={false}
-        />
-      </group>
       <ImportedFurniture kind="sofa" p={[-8, 16, 6.7]} rotation={Math.PI} />
       <ImportedFurniture kind="chair" p={[-5.5, 16, 5.6]} rotation={-0.5} />
       <Box p={[-8, 16.35, 4.7]} s={[1.6, 0.12, 0.8]} c="#a38a68" />
       <Cylinder p={[-8, 16.16, 4.7]} radius={0.27} height={0.3} c="#5f6866" />
       <Wayfinding
-        text="SPACES FOR POSSIBILITY"
-        sub="FAST / WORKPLACE"
-        p={[-8.5, 19, -9.76]}
-        width={6}
-      />
-      <Wayfinding
         text="SYSTEMS GALLERY ↓"
-        sub="LEVEL 01 / SERVICE LIFT"
+        sub="LEVEL 11 / SERVICE LIFT"
         p={[0, 19.3, -10.25]}
         width={3.4}
       />
@@ -429,7 +401,7 @@ export function Lift({
           exit
             ? "WELCOME / RECEPTION"
             : roof
-              ? "THE WORKPLACE"
+              ? "ABOUT FAST / LEVEL 12"
               : "ENGINEERING FLOORS"
         }
         sub={
@@ -529,6 +501,7 @@ export function Interior() {
         <StaticInstances>
           <OfficeFloor />
         </StaticInstances>
+        <AboutGallery />
         <Lift p={[11, 16, -5]} roof elevation={60} />
         <Lift p={[0, 16, -7]} elevation={60} />
       </group>

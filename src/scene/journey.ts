@@ -43,7 +43,8 @@ shot(1.4, [11, 23, -5], [7, 23, -5], 66);
 shot(1.44, [11, 20, -5], [9, 20, 1], 66);
 shot(1.48, [11, 17.7, -5], [11, 17.7, 3], 66);
 shot(1.53, [10.2, 17.7, 0.5], [6.4, 17.2, -5], 68);
-shot(1.58, [11, 17.7, 3.8], [2, 17.6, 3.8], 66);
+shot(1.56, [5.8, 17.9, 3.8], [5.3, 18.1, -3.7], 66);
+shot(1.6, [5.8, 17.9, 3.8], [5.3, 18.1, -3.7], 66);
 shot(1.67, [4, 17.7, 3.8], [-6, 17.5, -1], 66);
 shot(1.74, [0, 17.7, 2], [0, 17.7, -7], 66);
 shot(1.82, [0, 17.7, -7], [0, 17.7, -11], 66);
@@ -208,9 +209,9 @@ export function journeyBeat(progress: number) {
     ];
   if (progress < 1.73)
     return [
-      "04 / THE HUMAN SIDE",
-      "Built around the people inside.",
-      "Workspaces, meeting rooms and quiet corners. Every space, connected.",
+      "04 / ABOUT FAST",
+      "Global expertise. Saudi delivery.",
+      "Explore our credentials, supplier registrations and international technology partners.",
     ];
   if (progress < 1.96)
     return [
@@ -334,6 +335,7 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }
   if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
+  if (p >= 1.56 && p <= 1.6) facing.set(5.3, 78, -3.7);
   if (p < 0.86)
     position.lerp(new Vector3(8, 83, 5), 1 - Math.min(1, (p - 0.7) / 0.16));
 }
@@ -430,6 +432,7 @@ function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
 }
 
 export function guideIsPresenting(p: number) {
+  if (p >= 1.56 && p <= 1.6) return true;
   if (p >= 1.94 && p < ELECTRICAL_END) return electricalPresenting(p);
   if (p >= 0.86 && p <= 1.14) return true;
   const at = Math.round(p);

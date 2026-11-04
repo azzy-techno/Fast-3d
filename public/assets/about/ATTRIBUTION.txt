@@ -1,0 +1,16 @@
+FAST O&M About gallery assets
+
+Partner logos: original FAST public website files at
+https://fast-arabia.com/assets/logos/partners/<filename>
+Retrieved 2026-11-03. Empty outer padding trimmed for legibility. Partner names, countries, bilingual descriptions and official
+links are from https://fast-arabia.com/partners (assets/js/site.js?v=174), cross-checked
+against the user-supplied FAST_OM_2026_SA.pdf pp25–26. Logos remain the property of
+their respective owners and identify FAST's listed technology partners.
+
+ISO certificates: user-supplied PDFs for FAST Operations and Maintenance Company,
+issued by ANS System Certification Private Limited, 27 October 2026.
+Original PDF bytes retained; WebP previews rendered from the first page.
+ISO 9001:2015 / CN-QMS-15252924
+ISO 14001:2015 / CN-EMS-15252925
+ISO 45001:2018 / CN-OH&SMS-15252926
+Printed expiry for each: 26 October 2027.

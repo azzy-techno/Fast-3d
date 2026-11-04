@@ -230,6 +230,7 @@ try {
   await capture(1.85, "service-lift-turn");
   await capture(1.88, "service-lift-descent");
   await capture(1.53, "workplace-entry");
+  await capture(1.57, "about-gallery");
   await capture(1.65, "offices");
   await capture(1.74, "office-corridor");
   await capture(1.94, "systems-entry");
@@ -251,6 +252,7 @@ try {
   await capture(8, "manufacturing");
   await capture(10, "iiot");
   await capture(1, "phone-host", true);
+  await capture(1.57, "phone-about-gallery", true);
   await capture(11.86, "phone-farewell", true);
   await capture(2, "phone-electrical", true);
   await capture(2.051, "phone-electrical-stop-01", true);

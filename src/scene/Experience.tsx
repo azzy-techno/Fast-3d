@@ -98,7 +98,12 @@ function World({
     gl.domElement.dataset.jumpVersion = String(jumpVersion.current);
     const fov =
       sampleJourney(p, vectors.p, vectors.target) +
-      (mobile && p >= 2 && p < 2.84 ? 12 : 0);
+      (mobile && p >= 2 && p < 2.84 ? 12 : 0) +
+      (mobile
+        ? 18 *
+          Math.min(1, Math.max(0, (p - 1.49) / 0.07)) *
+          (1 - Math.min(1, Math.max(0, (p - 1.69) / 0.05)))
+        : 0);
     const inside =
       Math.min(1, Math.max(0, (p - 1.3) / 0.13)) *
       (1 - Math.min(1, Math.max(0, (p - 11.77) / 0.08)));

@@ -1,3 +1,9 @@
+import {
+  AboutWelcome,
+  AboutProjection,
+  AboutList,
+} from "./components/AboutFAST";
+import type { AboutPanel } from "./data/about";
 import { ElectricalTour } from "./components/ElectricalTour";
 import { ElectricalWelcome } from "./components/ElectricalWelcome";
 import { LiftNavigator, LiftPrompt } from "./components/LiftNavigator";
@@ -69,6 +75,9 @@ export default function App() {
   const [loaded, setLoaded] = useState(0);
   const [menu, setMenu] = useState(false);
   const [liftOpen, setLiftOpen] = useState(false);
+  const [pendingAbout, setPendingAbout] = useState<AboutPanel | null>(null);
+  const aboutPanel = useTour((s) => s.aboutPanel);
+  const setAboutPanel = useTour((s) => s.setAboutPanel);
   const [liftDestination, setLiftDestination] = useState<string | null>(null);
   const liftRequest = useTour((s) => s.liftRequest);
   const [sound, setSound] = useState(false);
@@ -79,6 +88,7 @@ export default function App() {
   const audio = useRef<Howl | null>(null);
   const soundscapes = useRef<ServiceSound | null>(null);
   const active = useTour((s) => s.active);
+  const aboutFloor = useTour((s) => s.progress >= 1.51 && s.progress < 1.735);
   const [percent, setPercent] = useState(0);
   const t = (en: string, ar: string) => (rtl ? ar : en);
   const sceneReady = useCallback(() => setReady(true), []);
@@ -148,14 +158,15 @@ export default function App() {
     };
   }, [list, reduced]);
   useEffect(() => {
-    if (menu || loading || liftOpen) lenis.current?.stop();
+    if (menu || loading || liftOpen || aboutPanel) lenis.current?.stop();
     else lenis.current?.start();
     const previous = document.body.style.overflow;
-    if (menu || loading || liftOpen) document.body.style.overflow = "hidden";
+    if (menu || loading || liftOpen || aboutPanel)
+      document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [menu, loading, list, liftOpen]);
+  }, [menu, loading, list, liftOpen, aboutPanel]);
   useEffect(() => {
     if (menu && !dialog.current?.open) dialog.current?.showModal();
     if (!menu && dialog.current?.open) dialog.current?.close();
@@ -274,7 +285,11 @@ export default function App() {
   };
   const jump = (id: string) => {
     setMenu(false);
-    if (!list && !loading && chapters.some((c) => c.id === id)) {
+    if (
+      !list &&
+      !loading &&
+      (id === "about" || chapters.some((c) => c.id === id))
+    ) {
       setLiftDestination(id);
       setLiftOpen(true);
       return;
@@ -300,6 +315,17 @@ export default function App() {
       lenis.current.scrollTo(y, { immediate, force: true, duration: 1.8 });
     else window.scrollTo({ top: y, behavior: "instant" });
     if (immediate) useTour.getState().teleport(at);
+  };
+  const showAbout = (panel: AboutPanel) => {
+    setMenu(false);
+    const p = useTour.getState().progress;
+    if (list || (p >= 1.51 && p < 1.735)) {
+      setAboutPanel(panel);
+      return;
+    }
+    setPendingAbout(panel);
+    setLiftDestination("about");
+    setLiftOpen(true);
   };
   const toggleView = () => {
     if (list) setReady(false);
@@ -333,6 +359,11 @@ export default function App() {
       <div className="scene-scrim" aria-hidden="true" />
       {!list && !loading && (
         <>
+          <AboutWelcome
+            rtl={rtl}
+            onOpen={showAbout}
+            onContinue={() => scrollToProgress(1.79)}
+          />
           <ElectricalWelcome
             rtl={rtl}
             onEnter={() => scrollToProgress(2.05)}
@@ -377,9 +408,13 @@ export default function App() {
               <i />
             </span>
           </button>
-          <a className="partner-link" href={`${source}/partners`}>
+          <button
+            className="partner-link"
+            onClick={() => showAbout("partners")}
+            aria-haspopup="dialog"
+          >
             {t("Our partners", "شركاؤنا")}
-          </a>
+          </button>
         </nav>
         <div className="header-actions">
           <button
@@ -460,6 +495,7 @@ export default function App() {
           </p>
         </section>
 
+        {list && <AboutList rtl={rtl} onOpen={showAbout} />}
         {chapters.map((chapter, i) => (
           <section
             className="chapter"
@@ -625,13 +661,15 @@ export default function App() {
         <div className="journey-label">
           <span className="live-dot" />
           <button onClick={() => setMenu(true)} aria-haspopup="dialog">
-            {active === 0
-              ? t("The arrival", "الوصول")
-              : active === 12
-                ? t("What’s next", "الخطوة التالية")
-                : rtl
-                  ? chapters[active - 1].ar
-                  : chapters[active - 1].title}
+            {aboutFloor && !list
+              ? t("About FAST", "عن فاست")
+              : active === 0
+                ? t("The arrival", "الوصول")
+                : active === 12
+                  ? t("What’s next", "الخطوة التالية")
+                  : rtl
+                    ? chapters[active - 1].ar
+                    : chapters[active - 1].title}
           </button>
         </div>
         <nav
@@ -755,6 +793,7 @@ export default function App() {
           </a>
         </div>
       </dialog>
+      <AboutProjection rtl={rtl} />
       <LiftNavigator
         open={liftOpen}
         initialDestination={liftDestination}
@@ -762,6 +801,10 @@ export default function App() {
         onClose={() => {
           setLiftOpen(false);
           setLiftDestination(null);
+          if (pendingAbout) {
+            setAboutPanel(pendingAbout);
+            setPendingAbout(null);
+          }
         }}
         onArrive={(at) => scrollToProgress(at, true)}
       />

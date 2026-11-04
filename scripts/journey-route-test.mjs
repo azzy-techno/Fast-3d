@@ -90,6 +90,24 @@ try {
     previous.copy(p);
   }
   assert(doors > 10);
+  // The gallery reveal must hold still and keep both people outside its table.
+  sampleJourney(1.57, p, target);
+  sampleJourney(1.59, reverse, reverseTarget);
+  assert(
+    p.equals(reverse) && target.equals(reverseTarget),
+    "About gallery has a stationary viewing hold",
+  );
+  assert(guideIsPresenting(1.57), "The guide presents the gallery projector");
+  for (let n = 1510; n <= 1735; n++) {
+    sampleJourney(n / 1000, p, target);
+    sampleGuide(n / 1000, reverse, reverseTarget);
+    for (const person of [p, reverse]) {
+      assert(
+        Math.hypot(person.x - 5.3, person.z + 3.7) > 2.6,
+        "Gallery camera and guide clear the projection table",
+      );
+    }
+  }
   for (let chapter = 2; chapter < 11; chapter++)
     for (let n = 0; n <= 100; n++) {
       const raw = chapter + 0.6 + (n * 0.16) / 100;

@@ -10,6 +10,7 @@ export const liftDestinations = [
     floor: i === 0 ? "R" : String(12 - i).padStart(2, "0"),
     at: i + 1,
   })),
+  { id: "about", title: "About FAST", ar: "عن فاست", floor: "12", at: 1.57 },
   {
     id: "reception",
     title: "Reception & exit",
@@ -17,7 +18,7 @@ export const liftDestinations = [
     floor: "G",
     at: 11.69,
   },
-];
+].sort((a, b) => a.at - b.at);
 
 export function LiftNavigator({
   open,
@@ -37,7 +38,10 @@ export function LiftNavigator({
     "select" | "closing" | "travelling" | "opening"
   >("select");
   const [selected, setSelected] = useState<string | null>(null);
-  const active = useTour((s) => s.active);
+  const current = useTour((s) => s.progress);
+  const currentDestination = [...liftDestinations]
+    .reverse()
+    .find((d) => current >= d.at - 0.015)?.id;
   const arrival = useRef(onArrive);
   arrival.current = onArrive;
   const close = useRef(onClose);
@@ -113,7 +117,9 @@ export function LiftNavigator({
             <button
               key={d.id}
               data-destination={d.id}
-              aria-current={active === d.at ? "location" : undefined}
+              aria-current={
+                currentDestination === d.id ? "location" : undefined
+              }
               onClick={() => {
                 setSelected(d.id);
                 setPhase("closing");
@@ -163,7 +169,8 @@ export function LiftPrompt({
     const p = s.progress,
       local = p % 1;
     return (
-      (p > 1.27 && p < 1.94) ||
+      (p > 1.27 && p < 1.51) ||
+      (p >= 1.735 && p < 1.94) ||
       (p > 2.77 && p < 2.94) ||
       (p >= 3 && p < 11.4 && local > 0.46 && local < 0.82) ||
       (p > 11.46 && p < 11.61)
