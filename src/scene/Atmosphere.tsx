@@ -24,7 +24,7 @@ export function Atmosphere({ mobile }: { mobile: boolean }) {
   useFrame(({ clock }) => {
     if (cloudGroup.current) {
       cloudGroup.current.visible =
-        journeyState.progress < 1.9 || journeyState.progress > 11.65;
+        journeyState.progress < 1.38 || journeyState.progress > 11.72;
       cloudGroup.current.position.x = Math.sin(clock.elapsedTime * 0.008) * 0.6;
     }
     if (dust.current) {

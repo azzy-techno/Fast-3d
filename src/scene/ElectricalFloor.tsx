@@ -9,16 +9,19 @@ import { ElectricalStationModel } from "./ElectricalExhibits";
 import { journeyState } from "./journey";
 import { ElectricalIntro } from "./ElectricalIntro";
 import { ElectricalInterior } from "./ElectricalInterior";
+import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
 /** Dedicated 62 × 64 m exhibition floor. The lift core retains its real slab opening. */
 export function ElectricalFloor() {
   const root = useRef<Group>(null);
+  useVisibilityUpdates(root);
   useFrame(({ camera }) => {
     if (root.current)
       root.current.visible =
         journeyState.progress > 1.73 &&
         journeyState.progress < 3 &&
-        Math.abs(camera.position.y - ELECTRICAL_Y) < 9;
+        camera.position.y > ELECTRICAL_Y - 1 &&
+        camera.position.y < ELECTRICAL_Y + 6.2;
   });
   return (
     <group

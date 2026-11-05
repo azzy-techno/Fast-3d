@@ -25,7 +25,9 @@ function material(color: string, metal: number, glow: boolean) {
         emissiveIntensity: glow ? 1.4 : 0,
       }),
     );
-  return materials.get(key)!;
+  const shared = materials.get(key)!;
+  shared.userData.fastPrimitive = !glow;
+  return shared;
 }
 export function Box({
   p = [0, 0, 0],

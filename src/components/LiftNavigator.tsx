@@ -38,10 +38,11 @@ export function LiftNavigator({
     "select" | "closing" | "travelling" | "opening"
   >("select");
   const [selected, setSelected] = useState<string | null>(null);
-  const current = useTour((s) => s.progress);
-  const currentDestination = [...liftDestinations]
-    .reverse()
-    .find((d) => current >= d.at - 0.015)?.id;
+  const currentDestination = useTour(
+    (s) =>
+      [...liftDestinations].reverse().find((d) => s.progress >= d.at - 0.015)
+        ?.id,
+  );
   const arrival = useRef(onArrive);
   arrival.current = onArrive;
   const close = useRef(onClose);

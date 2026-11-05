@@ -10,17 +10,20 @@ import { serviceRooms, journeyState } from "./journey";
 import { chapters } from "../data/chapters";
 import { equipment } from "./Equipment";
 import { SystemAnimation } from "./SystemAnimation";
+import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
 function ServiceFloor({ index }: { index: number }) {
   const root = useRef<Group>(null),
     room = serviceRooms[index];
   const Equipment = equipment[room.index];
+  useVisibilityUpdates(root);
   useFrame(({ camera }) => {
     if (root.current)
       root.current.visible =
         journeyState.progress > 1.73 &&
         journeyState.progress < 11.62 &&
-        Math.abs(camera.position.y - room.y) < 9;
+        camera.position.y > room.y - 1 &&
+        camera.position.y < room.y + 6.2;
   });
   return (
     <group

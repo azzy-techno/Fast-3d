@@ -27,6 +27,7 @@ import { type Point } from "../data/chapters";
 import { journeyState } from "./journey";
 import { StaticInstances } from "./StaticInstances";
 import { AboutGallery } from "./AboutGallery";
+import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
 export type Part = { p: Point; s: Point; c?: string; r?: Point };
 export function ArchitectureBatch({
@@ -395,10 +396,11 @@ export function RoofAccess() {
 
 export function Interior() {
   const office = useRef<Group>(null);
+  useVisibilityUpdates(office);
   useFrame(() => {
     if (office.current)
       office.current.visible =
-        journeyState.progress > 1.27 && journeyState.progress < 2.06;
+        journeyState.progress > 1.27 && journeyState.progress < 1.96;
   });
   return (
     <group name="connected-building-interior">

@@ -562,6 +562,7 @@ function ElectricalExhibitLight() {
     fill = useRef<SpotLight>(null);
   const target = useMemo(() => new Object3D(), []);
   useFrame((_, dt) => {
+    if (journeyState.progress < 1.73 || journeyState.progress >= 3) return;
     const station = electricalStationAt(journeyState.progress);
     if (!key.current || !fill.current) return;
     const x = station?.x ?? 0,

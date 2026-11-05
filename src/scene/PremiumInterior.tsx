@@ -12,6 +12,7 @@ import {
 } from "./Architecture";
 import { StaticInstances } from "./StaticInstances";
 import { journeyState } from "./journey";
+import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
 function Pendant({
   p,
@@ -121,6 +122,7 @@ export function Reception() {
   const root = useRef<Group>(null),
     doors = useRef<Group>(null),
     lift = useRef<Group>(null);
+  useVisibilityUpdates(root);
   const marble = useMemo(() => {
     const c = document.createElement("canvas");
     c.width = c.height = 512;

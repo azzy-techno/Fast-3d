@@ -1,5 +1,5 @@
 import { electricalStationAt } from "./electricalTour";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   PerspectiveCamera,
@@ -24,8 +24,10 @@ import { Interior, RoofAccess } from "./Architecture";
 import { Atmosphere } from "./Atmosphere";
 import { journeyState, sampleJourney } from "./journey";
 import { observatoryView } from "../lib/observatoryView";
+import { installRenderProbe } from "./renderProbe";
+import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
-function World({
+const World = memo(function World({
   onReady,
   rtl,
   mobile,
@@ -36,7 +38,14 @@ function World({
 }) {
   const shell = useRef<Group>(null),
     city = useRef<Group>(null);
-  const { camera, size, gl, scene, invalidate } = useThree();
+  useVisibilityUpdates(shell);
+  useVisibilityUpdates(city);
+  // Resolution and frame-loop changes must not rebuild the whole scene tree.
+  const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const invalidate = useThree((s) => s.invalidate);
   const observatoryArmed = useRef(true);
   const ready = useRef(false),
     initialized = useRef(false),
@@ -194,9 +203,11 @@ function World({
     const electricalLight =
       Math.min(1, Math.max(0, (p - 1.96) / 0.04)) *
       (1 - Math.min(1, Math.max(0, (p - 2.8) / 0.06)));
-    if (sun.current)
+    if (sun.current) {
+      sun.current.castShadow = outside > 0.02;
       sun.current.intensity =
         2.6 * outside + (0.8 - electricalLight * 0.4) * inside;
+    }
     if (ambient.current)
       ambient.current.intensity =
         0.36 * outside + (0.38 - electricalLight * 0.15) * inside;
@@ -313,7 +324,7 @@ function World({
       <Host />
     </>
   );
-}
+});
 function PausedFrame({ paused }: { paused: boolean }) {
   const { advance, clock } = useThree();
   useEffect(() => {
@@ -321,7 +332,7 @@ function PausedFrame({ paused }: { paused: boolean }) {
   }, [paused, advance, clock]);
   return null;
 }
-export default function Experience({
+function Experience({
   onReady,
   onFailure,
   rtl,
@@ -333,6 +344,7 @@ export default function Experience({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mobile, setMobile] = useState(window.innerWidth < 900);
   const [resolution, setResolution] = useState(1);
+  const [dynamicShadows, setDynamicShadows] = useState(true);
   const observatoryOpen = useTour((s) => s.observatoryOpen);
   const panelOpen = useTour((s) => s.aboutPanel !== null);
   const [hidden, setHidden] = useState(document.hidden);
@@ -358,12 +370,13 @@ export default function Experience({
   return (
     <div className="scene" aria-hidden="true">
       <Canvas
+        onCreated={({ gl, scene }) => installRenderProbe(gl, scene)}
         ref={canvasRef}
         dpr={resolution}
         frameloop={
           panelOpen || hidden ? "never" : observatoryOpen ? "demand" : "always"
         }
-        shadows
+        shadows={dynamicShadows}
         camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 1000 }}
         gl={{
           antialias: true,
@@ -376,14 +389,20 @@ export default function Experience({
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
           <PausedFrame paused={panelOpen} />
-          <PerformanceMonitor
-            ms={500}
-            iterations={4}
-            bounds={() => [35, 50]}
-            onDecline={() => setResolution((r) => Math.max(0.7, r - 0.15))}
-          />
+          {!observatoryOpen && !panelOpen && !hidden && (
+            <PerformanceMonitor
+              ms={500}
+              iterations={4}
+              bounds={() => [35, 50]}
+              onDecline={() => {
+                setResolution((r) => Math.max(0.7, r - 0.15));
+                setDynamicShadows(false);
+              }}
+            />
+          )}
         </Suspense>
       </Canvas>
     </div>
   );
 }
+export default memo(Experience);

@@ -18,6 +18,7 @@ import {
   SRGBColorSpace,
 } from "three";
 import { Box, Cylinder } from "./Primitives";
+import { StaticInstances } from "./StaticInstances";
 import { assetUrl } from "../lib/assets";
 import { useTour } from "../store";
 import type { Point } from "../data/chapters";
@@ -670,47 +671,49 @@ function Car({ index, parked = false }: { index: number; parked?: boolean }) {
       rotation={[0, parked ? Math.PI / 2 : 0, 0]}
       name={parked ? "parked-car" : "moving-car"}
     >
-      <mesh geometry={body} castShadow>
-        <meshPhysicalMaterial
-          color={["#d3d5d0", "#28383f", "#a8a8a1", "#565e60"][index % 4]}
-          metalness={0.65}
-          roughness={0.22}
-          clearcoat={1}
+      <StaticInstances>
+        <mesh geometry={body} castShadow>
+          <meshPhysicalMaterial
+            color={["#d3d5d0", "#28383f", "#a8a8a1", "#565e60"][index % 4]}
+            metalness={0.65}
+            roughness={0.22}
+            clearcoat={1}
+          />
+        </mesh>
+        <mesh geometry={glass} castShadow>
+          <meshPhysicalMaterial
+            color="#354b54"
+            metalness={0.9}
+            roughness={0.14}
+            clearcoat={1}
+          />
+        </mesh>
+        <Box
+          p={[0, 1.53, 0]}
+          s={[1.47, 0.07, 1.3]}
+          c={index % 2 ? "#435054" : "#c1c5bf"}
+          metal={0.7}
         />
-      </mesh>
-      <mesh geometry={glass} castShadow>
-        <meshPhysicalMaterial
-          color="#354b54"
-          metalness={0.9}
-          roughness={0.14}
-          clearcoat={1}
-        />
-      </mesh>
-      <Box
-        p={[0, 1.53, 0]}
-        s={[1.47, 0.07, 1.3]}
-        c={index % 2 ? "#435054" : "#c1c5bf"}
-        metal={0.7}
-      />
-      {[-0.88, 0.88].flatMap((x) =>
-        [-1.35, 1.35].map((z) => (
-          <group
-            key={`${x}${z}`}
-            position={[x, 0.42, z]}
-            rotation={[0, 0, Math.PI / 2]}
-          >
-            <Cylinder radius={0.39} height={0.24} c="#202325" metal={0} />
-            <Cylinder radius={0.23} height={0.26} c="#8b989e" />
+        {[-0.88, 0.88].flatMap((x) =>
+          [-1.35, 1.35].map((z) => (
+            <group
+              key={`${x}${z}`}
+              position={[x, 0.42, z]}
+              rotation={[0, 0, Math.PI / 2]}
+            >
+              <Cylinder radius={0.39} height={0.24} c="#202325" metal={0} />
+              <Cylinder radius={0.23} height={0.26} c="#8b989e" />
+            </group>
+          )),
+        )}
+        {[-0.6, 0.6].map((x) => (
+          <group key={x}>
+            <Box p={[x, 0.76, 2.16]} s={[0.43, 0.13, 0.04]} c="#fff0c9" glow />
+            <Box p={[x, 0.76, -2.16]} s={[0.43, 0.11, 0.04]} c="#bd4632" glow />
           </group>
-        )),
-      )}
-      {[-0.6, 0.6].map((x) => (
-        <group key={x}>
-          <Box p={[x, 0.76, 2.16]} s={[0.43, 0.13, 0.04]} c="#fff0c9" glow />
-          <Box p={[x, 0.76, -2.16]} s={[0.43, 0.11, 0.04]} c="#bd4632" glow />
-        </group>
-      ))}
-      <Box p={[0, 0.47, 2.18]} s={[0.85, 0.17, 0.03]} c="#222a2e" />
+        ))}
+        <Box p={[0, 0.47, 2.18]} s={[0.85, 0.17, 0.03]} c="#222a2e" />
+      </StaticInstances>
     </group>
   );
 }

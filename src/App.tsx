@@ -198,11 +198,16 @@ export default function App() {
   useGSAP(
     () => {
       let stops: ScrollStop[] = [];
+      let totalScroll = 1;
       const copies = Array.from(
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
       );
       const measure = () => {
         stops = journeyScrollStops();
+        totalScroll = Math.max(
+          1,
+          document.documentElement.scrollHeight - window.innerHeight,
+        );
       };
       const update = () => {
         if (!stops.length) return;
@@ -220,24 +225,18 @@ export default function App() {
                   : local < 0
                     ? Math.max(0, Math.min(1, (local + 0.12) / 0.12))
                     : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
-            copy.style.opacity = String(opacity);
-            copy.style.visibility = opacity < 0.01 ? "hidden" : "visible";
+            const value = String(opacity),
+              visibility = opacity < 0.01 ? "hidden" : "visible";
+            if (copy.style.opacity !== value) copy.style.opacity = value;
+            if (copy.style.visibility !== visibility)
+              copy.style.visibility = visibility;
           });
         else
           copies.forEach((copy) => {
             copy.style.opacity = "";
             copy.style.visibility = "";
           });
-        setPercent(
-          Math.round(
-            (y /
-              Math.max(
-                1,
-                document.documentElement.scrollHeight - window.innerHeight,
-              )) *
-              100,
-          ),
-        );
+        setPercent(Math.round((y / totalScroll) * 100));
       };
       measure();
       const trigger = ScrollTrigger.create({

@@ -8,6 +8,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Mesh } from "three";
 import { ExteriorSurfaces, groundSurface } from "./ExteriorSurfaces";
+import { StaticInstances } from "./StaticInstances";
 
 export function Building() {
   const logo = useTexture(assetUrl("fast-logo.png"));
@@ -19,7 +20,7 @@ export function Building() {
     ripples.offset.y = clock.elapsedTime * 0.006;
   });
   return (
-    <group>
+    <StaticInstances>
       <Box p={[0, -0.5, -8]} s={[53, 0.7, 63]} c="#a7a99f" metal={0} />
       <Box p={[0, -0.09, -8]} s={[49, 0.12, 59]} c="#aeb8b5" metal={0} />
       <Box p={[0, 0.05, 5]} s={[36, 0.35, 22]} c="#cad0cb" metal={0} />
@@ -218,6 +219,6 @@ export function Building() {
           c="#51595a"
         />
       ))}
-    </group>
+    </StaticInstances>
   );
 }

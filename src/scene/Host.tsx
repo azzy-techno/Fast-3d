@@ -42,6 +42,10 @@ export function Host() {
     if (!root.current) return;
     const p = journeyState.progress;
     root.current.visible = !(p >= 1.602 && p < 1.67);
+    if (!root.current.visible) {
+      state.initialized = false;
+      return;
+    }
     sampleGuide(p, state.p, state.face);
     const cut =
       state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
