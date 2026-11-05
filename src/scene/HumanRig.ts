@@ -153,8 +153,20 @@ export function useHumanRig(
       );
       const badge = new Mesh(
         new PlaneGeometry(0.145, 0.06),
-        new MeshBasicMaterial({ map: logo, toneMapped: false }),
+        new MeshBasicMaterial({
+          map: logo,
+          toneMapped: false,
+          transparent: true,
+        }),
       );
+      const badgeBack = new Mesh(
+        new PlaneGeometry(0.165, 0.078),
+        new MeshBasicMaterial({ color: "#f4f6ed", toneMapped: false }),
+      );
+      badgeBack.position.set(-0.095, 0.085, 0.203);
+      bones.get("Spine2")?.add(badgeBack);
+      ownedGeometry.push(badgeBack.geometry);
+      ownedMaterials.push(badgeBack.material);
       badge.position.set(-0.095, 0.085, 0.205);
       bones.get("Spine2")?.add(badge);
       ownedGeometry.push(badge.geometry);

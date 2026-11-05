@@ -102,11 +102,36 @@ export function Wayfinding({
     ctx.fillRect(0, 0, 1024, c.height);
     ctx.fillStyle = dark ? "#7ecbd6" : "#335b66";
     ctx.fillRect(40, c.height * 0.156, 5, c.height * 0.684);
-    ctx.font = `500 ${Math.min(20, c.height * 0.14)}px sans-serif`;
-    ctx.fillText(sub, 75, c.height * 0.305);
+    const fit = (value: string, size: number) => {
+      ctx.font = `500 ${size}px sans-serif`;
+      const measured = ctx.measureText(value).width;
+      ctx.font = `500 ${Math.min(size, (size * 880) / Math.max(1, measured))}px sans-serif`;
+    };
+    fit(sub, Math.min(20, c.height * 0.14));
+    ctx.fillText(sub, 75, c.height * 0.25);
     ctx.fillStyle = dark ? "#f0ede3" : "#183640";
-    ctx.font = `500 ${Math.min(52, c.height * 0.3)}px sans-serif`;
-    ctx.fillText(text, 72, c.height * 0.625, 880);
+    const size = Math.min(52, c.height * 0.3);
+    ctx.font = `500 ${size}px sans-serif`;
+    const words = text.split(" "),
+      lines: string[] = [];
+    let line = "";
+    for (const word of words) {
+      const next = line ? line + " " + word : word;
+      if (line && ctx.measureText(next).width > 880) {
+        lines.push(line);
+        line = word;
+      } else line = next;
+    }
+    if (line) lines.push(line);
+    if (lines.length <= 2 && lines.length > 1 && c.height > 130) {
+      lines.forEach((value, i) => {
+        fit(value, size * 0.85);
+        ctx.fillText(value, 72, c.height * (0.55 + i * 0.27));
+      });
+    } else {
+      fit(text, size);
+      ctx.fillText(text, 72, c.height * 0.65);
+    }
     const texture = new CanvasTexture(c);
     texture.colorSpace = SRGBColorSpace;
     return texture;
@@ -377,7 +402,7 @@ export function Interior() {
   });
   return (
     <group name="connected-building-interior">
-      <group ref={office} position={[0, 60, 0]}>
+      <group ref={office} visible={false} position={[0, 60, 0]}>
         <AboutHall />
         <AboutGallery />
         <Lift p={[11, 16, -5]} roof elevation={60} />

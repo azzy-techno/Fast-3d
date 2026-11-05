@@ -252,9 +252,8 @@ try {
   await capture(1.53, "workplace-entry");
   await capture(1.535, "about-gallery");
   await capture(1.53, "about-hologram");
-  await capture(1.57515, "about-aramco");
-  await capture(1.5804, "about-saudi-energy");
-  await capture(1.65, "offices");
+  await capture(1.588, "about-binoculars");
+  await capture(1.605, "binocular-pov");
   await capture(1.74, "office-corridor");
   await capture(1.94, "systems-entry");
   await capture(2, "electrical");
@@ -273,6 +272,7 @@ try {
   await capture(2.858, "service-corridor");
   await capture(3, "mechanical");
   await capture(8, "manufacturing");
+  await capture(9, "digital-twin-labels");
   await capture(10, "iiot");
   await capture(1, "phone-host", true);
   await capture(1.535, "phone-about-gallery", true);

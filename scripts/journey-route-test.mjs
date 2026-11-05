@@ -10,7 +10,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts"; export {aboutStations,aboutPoint} from "./src/scene/aboutTour.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
+        'export * from "./src/scene/journey.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -19,8 +19,6 @@ try {
     outfile: file,
   });
   const {
-    aboutStations,
-    aboutPoint,
     electricalDepartureAt,
     sampleJourney,
     sampleGuide,
@@ -96,15 +94,13 @@ try {
     previous.copy(p);
   }
   assert(doors > 10);
-  for (const station of aboutStations) {
-    sampleJourney(station.at + 0.0003, p, target);
-    sampleJourney(station.end - 0.0003, reverse, reverseTarget);
-    assert(
-      p.equals(reverse) && target.equals(reverseTarget),
-      `About stop ${station.number} holds still`,
-    );
-    assert(guideIsPresenting(station.at + 0.0009));
-  }
+  sampleJourney(1.585, p, target);
+  sampleJourney(1.591, reverse, reverseTarget);
+  assert(
+    p.equals(reverse) && target.equals(reverseTarget),
+    "Binocular presentation holds still",
+  );
+  assert(guideIsPresenting(1.588));
   for (let chapter = 2; chapter < 11; chapter++)
     for (let n = 0; n <= 100; n++) {
       const raw = chapter + 0.6 + (n * 0.16) / 100;

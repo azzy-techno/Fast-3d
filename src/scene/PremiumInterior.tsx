@@ -172,7 +172,7 @@ export function Reception() {
       <group ref={lift}>
         <Lift p={[0, 12, -37]} exit />
       </group>
-      <group ref={root} name="ground-floor-reception">
+      <group ref={root} visible={false} name="ground-floor-reception">
         <StaticInstances>
           <Box p={[0, 0.18, -23]} s={[4.6, 0.14, 30]} c="#c5bca7" metal={0.2} />
           <Box p={[0, 5.5, -22]} s={[4.6, 0.18, 26]} c="#d8d1c1" metal={0} />

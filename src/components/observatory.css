@@ -1,0 +1,537 @@
+.observatory {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: #071c2b;
+  color: #eaf5f4;
+  overflow: hidden;
+  z-index: 90;
+}
+.observatory::backdrop {
+  background: #071c2b;
+}
+.observatory[open] {
+  animation: observatory-reveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.observatory-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+.observatory-aurora {
+  position: absolute;
+  inset: -20%;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 25% 65%, #1f78825e, transparent 45%),
+    radial-gradient(ellipse at 85% 20%, #4b549a55, transparent 40%),
+    radial-gradient(ellipse at 60% 110%, #9ad5cb33, transparent 55%);
+  pointer-events: none;
+}
+.observatory-orbit {
+  position: absolute;
+  inset: 15% -20% -75%;
+  z-index: -1;
+  border: 1px solid #7ae7ec30;
+  border-radius: 50%;
+  box-shadow:
+    0 0 100px #63ccd012,
+    inset 0 0 100px #63ccd010;
+  transform: rotateX(65deg);
+  pointer-events: none;
+}
+.observatory-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 4vw;
+  border-bottom: 1px solid #a5d9e022;
+}
+.observatory-brand {
+  width: 130px;
+  height: 50px;
+  object-fit: contain;
+  background: #f1f5ee;
+  padding: 10px;
+}
+.observatory-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.17em;
+  font-size: 10px;
+  color: #9bd9df;
+}
+.observatory-header h2 {
+  font-size: 22px;
+  font-weight: 400;
+  margin: 6px 0 0;
+  letter-spacing: -0.02em;
+}
+.observatory-exit {
+  margin-inline-start: auto;
+  border: 1px solid #b4d7d34a;
+  padding: 14px 18px;
+  display: flex;
+  gap: 26px;
+  align-items: center;
+  font-size: 12px;
+  min-height: 44px;
+}
+.observatory button,
+.observatory a {
+  color: inherit;
+}
+.observatory button:focus-visible,
+.observatory a:focus-visible,
+.observatory-viewport:focus-visible {
+  outline: 2px solid #cdf8f3;
+  outline-offset: 4px;
+}
+.observatory-nav {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  z-index: 3;
+}
+.observatory-nav button {
+  padding: 12px 18px;
+  font-size: 12px;
+  color: #b6d1d8;
+  border: 1px solid transparent;
+  min-height: 44px;
+}
+.observatory-nav button span {
+  font-size: 9px;
+  margin-inline-end: 12px;
+  color: #93cbd0;
+}
+.observatory-nav button[aria-pressed="true"] {
+  background: #bedfdb14;
+  border-color: #b2d6d744;
+  color: #f3f9f6;
+}
+.observatory-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  perspective: 1100px;
+  overflow: hidden;
+  touch-action: none;
+}
+.observatory-world {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.observatory-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 210px;
+  background: #163642f2;
+  border: 1px solid #86d5df68;
+  padding: 18px 20px;
+  text-align: start;
+  box-shadow:
+    0 20px 50px #0003,
+    inset 0 0 35px #b1f5f108;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  backface-visibility: hidden;
+}
+.observatory-card:hover {
+  border-color: #d0faf3;
+  background: #214955;
+}
+.observatory-card-index {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  color: #9fcbd3;
+}
+.observatory-card img {
+  height: 84px;
+  width: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+  padding: 10px;
+  margin: 10px 0 12px;
+}
+.observatory-card strong {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+.observatory-card-action {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 10px;
+  color: #b6dbe0;
+}
+.observatory-card-action b {
+  font-size: 16px;
+  font-weight: 400;
+}
+.observatory-introduction {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vh, 60px) 32px;
+  text-align: center;
+}
+.observatory-introduction h3 {
+  font-size: clamp(30px, 4.3vw, 64px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.055em;
+  margin: 16px 0;
+}
+.observatory-introduction h3 em {
+  font-style: normal;
+  color: #9cdde0;
+}
+.observatory-introduction > p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #b4ced5;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.observatory-portals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 30px auto 0;
+  max-width: 800px;
+}
+.observatory-portals button {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 22px 16px;
+  border: 1px solid #a9dce044;
+  background: #bbf0e806;
+}
+.observatory-portals button:hover {
+  background: #b6efe916;
+}
+.portal-symbol {
+  font-size: 38px;
+  line-height: 1;
+  color: #afe6e1;
+}
+.observatory-portals strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.observatory-portals button > span:last-child {
+  font-size: 10px;
+  color: #b1cfd6;
+}
+.observatory-footer {
+  padding: 18px 4vw;
+  border-top: 1px solid #9fdae022;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 2;
+  background: #071c2b88;
+}
+.observatory-footer p {
+  font-size: 11px;
+  color: #aacbd3;
+  margin: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.observatory-footer i {
+  height: 5px;
+  width: 5px;
+  flex-shrink: 0;
+  background: #90e7d6;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #99f8dd;
+}
+.observatory-footer > div {
+  display: flex;
+  gap: 12px;
+}
+.observatory-footer button {
+  font-size: 11px;
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid #bbdfe43a;
+}
+.observatory-detail-wrap {
+  position: absolute;
+  inset: 100px 0 70px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: #061722d9;
+  padding: 20px;
+  overflow: auto;
+}
+.observatory-detail {
+  width: min(620px, 100%);
+  background: #15313e;
+  border: 1px solid #96d5d85c;
+  padding: 28px;
+  box-shadow: 0 30px 100px #0006;
+  outline: none;
+}
+.observatory-detail-close {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 12px;
+  margin-bottom: 20px;
+  min-height: 44px;
+}
+.observatory-detail-close span {
+  font-size: 24px;
+}
+.observatory-detail > img {
+  display: block;
+  width: 100%;
+  height: clamp(100px, 22vh, 220px);
+  object-fit: contain;
+  background: #fff;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+.observatory-detail h3 {
+  font-size: 26px;
+  line-height: 1.3;
+  margin: 12px 0;
+}
+.observatory-detail p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #c0d7dd;
+}
+.observatory-detail a {
+  display: inline-block;
+  border-bottom: 1px solid #b4d4d7;
+  padding: 12px 0;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.is-grid .observatory-viewport {
+  overflow: auto;
+  touch-action: pan-y;
+}
+.is-grid .observatory-world {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  width: min(1200px, 100%);
+  height: auto;
+  margin: auto;
+  padding: 24px 32px;
+  transform: none !important;
+}
+.is-grid .observatory-card {
+  position: relative;
+  width: 100%;
+  height: 225px;
+  transform: none !important;
+}
+.is-grid .observatory-introduction {
+  padding-bottom: 40px;
+}
+@keyframes observatory-reveal {
+  from {
+    clip-path: ellipse(6% 10% at 50% 50%);
+    opacity: 0.2;
+  }
+  to {
+    clip-path: ellipse(110% 110% at 50% 50%);
+    opacity: 1;
+  }
+}
+@media (max-width: 700px) {
+  .observatory-header {
+    padding: 16px;
+    gap: 12px;
+  }
+  .observatory-brand {
+    width: 85px;
+    height: 38px;
+    padding: 7px;
+  }
+  .observatory-header h2 {
+    font-size: 15px;
+  }
+  .observatory-header .observatory-eyebrow {
+    display: none;
+  }
+  .observatory-exit {
+    font-size: 10px;
+    padding: 9px;
+    gap: 8px;
+    max-width: 110px;
+  }
+  .observatory-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 10px;
+    gap: 4px;
+  }
+  .observatory-nav button {
+    font-size: 11px;
+    padding: 8px;
+    text-align: start;
+  }
+  .observatory-nav button span {
+    margin-inline-end: 8px;
+  }
+  .observatory-footer {
+    padding: 10px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .observatory-footer p {
+    font-size: 10px;
+  }
+  .observatory-footer > div {
+    justify-content: space-between;
+  }
+  .observatory-introduction {
+    padding: 18px 20px;
+  }
+  .observatory-introduction > p {
+    font-size: 12px;
+  }
+  .observatory-portals {
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .observatory-portals button {
+    padding: 16px 8px;
+  }
+  .observatory-portals strong {
+    font-size: 11px;
+  }
+  .observatory-portals button > span:last-child {
+    font-size: 9px;
+  }
+  .observatory-detail-wrap {
+    inset: 78px 0 0;
+    padding: 14px;
+  }
+  .observatory-detail {
+    padding: 18px;
+  }
+  .observatory-detail h3 {
+    font-size: 21px;
+  }
+  .observatory-detail p {
+    font-size: 12px;
+  }
+  .is-grid .observatory-world {
+    padding: 16px;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .is-grid .observatory-card {
+    padding: 12px;
+    height: 230px;
+  }
+  .observatory-card strong {
+    font-size: 12px;
+  }
+  .observatory-card img {
+    height: 85px;
+    padding: 6px;
+  }
+  .observatory-card {
+    width: 260px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .observatory[open] {
+    animation: none;
+  }
+  .observatory-world {
+    will-change: auto;
+  }
+}
+.observatory-viewport:has(.observatory-introduction) {
+  overflow: auto;
+  touch-action: pan-y;
+}
+
+.observatory-language {
+  margin-inline-start: auto;
+  font-size: 12px;
+  min-height: 44px;
+  padding: 10px;
+}
+.observatory-exit {
+  margin-inline-start: 0;
+}
+@media (max-width: 700px) {
+  .observatory-language {
+    font-size: 10px;
+    padding: 5px;
+  }
+  .observatory-header {
+    gap: 8px;
+  }
+  .observatory-header h2 {
+    font-size: 13px;
+  }
+  .observatory-exit {
+    max-width: 88px;
+  }
+}
+
+.observatory-shell {
+  overflow: clip;
+}
+.observatory-aurora {
+  inset: 0;
+}
+.observatory-orbit {
+  inset: 15% 0 -75%;
+}
+.observatory-footer {
+  flex-wrap: nowrap;
+}
+.observatory-footer > div {
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: auto;
+}
+.observatory-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 28%, #b6ebdf80 90%, transparent),
+    radial-gradient(1px 1px at 83% 37%, #b6ebdf80 90%, transparent),
+    radial-gradient(1px 1px at 70% 12%, #b6ebdf60 90%, transparent),
+    radial-gradient(1px 1px at 27% 77%, #b6ebdf60 90%, transparent),
+    radial-gradient(1px 1px at 92% 68%, #b6ebdf80 90%, transparent);
+}

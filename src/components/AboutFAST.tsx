@@ -27,52 +27,47 @@ function ProjectionArrow() {
 
 export function AboutWelcome({
   rtl,
-  onOpen,
   onContinue,
+  onLift,
 }: {
   rtl: boolean;
-  onOpen: (panel: AboutPanel) => void;
   onContinue: () => void;
+  onLift: () => void;
 }) {
-  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.546);
+  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.735);
+  const pending = useTour((s) => s.observatoryPending);
   if (!visible) return null;
   return (
     <aside
       className="about-welcome"
-      aria-label={rtl ? "عن فاست" : "About FAST gallery"}
+      aria-label={rtl ? "مرصد فاست" : "FAST Observatory"}
     >
       <span className="about-eyebrow">
-        12 / {rtl ? "معرض فاست" : "THE FAST GALLERY"}
+        12 / {rtl ? "مرصد فاست" : "THE FAST OBSERVATORY"}
       </span>
-      <h2>
-        {rtl
-          ? "خبرة عالمية. تنفيذ سعودي."
-          : "Global expertise. Saudi delivery."}
-      </h2>
+      <h2>{rtl ? "اقترب. واكتشف المزيد." : "Look closer. Discover more."}</h2>
       <p>
         {rtl
-          ? "تعرّف على فاست وشهاداتنا وشبكة شركائنا. اختر عرضاً لاستكشافه."
-          : "Meet FAST, explore our credentials, and discover the people behind our technology. Select a projection."}
+          ? "رافق مهندس فاست إلى المنظار في وسط القاعة. استكشف شهاداتنا وعلاقاتنا الصناعية وشركاءنا من منظورك الخاص."
+          : "Follow your FAST engineer to the binoculars at the heart of the hall. Step into a new perspective on our credentials, industry relationships and partners."}
       </p>
-      <div className="about-launchers">
-        {aboutTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onOpen(tab.id)}
-            aria-haspopup="dialog"
-            data-about-open={tab.id}
-          >
-            <span>{tab.number}</span>
-            {rtl ? tab.ar : tab.en}
-            <b aria-hidden="true">
-              <ProjectionArrow />
-            </b>
-          </button>
-        ))}
-      </div>
-      <button className="about-continue" onClick={onContinue}>
-        {rtl ? "ابدأ الجولة مع مهندس فاست" : "Start the guided presentation"}{" "}
-        <span aria-hidden="true">↓</span>
+      <button
+        className="about-continue"
+        disabled={pending}
+        onClick={onContinue}
+      >
+        {rtl
+          ? pending
+            ? "نقترب من المنظار…"
+            : "انظر عبر المنظار"
+          : pending
+            ? "Approaching the binoculars…"
+            : "Look through the binoculars"}{" "}
+        <span aria-hidden="true">◎</span>
+      </button>
+      <button className="observatory-skip" onClick={onLift}>
+        {rtl ? "اختر طابق الخدمات" : "Choose a service floor"}{" "}
+        <span className="direction-arrow" aria-hidden="true" />
       </button>
     </aside>
   );

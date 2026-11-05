@@ -1,6 +1,5 @@
-import { aboutStationAt } from "./aboutTour";
 import { electricalStationAt } from "./electricalTour";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   PerspectiveCamera,
@@ -24,7 +23,6 @@ import { Building } from "./Building";
 import { Interior, RoofAccess } from "./Architecture";
 import { Atmosphere } from "./Atmosphere";
 import { journeyState, sampleJourney } from "./journey";
-const ExteriorEffects = lazy(() => import("./ExteriorEffects"));
 
 function World({
   onReady,
@@ -41,6 +39,7 @@ function World({
   const ready = useRef(false),
     initialized = useRef(false),
     warmed = useRef(false);
+  const diagnosticTime = useRef(0);
   const progress = useRef(useTour.getState().progress);
   const jumpVersion = useRef(useTour.getState().jumpVersion);
   const sun = useRef<DirectionalLight>(null),
@@ -58,17 +57,16 @@ function World({
   );
   useEffect(() => {
     let cancelled = false;
-    const hidden: Group[] = [];
-    scene.traverse((object) => {
-      if (!object.visible) {
-        hidden.push(object as Group);
-        object.visible = true;
-      }
-    });
-    const compile = gl.compileAsync(scene, camera);
-    hidden.forEach((object) => {
-      object.visible = false;
-    });
+    // Only warm the visible opening scene. Hidden floors share these materials;
+    // compiling every floor here stalls the first interaction on integrated GPUs.
+    const compile = new Promise<void>((resolve) =>
+      requestAnimationFrame(() => {
+        gl.compileAsync(scene, camera).then(
+          () => resolve(),
+          () => resolve(),
+        );
+      }),
+    );
     compile
       .then(() => {
         if (!cancelled) warmed.current = true;
@@ -86,6 +84,7 @@ function World({
       !initialized.current ||
       jumpVersion.current !== useTour.getState().jumpVersion
     ) {
+      diagnosticTime.current = 0.1;
       progress.current = requested;
       initialized.current = true;
       jumpVersion.current = useTour.getState().jumpVersion;
@@ -185,14 +184,23 @@ function World({
     if (scene.background instanceof Color)
       scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
     if (shell.current) shell.current.visible = p < 1.38 || p > 11.825;
-    if (city.current) city.current.visible = true;
-    gl.domElement.dataset.journey = p.toFixed(4);
-    gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
-    gl.domElement.dataset.towerHeight = "83";
-    gl.domElement.dataset.aboutStation = String(aboutStationAt(p)?.number ?? 0);
-    gl.domElement.dataset.electricalStation = String(
-      electricalStationAt(p)?.number ?? 0,
-    );
+    if (city.current) city.current.visible = p < 1.38 || p > 11.72;
+    if (useTour.getState().observatoryPending && Math.abs(p - 1.605) < 0.0004)
+      useTour.getState().setObservatory(true);
+    diagnosticTime.current += dt;
+    if (diagnosticTime.current >= 0.1) {
+      diagnosticTime.current = 0;
+      gl.domElement.dataset.journey = p.toFixed(4);
+      gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
+      gl.domElement.dataset.towerHeight = "83";
+      gl.domElement.dataset.aboutStation = "0";
+      gl.domElement.dataset.electricalStation = String(
+        electricalStationAt(p)?.number ?? 0,
+      );
+      gl.domElement.dataset.drawCalls = String(gl.info.render.calls);
+      gl.domElement.dataset.triangles = String(gl.info.render.triangles);
+      gl.domElement.dataset.pixelRatio = gl.getPixelRatio().toFixed(2);
+    }
     if (warmed.current && !ready.current) {
       ready.current = true;
       gl.domElement.dataset.ready = "true";
@@ -211,7 +219,7 @@ function World({
         intensity={2.6}
         color="#ffdfb1"
         castShadow
-        shadow-mapSize={mobile ? [1024, 1024] : [2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-55}
         shadow-camera-right={55}
         shadow-camera-top={110}
@@ -233,7 +241,6 @@ function World({
         decay={1.7}
         angle={1.15}
         penumbra={0.8}
-        castShadow
         shadow-mapSize={[512, 512]}
         shadow-camera-near={0.2}
         shadow-camera-far={20}
@@ -266,6 +273,13 @@ function World({
     </>
   );
 }
+function PausedFrame({ paused }: { paused: boolean }) {
+  const { advance, clock } = useThree();
+  useEffect(() => {
+    if (paused) advance(clock.elapsedTime + 1 / 60);
+  }, [paused, advance, clock]);
+  return null;
+}
 export default function Experience({
   onReady,
   onFailure,
@@ -277,7 +291,15 @@ export default function Experience({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mobile, setMobile] = useState(window.innerWidth < 900);
-  const [enhanced, setEnhanced] = useState(true);
+  const [resolution, setResolution] = useState(1);
+  const observatoryOpen = useTour((s) => s.observatoryOpen);
+  const panelOpen = useTour((s) => s.aboutPanel !== null);
+  const [hidden, setHidden] = useState(document.hidden);
+  useEffect(() => {
+    const fn = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", fn);
+    return () => document.removeEventListener("visibilitychange", fn);
+  }, []);
   useEffect(() => {
     const canvas = canvasRef.current;
     const lost = (event: Event) => {
@@ -296,7 +318,8 @@ export default function Experience({
     <div className="scene" aria-hidden="true">
       <Canvas
         ref={canvasRef}
-        dpr={mobile ? 1 : enhanced ? [1, 1.25] : 1}
+        dpr={resolution}
+        frameloop={observatoryOpen || panelOpen || hidden ? "never" : "always"}
         shadows
         camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 1000 }}
         gl={{
@@ -309,17 +332,13 @@ export default function Experience({
       >
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
+          <PausedFrame paused={observatoryOpen || panelOpen} />
           <PerformanceMonitor
             ms={500}
             iterations={4}
-            bounds={() => [24, 45]}
-            onDecline={() => setEnhanced(false)}
+            bounds={() => [35, 50]}
+            onDecline={() => setResolution((r) => Math.max(0.7, r - 0.15))}
           />
-          {!mobile && enhanced && (
-            <Suspense fallback={null}>
-              <ExteriorEffects />
-            </Suspense>
-          )}
         </Suspense>
       </Canvas>
     </div>

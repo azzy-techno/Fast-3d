@@ -1,21 +1,11 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo } from "react";
 import { useTexture } from "@react-three/drei";
-import {
-  MathUtils,
-  Object3D,
-  SpotLight,
-  RepeatWrapping,
-  SRGBColorSpace,
-} from "three";
+import { RepeatWrapping, SRGBColorSpace } from "three";
 import { Box, Cylinder } from "./Primitives";
 import { Wayfinding, Planter } from "./Architecture";
 import { StaticInstances } from "./StaticInstances";
-import { aboutPoint, aboutStations, aboutStationAt } from "./aboutTour";
 import { assetUrl } from "../lib/assets";
-import { journeyState } from "./journey";
 import { useTour } from "../store";
-import type { Point } from "../data/chapters";
 
 function slabPieces(hole: [number, number, number, number]) {
   const [x0, x1, z0, z1] = hole;
@@ -203,9 +193,7 @@ export function AboutHall() {
           height={1.2}
         />
       </StaticInstances>
-      {aboutStations.map((s) => (
-        <HallDisplay key={s.number} station={s} />
-      ))}
+      <BinocularStation />
       <group position={[0, 3.6, 40]}>
         <mesh>
           <sphereGeometry args={[1.6, 24, 16]} />
@@ -232,177 +220,98 @@ export function AboutHall() {
           <Planter key={`${x}-${z}`} p={[x, 0, z]} scale={1.3} />
         )),
       )}
-      <HallLight />
+      <pointLight
+        position={[0, 4.6, 30]}
+        color="#a7e6ee"
+        intensity={70}
+        distance={12}
+      />
     </group>
   );
 }
-function HallDisplay({
-  station: s,
-}: {
-  station: (typeof aboutStations)[number];
-}) {
-  const image = useTexture(assetUrl(s.image));
-  const logo = useTexture(assetUrl("fast-logo.png"));
-  const isCert = s.panel === "certifications",
-    isPartner = s.panel === "partners";
-  const dims = image.image as { width: number; height: number };
-  const ratio = (dims?.width || 1) / (dims?.height || 1);
-  const w = Math.min(isCert ? 2.2 : 3.5, (isCert ? 2.9 : 1.7) * ratio),
-    h = w / ratio;
-  const open = () => {
-    if (s.partnerId) useTour.getState().setAboutPartner(s.partnerId);
-    useTour.getState().setAboutPanel(s.panel);
-  };
+function BinocularStation() {
+  const begin = useTour((s) => s.beginObservatory);
   return (
     <group
-      position={[s.x, 0, s.z]}
-      rotation={[0, s.rotation, 0]}
-      name={`about-display-${s.number}`}
+      position={[0, 0, 30]}
+      name="fast-binocular-observatory"
+      onClick={begin}
     >
       <StaticInstances>
-        <Box p={[0, 2.7, -0.11]} s={[5.1, 5.4, 0.22]} c="#263f47" metal={0.2} />
-        <Box
-          p={[0, 2.7, 0.025]}
-          s={[4.8, 5.1, 0.04]}
-          c={isCert ? "#b9ad96" : "#d6d8ca"}
-          metal={0.06}
+        <Cylinder
+          p={[0, 0.12, 0]}
+          radius={0.7}
+          height={0.24}
+          c="#a48d61"
+          metal={0.65}
         />
-        {[-2.48, 2.48].map((x) => (
+        <Cylinder
+          p={[0, 0.75, 0]}
+          radius={0.13}
+          height={1.3}
+          c="#d6dedc"
+          metal={0.7}
+        />
+        <Box p={[0, 1.45, 0]} s={[1, 0.22, 0.55]} c="#193743" metal={0.55} />
+        {[-0.25, 0.25].map((x) => (
           <group key={x}>
-            <Box
-              p={[x, 2.7, 0.07]}
-              s={[0.075, 5.2, 0.12]}
-              c="#c9ad73"
+            <Cylinder
+              p={[x, 1.65, 0]}
+              radius={0.21}
+              height={0.85}
+              c="#d5d8ce"
+              r={[Math.PI / 2, 0, 0]}
               metal={0.65}
             />
-            <Box
-              p={[x * 0.95, 2.7, 0.11]}
-              s={[0.025, 4.9, 0.02]}
-              c="#c4e7e3"
-              glow
+            <Cylinder
+              p={[x, 1.65, 0.48]}
+              radius={0.13}
+              height={0.16}
+              c="#183643"
+              r={[Math.PI / 2, 0, 0]}
+            />
+            <Cylinder
+              p={[x, 1.65, 0.57]}
+              radius={0.09}
+              height={0.025}
+              c="#5ddae8"
+              r={[Math.PI / 2, 0, 0]}
+              metal={0.8}
+            />
+            <Cylinder
+              p={[x, 1.65, -0.44]}
+              radius={0.18}
+              height={0.025}
+              c="#527d90"
+              r={[Math.PI / 2, 0, 0]}
+            />
+            <Cylinder
+              p={[x * 2, 1.28, 0.14]}
+              radius={0.045}
+              height={0.35}
+              c="#ae9464"
             />
           </group>
         ))}
-        <Box p={[0, 5.5, 0]} s={[5.4, 0.12, 0.75]} c="#536368" metal={0.5} />
-        <Box p={[0, 5.42, 0.16]} s={[5.05, 0.025, 0.45]} c="#ffe6be" glow />
-        {[-1.9, 1.9].map((x) => (
-          <Cylinder
-            key={x}
-            p={[x, 5.95, 0]}
-            radius={0.025}
-            height={1.1}
-            c="#929d99"
-          />
-        ))}
         <Wayfinding
-          text={`${String(s.number).padStart(2, "0")} / ${s.title.toUpperCase()}`}
-          sub={
-            isCert
-              ? "CERTIFICATIONS & LICENSES"
-              : isPartner
-                ? "INTERNATIONAL TECHNOLOGY PARTNER"
-                : "APPROVALS & SUPPLIER REGISTRATIONS"
-          }
-          p={[0, 4.82, 0.12]}
-          width={4.55}
-          height={0.7}
+          text="A CLOSER LOOK AT FAST"
+          sub="LOOK THROUGH / DISCOVER OUR WORLD"
+          p={[0, 0.55, 0.3]}
+          width={2.2}
+          height={0.55}
         />
-        <Wayfinding
-          text={isPartner ? s.title : s.note}
-          sub="FAST OPERATIONS & MAINTENANCE"
-          p={[0, isCert ? 0.65 : 1.35, 0.14]}
-          width={4.55}
-          height={0.65}
-        />
-        <Box p={[0, 0.09, 0.2]} s={[5.35, 0.18, 1.5]} c="#53696a" />
-        {!isCert && (
-          <Box p={[0, 3.1, 0.12]} s={[4, 2.05, 0.06]} c="#f3f5ee" metal={0} />
-        )}
       </StaticInstances>
-      {s.number >= 30 && (
-        <group rotation={[0, Math.PI, 0]} position={[0, 0, -0.24]}>
-          <Wayfinding
-            text={s.title}
-            sub="DISCOVER OUR GLOBAL TECHNOLOGY PARTNERS"
-            p={[0, 4.45, 0.02]}
-            width={4.5}
-            height={0.85}
-          />
-          <Box p={[0, 2.9, 0.02]} s={[4, 2.05, 0.04]} c="#f3f5ee" metal={0} />
-          <mesh position={[0, 2.9, 0.05]} onClick={open}>
-            <planeGeometry args={[w, h]} />
-            <meshBasicMaterial map={image} toneMapped={false} />
-          </mesh>
-          <Wayfinding
-            text="GLOBAL EXPERTISE. SAUDI DELIVERY."
-            sub="FAST OPERATIONS & MAINTENANCE"
-            p={[0, 1.2, 0.02]}
-            width={4.5}
-            height={0.65}
-          />
-        </group>
-      )}
-      <mesh position={[0, isCert ? 2.65 : 3.1, 0.18]} onClick={open}>
-        <planeGeometry args={[w, h]} />
-        <meshBasicMaterial map={image} toneMapped={false} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
+        <ringGeometry args={[2.6, 2.65, 64]} />
+        <meshBasicMaterial color="#6acbd4" />
       </mesh>
-      {isCert && (
-        <mesh position={[1.65, 0.65, 0.17]}>
-          <planeGeometry args={[0.85, 0.28]} />
-          <meshBasicMaterial map={logo} toneMapped={false} />
-        </mesh>
-      )}
-      <group position={[-1.8, 0.92, 1.1]} onClick={open}>
-        <Box s={[0.12, 1.8, 0.12]} c="#a79164" metal={0.65} />
-        <Box
-          p={[0, 0.93, 0]}
-          s={[1.2, 0.08, 0.7]}
-          c="#20434e"
-          r={[-0.25, 0, 0]}
-        />
-      </group>
-    </group>
-  );
-}
-function HallLight() {
-  const light = useRef<SpotLight>(null),
-    target = useMemo(() => new Object3D(), []);
-  useFrame((_, dt) => {
-    const s = aboutStationAt(journeyState.progress);
-    if (!light.current) return;
-    const p = s ? aboutPoint(s, 0, 2.6, 0.1) : [0, 78, 12];
-    target.position.set(p[0], p[1] - 76, p[2]);
-    target.updateMatrixWorld();
-    const pos = s ? aboutPoint(s, 0, 5.7, 4) : [0, 81.7, 15];
-    light.current.position.x = MathUtils.damp(
-      light.current.position.x,
-      pos[0],
-      8,
-      Math.min(dt, 0.1),
-    );
-    light.current.position.y = 5.7;
-    light.current.position.z = MathUtils.damp(
-      light.current.position.z,
-      pos[2],
-      8,
-      Math.min(dt, 0.1),
-    );
-  });
-  return (
-    <>
-      <primitive object={target} />
-      <spotLight
-        ref={light}
-        target={target}
-        intensity={180}
-        color="#ffe7c6"
-        distance={17}
-        angle={0.85}
-        penumbra={0.8}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0003}
+      <Wayfinding
+        text="THE FAST OBSERVATORY"
+        sub="CREDENTIALS / INDUSTRY / GLOBAL PARTNERS"
+        p={[0, 3.7, -3]}
+        width={8}
+        height={1.2}
       />
-    </>
+    </group>
   );
 }

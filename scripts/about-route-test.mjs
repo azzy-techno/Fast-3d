@@ -8,7 +8,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts";export * from "./src/scene/aboutTour.ts";export * from "./src/lib/journeyScroll.ts";export {Vector3} from "three";',
+        'export * from "./src/scene/journey.ts";export * from "./src/scene/aboutTour.ts";export {aboutItems} from "./src/data/observatory.ts";export * from "./src/lib/journeyScroll.ts";export {Vector3} from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -17,7 +17,7 @@ try {
     outfile: dir + "/route.mjs",
   });
   const {
-    aboutStations,
+    aboutItems,
     sampleJourney,
     sampleGuide,
     guideIsPresenting,
@@ -25,8 +25,8 @@ try {
     scrollAtProgress,
     progressAtScroll,
   } = await import(pathToFileURL(dir + "/route.mjs"));
-  assert.equal(aboutStations.length, 33);
-  assert.equal(aboutStations.filter((s) => s.panel === "partners").length, 13);
+  assert.equal(aboutItems.length, 33);
+  assert.equal(aboutItems.filter((s) => s.panel === "partners").length, 13);
   const camera = new Vector3(),
     target = new Vector3(),
     guide = new Vector3(),
@@ -58,36 +58,25 @@ try {
           Math.abs(person.x) < 32.5 && person.z > -11.5 && person.z < 67.5,
           "Stay within the hall",
         );
-        for (const s of aboutStations) {
-          const dx = person.x - s.x,
-            dz = person.z - s.z;
-          const x = dx * Math.cos(s.rotation) - dz * Math.sin(s.rotation),
-            z = dx * Math.sin(s.rotation) + dz * Math.cos(s.rotation);
-          const dist = Math.hypot(
-            Math.max(0, Math.abs(x) - 2.7),
-            Math.max(0, -0.3 - z, z - 1.5),
-          );
-          minDisplay = Math.min(minDisplay, dist);
-          assert(
-            dist > 0.42,
-            `Clear display ${s.number} at ${p}: ${person.toArray()}`,
-          );
-        }
+        const d = Math.hypot(person.x, person.z - 30);
+        minDisplay = Math.min(minDisplay, d);
+        assert(d > 0.75, "Camera and guide clear the binocular pedestal");
       }
     }
   }
   assert(maxStep < 0.2, `Camera continuous: ${maxStep}`);
   assert(maxGuideStep < 0.2, `Guide continuous: ${maxGuideStep}`);
-  assert(minSeparation > 1, `Guide/camera separation: ${minSeparation}`);
-  for (const s of aboutStations) {
-    const p = s.at + 0.0009;
-    sampleJourney(p, camera, target);
-    sampleGuide(p, guide, face);
-    assert(guideIsPresenting(p));
-    assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 4);
-    sampleJourney(s.end - 0.0001, previous, prevGuide);
-    assert(camera.equals(previous), "Stationary viewing hold");
-  }
+  assert(
+    minSeparation > 0.3,
+    `Guide/camera separation during the POV handoff: ${minSeparation}`,
+  );
+  sampleJourney(1.585, camera, target);
+  sampleJourney(1.591, previous, prevGuide);
+  assert(camera.equals(previous), "Presentation viewing hold");
+  assert(guideIsPresenting(1.588));
+  sampleJourney(1.605, camera, target);
+  sampleJourney(1.65, previous, prevGuide);
+  assert(camera.equals(previous), "Steady first-person binocular hold");
   const stops = [
     { at: 0, y: 0 },
     { at: 1, y: 2000 },
@@ -105,7 +94,7 @@ try {
   }
   console.log({
     passed: true,
-    stations: 33,
+    companyDisplays: 33,
     samples: 50001,
     minSeparation,
     minDisplay,

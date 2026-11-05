@@ -1,9 +1,15 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { CanvasTexture, Group } from "three";
+import { CanvasTexture, Group, SRGBColorSpace, Object3D } from "three";
 import { Box, Cylinder, Pipe, Screen } from "./Primitives";
 import type { Point } from "../data/chapters";
 
+function shown(object: Object3D | null) {
+  if (!object) return false;
+  for (let p: Object3D | null = object; p; p = p.parent)
+    if (!p.visible) return false;
+  return true;
+}
 function Label({
   text,
   p,
@@ -13,31 +19,40 @@ function Label({
   p: Point;
   width?: number;
 }) {
-  const texture = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 96;
-    const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#15344a";
-    ctx.fillRect(0, 0, 512, 96);
+  const { texture, plateWidth, plateHeight } = useMemo(() => {
+    const canvas = document.createElement("canvas"),
+      ctx = canvas.getContext("2d")!;
     ctx.font = "600 40px sans-serif";
+    const measured = ctx.measureText(text).width;
+    canvas.width = Math.ceil(Math.max(512, Math.min(1600, measured + 80)));
+    canvas.height = 100;
+    ctx.fillStyle = "#15344a";
+    ctx.fillRect(0, 0, canvas.width, 100);
+    ctx.font = `600 ${Math.min(40, (40 * (canvas.width - 80)) / measured)}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#c9e6ee";
-    ctx.fillText(text, 256, 48);
-    return new CanvasTexture(canvas);
-  }, [text]);
+    ctx.fillStyle = "#e1f2f4";
+    ctx.fillText(text, canvas.width / 2, 50);
+    const texture = new CanvasTexture(canvas);
+    texture.colorSpace = SRGBColorSpace;
+    return {
+      texture,
+      plateWidth: (width * canvas.width) / 512,
+      plateHeight: (width * 100) / 512,
+    };
+  }, [text, width]);
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <mesh position={p}>
-      <planeGeometry args={[width, (width * 96) / 512]} />
-      <meshBasicMaterial map={texture} />
+      <planeGeometry args={[plateWidth, plateHeight]} />
+      <meshBasicMaterial map={texture} toneMapped={false} />
     </mesh>
   );
 }
 function Fan({ p, radius = 1 }: { p: Point; radius?: number }) {
   const blades = useRef<Group>(null);
   useFrame((_, dt) => {
+    if (!shown(blades.current)) return;
     if (blades.current) blades.current.rotation.y += Math.min(dt, 0.05) * 2;
   });
   return (
@@ -475,6 +490,7 @@ export function Servers() {
 function Conveyor({ vision = false }: { vision?: boolean }) {
   const goods = useRef<Group>(null);
   useFrame(({ clock }) => {
+    if (!shown(goods.current)) return;
     if (goods.current)
       goods.current.children.forEach((box, i) => {
         const x = ((clock.elapsedTime * 0.65 + i * 3.2) % 9.6) - 4.8;
@@ -538,6 +554,7 @@ function Robot({ p, mirrored = false }: { p: Point; mirrored?: boolean }) {
     elbow = useRef<Group>(null),
     tool = useRef<Group>(null);
   useFrame(({ clock }) => {
+    if (!shown(base.current)) return;
     const t = clock.elapsedTime * 0.65 + (mirrored ? Math.PI : 0);
     if (base.current)
       base.current.rotation.y = Math.sin(t) * 0.38 + (mirrored ? Math.PI : 0);
@@ -639,6 +656,7 @@ export function ControlRoom() {
 export function IoT() {
   const trace = useRef<Group>(null);
   useFrame(({ clock }) => {
+    if (!shown(trace.current)) return;
     if (trace.current)
       trace.current.position.x = Math.sin(clock.elapsedTime) * 3;
   });

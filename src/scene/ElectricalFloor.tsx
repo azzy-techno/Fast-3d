@@ -23,6 +23,7 @@ export function ElectricalFloor() {
   return (
     <group
       ref={root}
+      visible={false}
       position={[0, ELECTRICAL_Y, 0]}
       name="electrical-exhibition-floor"
     >

@@ -58,6 +58,7 @@
     "test:lift:browser": "node scripts/lift-browser-test.mjs",
     "test:about:browser": "node scripts/about-browser-test.mjs",
     "test:about": "node scripts/about-route-test.mjs",
-    "test:about:hall": "node scripts/about-hall-browser-test.mjs"
+    "test:about:hall": "node scripts/about-hall-browser-test.mjs",
+    "test:observatory": "node scripts/observatory-browser-test.mjs"
   }
 }

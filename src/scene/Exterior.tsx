@@ -33,7 +33,7 @@ const random = (n: number) => {
 };
 const exteriorVisible = () => {
   const p = useTour.getState().progress;
-  return p < 1.9 || p > 11.65;
+  return p < 1.38 || p > 11.72;
 };
 
 /** Deterministic, locally generated surface grain, with no remote texture requests. */

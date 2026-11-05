@@ -29,7 +29,7 @@ async function waitFor(page, fn, label, timeout = 30000) {
   const state = await page.evaluate(() => ({
     scrollY: window.scrollY,
     coolingTop: document.getElementById("cooling")?.offsetTop,
-    dialogOpen: document.querySelector("dialog")?.open,
+    dialogOpen: document.querySelector(".chapter-dialog")?.open,
     overflow: document.body.style.overflow,
     errors: window.__runtimeErrors,
   }));
@@ -306,12 +306,14 @@ try {
 
   await click(".header-nav button");
   assert.equal(
-    await page.evaluate(() => document.querySelector("dialog").open),
+    await page.evaluate(() => document.querySelector(".chapter-dialog").open),
     true,
   );
   assert.equal(
     await page.evaluate(() =>
-      document.querySelector("dialog").contains(document.activeElement),
+      document
+        .querySelector(".chapter-dialog")
+        .contains(document.activeElement),
     ),
     true,
   );
@@ -329,7 +331,7 @@ try {
   });
   await delay(200);
   assert.equal(
-    await page.evaluate(() => document.querySelector("dialog").open),
+    await page.evaluate(() => document.querySelector(".chapter-dialog").open),
     false,
   );
   assert.equal(

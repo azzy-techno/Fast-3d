@@ -2,6 +2,10 @@ import { create } from "zustand";
 import type { AboutPanel } from "./data/about";
 export const useTour = create<{
   progress: number;
+  observatoryOpen: boolean;
+  observatoryPending: boolean;
+  beginObservatory: () => void;
+  setObservatory: (open: boolean) => void;
   aboutPanel: AboutPanel | null;
   aboutPartner: string;
   setAboutPartner: (id: string) => void;
@@ -14,6 +18,11 @@ export const useTour = create<{
   setProgress: (progress: number) => void;
 }>((set) => ({
   progress: 0,
+  observatoryOpen: false,
+  observatoryPending: false,
+  beginObservatory: () => set({ observatoryPending: true }),
+  setObservatory: (observatoryOpen) =>
+    set({ observatoryOpen, observatoryPending: false }),
   aboutPanel: null,
   aboutPartner: "meta-smart-factory",
   setAboutPartner: (aboutPartner) => set({ aboutPartner }),

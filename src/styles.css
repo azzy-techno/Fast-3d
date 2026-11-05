@@ -2538,3 +2538,56 @@ footer p,
     animation-duration: 0.01s !important;
   }
 }
+
+/* Keep the supplied FAST mark readable on every HTML brand surface. */
+.brand,
+.closing footer img {
+  background: #f3f5ee;
+}
+.closing footer img {
+  padding: 10px 14px;
+  width: 140px;
+  height: auto;
+  object-fit: contain;
+}
+.observatory-skip {
+  display: block;
+  margin-top: 12px;
+  padding: 12px 0;
+  font-size: 12px;
+  color: #bddce1;
+  min-height: 44px;
+}
+.about-welcome .about-continue {
+  border: 1px solid #a8d5db66;
+  padding: 15px 18px;
+  width: 100%;
+  background: #a8d5db0d;
+}
+.about-welcome .about-continue:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.direction-arrow {
+  display: inline-block;
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.direction-arrow::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  right: -1px;
+  top: -1px;
+  transform: rotate(-45deg);
+  transform-origin: right center;
+}

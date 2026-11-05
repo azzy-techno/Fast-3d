@@ -5,7 +5,8 @@ import {
   scrollAtProgress,
   type ScrollStop,
 } from "./lib/journeyScroll";
-import { AboutTour } from "./components/AboutTour";
+import { Observatory } from "./components/Observatory";
+import { ArrivalLoader } from "./components/ArrivalLoader";
 import {
   AboutWelcome,
   AboutProjection,
@@ -85,6 +86,9 @@ export default function App() {
   const [liftOpen, setLiftOpen] = useState(false);
   const [pendingAbout, setPendingAbout] = useState<AboutPanel | null>(null);
   const aboutPanel = useTour((s) => s.aboutPanel);
+  const observatoryOpen = useTour((s) => s.observatoryOpen);
+  const observatoryPending = useTour((s) => s.observatoryPending);
+  const beginObservatory = useTour((s) => s.beginObservatory);
   const setAboutPanel = useTour((s) => s.setAboutPanel);
   const [liftDestination, setLiftDestination] = useState<string | null>(null);
   const liftRequest = useTour((s) => s.liftRequest);
@@ -105,10 +109,20 @@ export default function App() {
     setList(true);
     setReady(true);
   }, []);
-  const loading = !list && (!ready || loaded < 3);
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    if (!ready || loaded < 3) {
+      setRevealed(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setRevealed(true), 350);
+    return () => window.clearTimeout(timer);
+  }, [ready, loaded]);
+  const loading = !list && !revealed;
   const openLift = () => {
     setMenu(false);
     setLiftDestination(null);
+    useTour.getState().setObservatory(false);
     setLiftOpen(true);
   };
   useEffect(() => {
@@ -166,15 +180,16 @@ export default function App() {
     };
   }, [list, reduced]);
   useEffect(() => {
-    if (menu || loading || liftOpen || aboutPanel) lenis.current?.stop();
+    if (menu || loading || liftOpen || aboutPanel || observatoryOpen)
+      lenis.current?.stop();
     else lenis.current?.start();
     const previous = document.body.style.overflow;
-    if (menu || loading || liftOpen || aboutPanel)
+    if (menu || loading || liftOpen || aboutPanel || observatoryOpen)
       document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [menu, loading, list, liftOpen, aboutPanel]);
+  }, [menu, loading, list, liftOpen, aboutPanel, observatoryOpen]);
   useEffect(() => {
     if (menu && !dialog.current?.open) dialog.current?.showModal();
     if (!menu && dialog.current?.open) dialog.current?.close();
@@ -264,9 +279,9 @@ export default function App() {
     };
   }, []);
   useEffect(() => {
-    soundscapes.current?.setEnabled(sound && !list);
+    soundscapes.current?.setEnabled(sound && !list && !observatoryOpen);
     soundscapes.current?.update(useTour.getState().progress);
-  }, [sound, list]);
+  }, [sound, list, observatoryOpen]);
   const toggleSound = () => {
     if (!audio.current)
       audio.current = new Howl({
@@ -308,6 +323,23 @@ export default function App() {
     else window.scrollTo({ top: y, behavior: "instant" });
     if (immediate) useTour.getState().teleport(at);
   };
+  useEffect(() => {
+    if (observatoryPending) {
+      if (lenis.current)
+        lenis.current.scrollTo(scrollAtProgress(1.605), {
+          duration: 9,
+          force: true,
+        });
+      else scrollToProgress(1.605, true);
+    }
+  }, [observatoryPending]);
+  const closeObservatory = () => {
+    scrollToProgress(1.585, true);
+    useTour.getState().setObservatory(false);
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLButtonElement>(".about-continue")?.focus(),
+    );
+  };
   const showAbout = (panel: AboutPanel) => {
     setMenu(false);
     const p = useTour.getState().progress;
@@ -348,15 +380,20 @@ export default function App() {
           </Suspense>
         </SceneBoundary>
       )}
+      <Observatory
+        rtl={rtl}
+        onClose={closeObservatory}
+        onLanguage={() => setRtl(!rtl)}
+      />
       <div className="scene-scrim" aria-hidden="true" />
       {!list && !loading && (
         <>
           <AboutWelcome
             rtl={rtl}
-            onOpen={showAbout}
-            onContinue={() => scrollToProgress(1.5489)}
+            onContinue={beginObservatory}
+            onLift={openLift}
           />
-          <AboutTour rtl={rtl} onSelect={scrollToProgress} onOpen={showAbout} />
+
           <ElectricalWelcome
             rtl={rtl}
             onEnter={() => scrollToProgress(2.05)}
@@ -824,47 +861,13 @@ export default function App() {
 
       <AnimatePresence>
         {loading && (
-          <motion.div
-            className="loader"
+          <ArrivalLoader
             key="loader"
-            exit={{ opacity: 0, transition: { duration: 0.7 } }}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="loader-inner">
-              <img
-                src={assetUrl("fast-logo.png")}
-                alt="FAST"
-                width="180"
-                height="52"
-              />
-              <p>
-                {t(
-                  "A world of engineering awaits.",
-                  "عالم من الهندسة بانتظارك.",
-                )}
-              </p>
-              <div className="loader-line">
-                <motion.span
-                  animate={{ scaleX: (loaded + (ready ? 1 : 0)) / 4 }}
-                  transition={{ duration: 0.4 }}
-                />
-              </div>
-              <span className="loader-label">
-                {t(
-                  ready
-                    ? "Preparing your journey…"
-                    : "Building your experience…",
-                  "نجهّز تجربتك…",
-                )}{" "}
-                {Math.round(((loaded + (ready ? 1 : 0)) / 4) * 100)}%
-              </span>
-              <button onClick={() => setList(true)}>
-                {t("Continue with the photo tour", "تابع الجولة المصوّرة")}
-              </button>
-            </div>
-            <span className="loader-bottom">FAST Operations & Maintenance</span>
-          </motion.div>
+            rtl={rtl}
+            ready={ready}
+            loaded={loaded}
+            onSkip={() => setList(true)}
+          />
         )}
       </AnimatePresence>
       <span className="sr-only" role="status" aria-live="polite">

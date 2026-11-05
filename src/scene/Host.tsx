@@ -1,4 +1,3 @@
-import { aboutStationAt } from "./aboutTour";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
@@ -42,6 +41,7 @@ export function Host() {
   useFrame(({ clock, camera, gl }, dt) => {
     if (!root.current) return;
     const p = journeyState.progress;
+    root.current.visible = !(p >= 1.602 && p < 1.67);
     sampleGuide(p, state.p, state.face);
     const cut =
       state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
@@ -95,7 +95,7 @@ export function Host() {
     // upper body turns, nods and uses an open supporting hand.
     const rhythm =
       state.presentationTime * 1.6 +
-      (electricalStationAt(p)?.number ?? aboutStationAt(p)?.number ?? 0) * 0.7;
+      (electricalStationAt(p)?.number ?? 0) * 0.7;
     const emphasis = (Math.sin(rhythm) + 1) / 2;
     const gestureWeight = state.presentation;
     if (gestureWeight > 0.001) {

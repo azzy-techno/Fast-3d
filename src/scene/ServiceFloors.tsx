@@ -25,6 +25,7 @@ function ServiceFloor({ index }: { index: number }) {
   return (
     <group
       ref={root}
+      visible={false}
       position={[0, room.y, 0]}
       name={`service-floor-${room.index}`}
     >
