@@ -327,17 +327,28 @@ export default function App() {
     if (observatoryPending) {
       if (lenis.current)
         lenis.current.scrollTo(scrollAtProgress(1.605), {
-          duration: 9,
+          duration: useTour.getState().progress >= 1.588 ? 3.2 : 9,
           force: true,
+          lock: true,
         });
       else scrollToProgress(1.605, true);
     }
   }, [observatoryPending]);
   const closeObservatory = () => {
-    scrollToProgress(1.585, true);
     useTour.getState().setObservatory(false);
+    if (lenis.current) {
+      // Resume before starting the return: Lenis.start() resets its animation.
+      lenis.current.start();
+      lenis.current.scrollTo(scrollAtProgress(1.585), {
+        duration: 2.2,
+        force: true,
+        lock: true,
+      });
+    } else scrollToProgress(1.585, true);
     requestAnimationFrame(() =>
-      document.querySelector<HTMLButtonElement>(".about-continue")?.focus(),
+      document
+        .querySelector<HTMLButtonElement>(".lift-toggle")
+        ?.focus({ preventScroll: true }),
     );
   };
   const showAbout = (panel: AboutPanel) => {
@@ -364,7 +375,7 @@ export default function App() {
 
   return (
     <div
-      className={`app ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${active === 0 ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
+      className={`app ${observatoryOpen ? "observatory-active" : ""} ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${active === 0 ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
     >
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
@@ -385,6 +396,14 @@ export default function App() {
         onClose={closeObservatory}
         onLanguage={() => setRtl(!rtl)}
       />
+      <div
+        id="optical-transition"
+        className="optical-transition"
+        aria-hidden="true"
+      >
+        <span />
+        <span />
+      </div>
       <div className="scene-scrim" aria-hidden="true" />
       {!list && !loading && (
         <>

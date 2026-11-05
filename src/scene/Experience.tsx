@@ -23,6 +23,7 @@ import { Building } from "./Building";
 import { Interior, RoofAccess } from "./Architecture";
 import { Atmosphere } from "./Atmosphere";
 import { journeyState, sampleJourney } from "./journey";
+import { observatoryView } from "../lib/observatoryView";
 
 function World({
   onReady,
@@ -35,7 +36,8 @@ function World({
 }) {
   const shell = useRef<Group>(null),
     city = useRef<Group>(null);
-  const { camera, size, gl, scene } = useThree();
+  const { camera, size, gl, scene, invalidate } = useThree();
+  const observatoryArmed = useRef(true);
   const ready = useRef(false),
     initialized = useRef(false),
     warmed = useRef(false);
@@ -55,6 +57,11 @@ function World({
     }),
     [],
   );
+  useEffect(() => {
+    const look = () => invalidate();
+    window.addEventListener("fast-observatory-look", look);
+    return () => window.removeEventListener("fast-observatory-look", look);
+  }, [invalidate]);
   useEffect(() => {
     let cancelled = false;
     // Only warm the visible opening scene. Hidden floors share these materials;
@@ -94,6 +101,35 @@ function World({
     progress.current +=
       (requested - progress.current) * (1 - Math.exp(-Math.min(dt, 0.1) * 13));
     const p = progress.current;
+    const tour = useTour.getState();
+    if (
+      !tour.observatoryPending &&
+      !tour.observatoryOpen &&
+      (p < 1.58 || p > 1.7)
+    )
+      observatoryArmed.current = true;
+    // Enter on a forward approach, never when selecting a different floor.
+    if (
+      observatoryArmed.current &&
+      !tour.observatoryOpen &&
+      !tour.observatoryPending &&
+      !tour.aboutPanel &&
+      requested >= 1.592 &&
+      requested < 1.67 &&
+      p >= 1.588
+    ) {
+      observatoryArmed.current = false;
+      tour.beginObservatory();
+    }
+    if (tour.observatoryPending || tour.observatoryOpen)
+      observatoryArmed.current = false;
+    const optical = document.getElementById("optical-transition");
+    if (optical) {
+      const t = Math.max(0, Math.min(1, (p - 1.598) / 0.007));
+      optical.style.opacity = String(
+        tour.observatoryOpen ? 0 : Math.sin(t * Math.PI),
+      );
+    }
     journeyState.progress = p;
     gl.domElement.dataset.jumpVersion = String(jumpVersion.current);
     const fov =
@@ -123,7 +159,12 @@ function World({
       vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
     }
     camera.position.copy(vectors.p);
+    if (tour.observatoryOpen) {
+      vectors.target.x += observatoryView.x * 1.7;
+      vectors.target.y -= observatoryView.y * 0.7;
+    }
     camera.lookAt(vectors.target);
+    gl.domElement.dataset.opticalPose = `${observatoryView.x.toFixed(3)},${observatoryView.y.toFixed(3)}`;
     // Lens shifts compose the architecture beside/beyond the copy without
     // moving the camera out through an interior wall on narrow screens.
     const offsetX = mobile
@@ -319,7 +360,9 @@ export default function Experience({
       <Canvas
         ref={canvasRef}
         dpr={resolution}
-        frameloop={observatoryOpen || panelOpen || hidden ? "never" : "always"}
+        frameloop={
+          panelOpen || hidden ? "never" : observatoryOpen ? "demand" : "always"
+        }
         shadows
         camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 1000 }}
         gl={{
@@ -332,7 +375,7 @@ export default function Experience({
       >
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
-          <PausedFrame paused={observatoryOpen || panelOpen} />
+          <PausedFrame paused={panelOpen} />
           <PerformanceMonitor
             ms={500}
             iterations={4}

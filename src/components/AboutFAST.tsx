@@ -34,7 +34,7 @@ export function AboutWelcome({
   onContinue: () => void;
   onLift: () => void;
 }) {
-  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.735);
+  const visible = useTour((s) => s.progress >= 1.51 && s.progress < 1.597);
   const pending = useTour((s) => s.observatoryPending);
   if (!visible) return null;
   return (
@@ -48,8 +48,13 @@ export function AboutWelcome({
       <h2>{rtl ? "اقترب. واكتشف المزيد." : "Look closer. Discover more."}</h2>
       <p>
         {rtl
-          ? "رافق مهندس فاست إلى المنظار في وسط القاعة. استكشف شهاداتنا وعلاقاتنا الصناعية وشركاءنا من منظورك الخاص."
-          : "Follow your FAST engineer to the binoculars at the heart of the hall. Step into a new perspective on our credentials, industry relationships and partners."}
+          ? "رافق مهندس فاست إلى المنظار وتابع التمرير للاقتراب. تظهر شهاداتنا وعلاقاتنا الصناعية وشركاؤنا داخل القاعة من خلال العدسات."
+          : "Follow your FAST engineer to the binoculars. Keep scrolling closer: the lenses will bring our credentials, industry relationships and partners into the room around you."}
+      </p>
+      <p className="observatory-scroll-cue">
+        {rtl
+          ? "تابع التمرير للاقتراب — يبدأ العرض تلقائياً"
+          : "Scroll closer · the view opens automatically"}
       </p>
       <button
         className="about-continue"
@@ -62,7 +67,7 @@ export function AboutWelcome({
             : "انظر عبر المنظار"
           : pending
             ? "Approaching the binoculars…"
-            : "Look through the binoculars"}{" "}
+            : "Approach with keyboard"}{" "}
         <span aria-hidden="true">◎</span>
       </button>
       <button className="observatory-skip" onClick={onLift}>

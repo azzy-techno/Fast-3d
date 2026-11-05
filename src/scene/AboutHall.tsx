@@ -1,11 +1,12 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
-import { RepeatWrapping, SRGBColorSpace } from "three";
+import { Group, RepeatWrapping, SRGBColorSpace } from "three";
 import { Box, Cylinder } from "./Primitives";
 import { Wayfinding, Planter } from "./Architecture";
 import { StaticInstances } from "./StaticInstances";
 import { assetUrl } from "../lib/assets";
-import { useTour } from "../store";
+import { journeyState } from "./journey";
 
 function slabPieces(hole: [number, number, number, number]) {
   const [x0, x1, z0, z1] = hole;
@@ -230,12 +231,18 @@ export function AboutHall() {
   );
 }
 function BinocularStation() {
-  const begin = useTour((s) => s.beginObservatory);
+  const instrument = useRef<Group>(null);
+  useFrame(() => {
+    // The optical housing is behind our eyes in first-person view.
+    if (instrument.current)
+      instrument.current.visible =
+        journeyState.progress < 1.602 || journeyState.progress >= 1.67;
+  });
   return (
     <group
       position={[0, 0, 30]}
       name="fast-binocular-observatory"
-      onClick={begin}
+      ref={instrument}
     >
       <StaticInstances>
         <Cylinder

@@ -3,6 +3,7 @@ import { useTour } from "../store";
 import { aboutItems } from "../data/observatory";
 import { partners, type AboutPanel } from "../data/about";
 import { assetUrl } from "../lib/assets";
+import { lookThroughObservatory } from "../lib/observatoryView";
 import "./observatory.css";
 
 type Item = (typeof aboutItems)[number];
@@ -33,6 +34,18 @@ export function Observatory({
   onLanguage: () => void;
 }) {
   const open = useTour((s) => s.observatoryOpen);
+  const [leaving, setLeaving] = useState(false);
+  const exitTimer = useRef<number | undefined>(undefined);
+  const leave = () => {
+    if (leaving) return;
+    setLeaving(true);
+    reset();
+    exitTimer.current = window.setTimeout(
+      onClose,
+      matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650,
+    );
+  };
+  useEffect(() => () => window.clearTimeout(exitTimer.current), []);
   const dialog = useRef<HTMLDialogElement>(null),
     world = useRef<HTMLDivElement>(null),
     detail = useRef<HTMLDivElement>(null),
@@ -70,11 +83,15 @@ export function Observatory({
   };
   useEffect(() => {
     if (open) {
+      setLeaving(false);
+      setSelected(null);
+      setCategory("story");
       opener.current = document.activeElement as HTMLElement;
       dialog.current?.showModal();
       reset();
     } else if (dialog.current?.open) {
       dialog.current.close();
+      lookThroughObservatory(0, 0);
       opener.current?.isConnected && opener.current.focus();
     }
   }, [open]);
@@ -82,7 +99,7 @@ export function Observatory({
     if (selected) detail.current?.focus();
   }, [selected]);
   useEffect(() => {
-    if (!open || grid || selected) return;
+    if (!open || ((grid || selected) && !leaving)) return;
     let frame = 0;
     const tick = (now: number) => {
       const m = motion.current,
@@ -91,6 +108,7 @@ export function Observatory({
       const a = 1 - Math.exp(-6 * dt);
       m.x += (m.tx - m.x) * a;
       m.y += (m.ty - m.y) * a;
+      lookThroughObservatory(m.x, m.y);
       if (world.current)
         world.current.style.transform = `translate3d(${-m.x * 430}px,${-m.y * 230}px,0) rotateX(${m.y * 4}deg) rotateY(${-m.x * 7}deg)`;
       frame = requestAnimationFrame(tick);
@@ -106,7 +124,7 @@ export function Observatory({
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [open, grid, selected]);
+  }, [open, grid, selected, leaving]);
   const choose = (item: Item, button: HTMLElement) => {
     cardOpener.current = button;
     setSelected(item);
@@ -127,17 +145,22 @@ export function Observatory({
   return (
     <dialog
       ref={dialog}
-      className={`observatory ${grid ? "is-grid" : "is-spatial"}`}
+      className={`observatory ${leaving ? "is-leaving" : ""} ${grid ? "is-grid" : "is-spatial"}`}
       aria-labelledby="observatory-title"
       onCancel={(e) => {
         e.preventDefault();
-        selected ? dismissDetail() : onClose();
+        selected ? dismissDetail() : leave();
       }}
     >
       {open && (
         <div className="observatory-shell" dir={rtl ? "rtl" : "ltr"}>
-          <div className="observatory-aurora" aria-hidden="true" />
-          <div className="observatory-orbit" aria-hidden="true" />
+          <div className="observatory-lens" aria-hidden="true">
+            <span className="lens-corner corner-left" />
+            <span className="lens-corner corner-right" />
+            <span className="lens-calibration">
+              FAST / SPATIAL VIEW <i /> LIVE
+            </span>
+          </div>
           <header className="observatory-header">
             <img
               className="observatory-brand"
@@ -148,7 +171,7 @@ export function Observatory({
             />
             <div>
               <span className="observatory-eyebrow">
-                {t("A different perspective", "منظور مختلف")}
+                {t("Your hall. A new layer.", "قاعتك. منظور جديد.")}
               </span>
               <h2 id="observatory-title">
                 {t("The FAST Observatory", "مرصد فاست")}
@@ -157,8 +180,12 @@ export function Observatory({
             <button className="observatory-language" onClick={onLanguage}>
               {rtl ? "English" : "عربي"}
             </button>
-            <button className="observatory-exit" onClick={onClose}>
-              {t("Return to the hall", "العودة إلى القاعة")}{" "}
+            <button
+              className="observatory-exit"
+              onClick={leave}
+              disabled={leaving}
+            >
+              {t("Step away", "ابتعد عن المنظار")}{" "}
               <span className="direction-arrow" aria-hidden="true" />
             </button>
           </header>

@@ -88,6 +88,7 @@ try {
   }
   const performanceResults = [];
   async function measure(name) {
+    if (!process.env.PROFILE_RENDERING) return;
     const result = await page.evaluate(async (name) => {
       const frames = [];
       let previous = window.__draws,
@@ -138,19 +139,58 @@ try {
   );
   await shot("hall");
   await measure("about");
-  await click(".about-continue");
+  // Ordinary scroll reaches the optical approach; no entry click is required.
+  await page.evaluate(() => {
+    window.__lensPeak = 0;
+    window.__lensTimer = setInterval(() => {
+      window.__lensPeak = Math.max(
+        window.__lensPeak,
+        +document.getElementById("optical-transition").style.opacity,
+      );
+    }, 50);
+    const a = document.getElementById("about-hall").offsetTop;
+    const b = document.getElementById("about-departure").offsetTop;
+    window.scrollTo({
+      top: a + (b - a) * ((1.595 - 1.53) / 0.21),
+      behavior: "instant",
+    });
+  });
   await wait(
     () => document.querySelector(".observatory").open,
     "first-person transition",
   );
-  await delay(900);
+  await delay(1500);
+  const lensPeak = await page.evaluate(() => {
+    clearInterval(window.__lensTimer);
+    return window.__lensPeak;
+  });
+  assert(lensPeak > 0.4, "A visible optical transition bridges the approach");
+  console.log("PASS automatic entry and lens transition", lensPeak);
   await shot("welcome");
+  assert.deepEqual(
+    await page.evaluate(() => ({
+      background: getComputedStyle(document.querySelector(".observatory"))
+        .backgroundColor,
+      backdrop: getComputedStyle(
+        document.querySelector(".observatory"),
+        "::backdrop",
+      ).backgroundColor,
+      scene: getComputedStyle(document.querySelector(".scene")).visibility,
+      chrome: getComputedStyle(document.querySelector(".header")).visibility,
+    })),
+    {
+      background: "rgba(0, 0, 0, 0)",
+      backdrop: "rgba(0, 0, 0, 0)",
+      scene: "visible",
+      chrome: "hidden",
+    },
+  );
   const draws = await page.evaluate(() => window.__draws);
   await delay(1500);
   assert.equal(
     await page.evaluate(() => window.__draws),
     draws,
-    "Main WebGL scene pauses behind observatory",
+    "The real hall stops drawing while the AR view is idle",
   );
   const axe = await fs.readFile("node_modules/axe-core/axe.min.js", "utf8");
   await page.evaluate((s) => (0, eval)(s), axe);
@@ -193,7 +233,12 @@ try {
         document.querySelector(".observatory-viewport").focus(),
       );
       await key("ArrowRight");
-      await delay(500);
+      await wait(
+        () =>
+          +document.querySelector("canvas").dataset.opticalPose.split(",")[0] >
+          0.05,
+        "live hall turns with keyboard",
+      );
       const transform = await page.evaluate(
         () => document.querySelector(".observatory-world").style.transform,
       );
@@ -278,6 +323,13 @@ try {
       0.001,
     "return camera",
   );
+  console.log("PASS smooth return to presentation point");
+  await delay(800);
+  assert.equal(
+    await page.evaluate(() => document.querySelector(".observatory").open),
+    false,
+    "Stepping away does not reopen the viewer",
+  );
   const resumed = await page.evaluate(() => window.__draws);
   await delay(1000);
   assert(
@@ -302,13 +354,14 @@ try {
     "electrical camera",
   );
   await measure("electrical");
-  await fs.writeFile(
-    "artifacts/observatory/after.json",
-    JSON.stringify(performanceResults, null, 2),
-  );
+  if (performanceResults.length)
+    await fs.writeFile(
+      "artifacts/observatory/after.json",
+      JSON.stringify(performanceResults, null, 2),
+    );
   assert.deepEqual(await page.evaluate(() => window.__errors), []);
   console.log(
-    "PASS binocular approach, first-person entry, cursor/keyboard, 33 displays, links, paused GPU, return to hall, lift, phone, Arabic, WCAG, zero runtime errors",
+    "PASS automatic scroll entry, transparent AR over live hall, pointer/keyboard camera, 33 displays, idle rendering, smooth exit without reopening, lift, phone, Arabic, WCAG, zero runtime errors",
   );
 } finally {
   await browser?.close({ silent: true });
