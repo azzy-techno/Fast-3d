@@ -38,6 +38,7 @@ export function LiftNavigator({
     "select" | "closing" | "travelling" | "opening"
   >("select");
   const [selected, setSelected] = useState<string | null>(null);
+  const frameReady = useTour((s) => s.liftFrameReady);
   const currentDestination = useTour(
     (s) =>
       [...liftDestinations].reverse().find((d) => s.progress >= d.at - 0.015)
@@ -48,6 +49,10 @@ export function LiftNavigator({
   const close = useRef(onClose);
   close.current = onClose;
   const destination = liftDestinations.find((d) => d.id === selected);
+  useEffect(() => {
+    useTour.getState().setLiftPhase(open ? phase : "idle");
+  }, [open, phase]);
+  useEffect(() => () => useTour.getState().setLiftPhase("idle"), []);
   useEffect(() => {
     if (open) {
       dialog.current?.showModal();
@@ -61,24 +66,16 @@ export function LiftNavigator({
       const timer = setTimeout(() => {
         arrival.current(destination.at);
         setPhase("travelling");
-      }, 650);
+      }, 450);
       return () => clearTimeout(timer);
     }
     if (phase === "travelling") {
-      // Keep the doors opaque until the destination has actually rendered.
-      const timer = setInterval(() => {
-        const canvas =
-          document.querySelector<HTMLCanvasElement>("canvas[data-ready]");
-        if (
-          Number(canvas?.dataset.jumpVersion) === useTour.getState().jumpVersion
-        )
-          setPhase("opening");
-      }, 150);
-      return () => clearInterval(timer);
+      if (frameReady === useTour.getState().jumpVersion) setPhase("opening");
+      return;
     }
-    const timer = setTimeout(() => close.current(), 700);
+    const timer = setTimeout(() => close.current(), 520);
     return () => clearTimeout(timer);
-  }, [open, phase, destination]);
+  }, [open, phase, destination, frameReady]);
   return (
     <dialog
       ref={dialog}

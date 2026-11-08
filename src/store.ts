@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import type { AboutPanel } from "./data/about";
+export type LiftPhase =
+  "idle" | "select" | "closing" | "travelling" | "opening";
 export const useTour = create<{
   progress: number;
+  liftPhase: LiftPhase;
+  setLiftPhase: (phase: LiftPhase) => void;
+  liftFrameReady: number;
+  setLiftFrameReady: (version: number) => void;
   observatoryOpen: boolean;
   observatoryPending: boolean;
   beginObservatory: () => void;
@@ -18,6 +24,10 @@ export const useTour = create<{
   setProgress: (progress: number) => void;
 }>((set) => ({
   progress: 0,
+  liftPhase: "idle",
+  setLiftPhase: (liftPhase) => set({ liftPhase }),
+  liftFrameReady: -1,
+  setLiftFrameReady: (liftFrameReady) => set({ liftFrameReady }),
   observatoryOpen: false,
   observatoryPending: false,
   beginObservatory: () => set({ observatoryPending: true }),

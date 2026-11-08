@@ -41,7 +41,10 @@ try {
     source:
       'window.__errors=[];addEventListener("error",e=>window.__errors.push(e.message));addEventListener("unhandledrejection",e=>window.__errors.push(String(e.reason)));',
   });
-  await page.goto({ url: "http://127.0.0.1:4178/Fast-3d/", timeout: 120000 });
+  await page.goto({
+    url: "http://127.0.0.1:4178/Fast-3d/?profile-renderer",
+    timeout: 120000,
+  });
   async function wait(fn, label) {
     for (let i = 0; i < 300; i++) {
       if (await page.evaluate(fn)) return;
@@ -76,6 +79,20 @@ try {
       () => document.querySelector(".lift-dialog")?.open,
       "lift opens",
     );
+    await delay(200);
+    const previousTime = await page.evaluate(
+      () => window.__fastRenderProbe.snapshot().frames.at(-1)?.elapsed ?? 0,
+    );
+    await page.evaluate(() => window.__fastRenderProbe.reset());
+    await delay(300);
+    assert.equal(
+      await page.evaluate(
+        () => window.__fastRenderProbe.snapshot().frames.length,
+      ),
+      0,
+      "Selector pauses the background renderer",
+    );
+    const started = Date.now();
     await page.evaluate(
       (id) => document.querySelector(`[data-destination="${id}"]`).click(),
       id,
@@ -88,6 +105,35 @@ try {
       () => +document.querySelector("canvas").dataset.journey,
     );
     assert(Math.abs(p - at) < 0.003, `Destination ${id}: ${p}`);
+    const frames = await page.evaluate(
+      () => window.__fastRenderProbe.snapshot().frames,
+    );
+    assert(
+      frames.every((f) => f.elapsed >= previousTime),
+      "Animation clock does not restart on exit",
+    );
+    assert.equal(
+      frames.filter((f) => f.liftPhase === "travelling").length,
+      1,
+      "Render the destination once behind closed doors",
+    );
+    assert(
+      !frames.some((f) =>
+        ["select", "closing", "opening"].includes(f.liftPhase),
+      ),
+      "Door animation does not compete with scene rendering",
+    );
+    assert.equal(
+      await page.evaluate(
+        () => document.querySelector("canvas").dataset.renderedJumpVersion,
+      ),
+      await page.evaluate(
+        () => document.querySelector("canvas").dataset.jumpVersion,
+      ),
+    );
+    console.log(
+      `PASS ${id}: ${Date.now() - started}ms total, one destination render, no rendering during doors`,
+    );
   }
   async function seek(p) {
     await page.evaluate((p) => {
@@ -236,6 +282,8 @@ try {
       exposed.every((p) => Math.abs(p - 2) < 0.01 || Math.abs(p - 6) < 0.01),
       `Skipped floor exposed: ${exposed}`,
     );
+    await choose("cooling", 1);
+    await choose("about", 1.535);
     await choose("electrical", 2);
     console.log(
       "PASS: service selection skips intermediate floors behind doors; reverse navigation works",

@@ -26,6 +26,8 @@ import { journeyState, sampleJourney } from "./journey";
 import { observatoryView } from "../lib/observatoryView";
 import { installRenderProbe } from "./renderProbe";
 import { useVisibilityUpdates } from "./useVisibilityUpdates";
+import { compileVisible } from "./compileVisible";
+import { LiftRender } from "./LiftRender";
 
 const World = memo(function World({
   onReady,
@@ -77,7 +79,7 @@ const World = memo(function World({
     // compiling every floor here stalls the first interaction on integrated GPUs.
     const compile = new Promise<void>((resolve) =>
       requestAnimationFrame(() => {
-        gl.compileAsync(scene, camera).then(
+        compileVisible(gl, scene, camera).then(
           () => resolve(),
           () => resolve(),
         );
@@ -346,6 +348,7 @@ function Experience({
   const [resolution, setResolution] = useState(1);
   const [dynamicShadows, setDynamicShadows] = useState(true);
   const observatoryOpen = useTour((s) => s.observatoryOpen);
+  const liftPhase = useTour((s) => s.liftPhase);
   const panelOpen = useTour((s) => s.aboutPanel !== null);
   const [hidden, setHidden] = useState(document.hidden);
   useEffect(() => {
@@ -370,11 +373,19 @@ function Experience({
   return (
     <div className="scene" aria-hidden="true">
       <Canvas
-        onCreated={({ gl, scene }) => installRenderProbe(gl, scene)}
+        onCreated={({ gl, scene, clock }) =>
+          installRenderProbe(gl, scene, clock)
+        }
         ref={canvasRef}
         dpr={resolution}
         frameloop={
-          panelOpen || hidden ? "never" : observatoryOpen ? "demand" : "always"
+          panelOpen ||
+          hidden ||
+          (liftPhase !== "idle" && liftPhase !== "travelling")
+            ? "never"
+            : observatoryOpen || liftPhase === "travelling"
+              ? "demand"
+              : "always"
         }
         shadows={dynamicShadows}
         camera={{ position: [49, 29, 67], fov: 42, near: 0.08, far: 1000 }}
@@ -388,18 +399,22 @@ function Experience({
       >
         <Suspense fallback={null}>
           <World onReady={onReady} rtl={rtl} mobile={mobile} />
+          <LiftRender onFailure={onFailure} />
           <PausedFrame paused={panelOpen} />
-          {!observatoryOpen && !panelOpen && !hidden && (
-            <PerformanceMonitor
-              ms={500}
-              iterations={4}
-              bounds={() => [35, 50]}
-              onDecline={() => {
-                setResolution((r) => Math.max(0.7, r - 0.15));
-                setDynamicShadows(false);
-              }}
-            />
-          )}
+          {!observatoryOpen &&
+            !panelOpen &&
+            !hidden &&
+            liftPhase === "idle" && (
+              <PerformanceMonitor
+                ms={500}
+                iterations={4}
+                bounds={() => [35, 50]}
+                onDecline={() => {
+                  setResolution((r) => Math.max(0.7, r - 0.15));
+                  setDynamicShadows(false);
+                }}
+              />
+            )}
         </Suspense>
       </Canvas>
     </div>

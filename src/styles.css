@@ -2413,16 +2413,17 @@ footer p,
   top: 0;
   bottom: 0;
   width: 50.1%;
+  will-change: transform;
   background: linear-gradient(90deg, #233a43, #708080 50%, #334951);
   box-shadow: inset 0 0 0 1px #b0b5a950;
 }
 .lift-door-left {
   left: 0;
-  animation: lift-close-left 0.65s ease-in-out both;
+  animation: lift-close-left 0.45s ease-in-out both;
 }
 .lift-door-right {
   right: 0;
-  animation: lift-close-right 0.65s ease-in-out both;
+  animation: lift-close-right 0.45s ease-in-out both;
 }
 .lift-trip-label {
   position: absolute;
@@ -2445,10 +2446,10 @@ footer p,
   font-size: 14px;
 }
 .lift-dialog[data-phase="opening"] .lift-door-left {
-  animation: lift-open-left 0.7s ease-in-out both;
+  animation: lift-open-left 0.52s ease-in-out both;
 }
 .lift-dialog[data-phase="opening"] .lift-door-right {
-  animation: lift-open-right 0.7s ease-in-out both;
+  animation: lift-open-right 0.52s ease-in-out both;
 }
 .lift-dialog[data-phase="opening"] .lift-trip-label {
   opacity: 0;
