@@ -208,7 +208,8 @@ const World = memo(function World({
       const scale =
         1 +
         Math.min(0.45, Math.max(0, (size.height / size.width) * 0.95 - 1)) *
-          outside;
+          outside *
+          (p > 11.61 ? Math.min(1, Math.max(0, (p - 11.9) / 0.075)) : 1);
       vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
     }
     camera.position.copy(vectors.p);
@@ -227,8 +228,11 @@ const World = memo(function World({
           0.03 * inside +
           0.13 *
             Math.max(0, Math.min(1, (p - 11.665) / 0.015)) *
-            Number(p <= 11.69));
-    const offsetY = mobile ? 0.19 * outside + 0.1 * inside : 0;
+            (1 - Math.min(1, Math.max(0, (p - 11.69) / 0.045))));
+    const skyline = Math.min(1, Math.max(0, (p - 11.94) / 0.06));
+    const offsetY = mobile
+      ? (0.19 - 0.18 * skyline) * outside + 0.1 * inside
+      : 0;
     const nextFov = fov + (mobile ? inside * 8 : 0);
     if (
       Math.abs(cam.fov - nextFov) > 0.02 ||
@@ -284,7 +288,7 @@ const World = memo(function World({
     }
     if (scene.background instanceof Color)
       scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
-    if (shell.current) shell.current.visible = p < 1.38 || p > 11.825;
+    if (shell.current) shell.current.visible = p < 1.38 || p > 11.715;
     if (city.current) city.current.visible = p < 1.38 || p > 11.72;
     if (useTour.getState().observatoryPending && Math.abs(p - 1.605) < 0.0004)
       useTour.getState().setObservatory(true);

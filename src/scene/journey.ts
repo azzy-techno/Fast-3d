@@ -15,6 +15,7 @@ import {
   inElectricalRearLift,
   toElectricalRear,
 } from "./electricalTour";
+import { EXTERIOR_ARRIVAL } from "../lib/journeyScroll";
 import { serviceLevel } from "./towerLayout";
 import { Vector3 } from "three";
 import type { Point } from "../data/chapters";
@@ -26,7 +27,7 @@ export const serviceRooms = Array.from({ length: 10 }, (_, i) => ({
   y: serviceLevel(i),
   side: i % 2 === 0 ? -1 : 1,
 }));
-export const journeyState = { progress: 11.69, section: "reception" };
+export const journeyState = { progress: EXTERIOR_ARRIVAL, section: "reception" };
 type Shot = { at: number; p: Point; target: Point; fov: number };
 const frames: Shot[] = [];
 const shot = (at: number, p: Point, target: Point, fov = 62) =>
@@ -126,14 +127,19 @@ shot(11.65, [0, 1.95, -6], [0.65, 1.65, -12], 60);
 shot(11.665, [1.5, 1.95, 2], [0, 1.65, -5.8], 60);
 shot(11.68, [2.1, 1.98, 5.7], [-2.0, 1.55, 1.5], 59);
 shot(11.69, [2.5, 2.02, 6.2], [-3.5, 1.52, 1.25], 58);
-shot(11.715, [1, 1.95, 4.5], [9, 1.5, 2.5], 66);
-shot(11.73, [2.4, 1.95, 4.8], [3, 1.8, 10], 64);
-shot(11.77, [3, 1.95, 8], [3, 1.6, 16], 62);
-shot(11.81, [3, 1.95, 13], [3, 1.6, 20], 60);
-shot(11.85, [6, 2.2, 22], [3, 1.3, 18], 54);
-shot(11.89, [9, 4.5, 27], [3, 1.2, 18], 50);
-shot(11.94, [70, 60, 95], [1, 35, 1], 46);
-shot(12, [115, 85, 150], [0, 38, -9], 42);
+// Scrolling forward follows these poses in descending order: skyline, gate,
+// canopy, glass doors, then the reception desk.
+shot(11.715, [2.8, 2.02, 7.2], [-0.7, 1.66, 1.6], 60);
+shot(11.75, [3, 2.02, 9.6], [2.3, 1.68, 2.1], 61);
+shot(11.77, [3, 2.02, 11.5], [2.9, 1.72, 4.5], 61);
+shot(11.81, [3, 2.02, 15.2], [3.2, 1.75, 7.5], 61);
+shot(11.84, [3.1, 2.05, 19.7], [3.3, 1.8, 10], 61);
+shot(11.87, [3.7, 2.36, 23.9], [3.2, 2.25, 14.5], 60);
+shot(11.89, [5.6, 4.8, 28], [3.2, 2.6, 16], 58);
+shot(11.915, [8, 8.5, 37], [3, 3.5, 15], 55);
+shot(11.94, [13, 14, 51], [2, 9, 8], 53);
+shot(11.97, [31, 28, 89], [1, 24, 3], 53);
+shot(EXTERIOR_ARRIVAL, [52, 44, 145], [0, 40, 0], 56);
 
 // Shape-preserving cubic Hermite interpolation: continuous velocity, no spline
 // overshoot through a wall, and deterministic forward/reverse scrubbing.
@@ -289,9 +295,16 @@ const receptionGuide = [
   [11.665, 0.25, -2.4],
   [11.68, -2.05, 1.7],
   [11.69, -2.05, 1.7],
+  [11.715, 0.5, 3.3],
+  [11.75, 2.4, 5.6],
+  [11.77, 3.1, 7.2],
+  [11.81, 3.6, 11.6],
+  [11.84, 3.9, 15.9],
+  [11.87, 4.1, 18],
+  [EXTERIOR_ARRIVAL, 4.1, 18],
 ];
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
-  if (p >= 11.61 && p <= 11.69) {
+  if (p >= 11.61) {
     // Follow the centre aisle past the desk and wait at the call panel.
     const keys = receptionGuide;
     let i = 0;
@@ -323,11 +336,6 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   if (p <= 0.7) {
     position.set(8, 83, 5);
     facing.set(12, 84, 12);
-    return;
-  }
-  if (p >= 11.84) {
-    position.set(3, 0.25, 18);
-    facing.set(3, 1.5, 25);
     return;
   }
   const smooth = (a: number, b: number) => {
@@ -376,9 +384,6 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   }
   if (p > 11.6 && p < 11.61)
     position.lerp(arcTarget.set(0.85, 0.25, -33.1), smooth(11.6, 11.61));
-  if (p > 11.69 && p < 11.71)
-    position.lerp(arcTarget.set(-2.05, 0.25, 1.7), 1 - smooth(11.69, 11.71));
-  if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
 
   if (p < 0.86)
     position.lerp(new Vector3(8, 83, 5), 1 - Math.min(1, (p - 0.7) / 0.16));

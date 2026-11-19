@@ -1,5 +1,7 @@
 import { chapters } from "../data/chapters";
 
+export const EXTERIOR_ARRIVAL = 12;
+
 /** Each floor is an independent visit. Values reference the authored camera and
  * guide poses; the end of each visit is on the landing outside the lift. */
 export const floors = [
@@ -48,9 +50,13 @@ export function floorStops(floor: Floor): [number, number][] {
     ];
   if (floor.id === "reception")
     return [
-      [0, 11.69],
-      [0.2, 11.686],
-      [0.56, 11.662],
+      [0, EXTERIOR_ARRIVAL],
+      [0.2, 11.94],
+      [0.34, 11.89],
+      [0.48, 11.84],
+      [0.64, 11.77],
+      [0.75, floor.start],
+      [0.85, 11.665],
       [1, 11.61],
     ];
   return [

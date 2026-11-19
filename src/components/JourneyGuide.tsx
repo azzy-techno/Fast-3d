@@ -7,6 +7,7 @@ export function JourneyGuide({
   setCinematic,
   openLift,
   floor,
+  locationLabel,
 }: {
   rtl: boolean;
   jump: (id: string) => void;
@@ -14,6 +15,7 @@ export function JourneyGuide({
   setCinematic: (value: boolean) => void;
   openLift: () => void;
   floor: Floor;
+  locationLabel: string;
 }) {
   const [mapOpen, setMapOpen] = useState(false);
   const row = floors.indexOf(floor);
@@ -30,7 +32,7 @@ export function JourneyGuide({
         </button>
         <span className="floor-indicator">
           <i />
-          {floor.floor} / {rtl ? floor.ar : floor.title}
+          {floor.floor} / {locationLabel}
         </span>
         <button
           className="cinema-toggle"

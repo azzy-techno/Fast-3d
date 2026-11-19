@@ -162,9 +162,14 @@ export function Reception() {
   );
   useFrame(() => {
     const p = journeyState.progress;
-    if (root.current) root.current.visible = p > 11.48 && p < 11.9;
+    if (root.current) root.current.visible = p > 11.48;
     if (lift.current) lift.current.visible = p > 11.43 && p < 11.73;
-    const open = Math.min(1, Math.max(0, (p - 11.73) / 0.025));
+    // Hold both leaves open until the visitor and guide have cleared the sill.
+    const open = Math.min(
+      1,
+      Math.max(0, (11.835 - p) / 0.022),
+      Math.max(0, (p - 11.697) / 0.024),
+    );
     if (doors.current) {
       doors.current.children[0].position.x = -0.9 - open * 1.8;
       doors.current.children[1].position.x = 0.9 + open * 1.8;
@@ -360,10 +365,9 @@ export function Reception() {
           ))}
           <Box p={[3, 5.25, 9]} s={[3.8, 0.3, 0.18]} c="#354d4c" />
           <Wayfinding
-            text="UNTIL NEXT TIME"
-            sub="THANK YOU FOR EXPLORING FAST"
-            p={[3, 4.9, 8.89]}
-            rotation={[0, Math.PI, 0]}
+            text="RECEPTION"
+            sub="FAST / GROUND FLOOR"
+            p={[3, 4.9, 9.12]}
             width={3.3}
           />
         </StaticInstances>

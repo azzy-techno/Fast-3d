@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { flushSync } from "react-dom";
 import {
+  EXTERIOR_ARRIVAL,
   floors,
   floorProgress,
   floorFraction,
@@ -90,6 +91,7 @@ export default function App() {
   const observatoryPending = useTour((s) => s.observatoryPending);
   const beginObservatory = useTour((s) => s.beginObservatory);
   const setAboutPanel = useTour((s) => s.setAboutPanel);
+  const replayFromOutside = useRef(false);
   const [liftDestination, setLiftDestination] = useState<string | null>(null);
   const liftRequest = useTour((s) => s.liftRequest);
   const [sound, setSound] = useState(false);
@@ -107,6 +109,11 @@ export default function App() {
     floorFraction(floor, pose) * scrollRange();
   const [percent, setPercent] = useState(0);
   const t = (en: string, ar: string) => (rtl ? ar : en);
+  let locationLabel = rtl ? currentFloor.ar : currentFloor.title;
+  if (!list && floor.id === "reception") {
+    if (percent < 28) locationLabel = t("Tower grounds", "ساحة البرج");
+    else if (percent < 67) locationLabel = t("Visitor entrance", "مدخل الزوار");
+  }
   const sceneReady = useCallback(() => setReady(true), []);
   const sceneFailure = useCallback(() => {
     setFailed(true);
@@ -142,7 +149,7 @@ export default function App() {
       if (!cancelled) setLoaded((n) => n + 1);
     };
     document.fonts.ready.then(complete);
-    [assetUrl("fast-logo.png"), assetUrl("cooling.webp")].forEach((src) => {
+    [assetUrl("fast-logo.png"), assetUrl("exterior/tower-arrival.webp")].forEach((src) => {
       const image = new Image();
       image.onload = complete;
       image.onerror = complete;
@@ -308,6 +315,7 @@ export default function App() {
     setSound(!sound);
   };
   const jump = (id: string) => {
+    replayFromOutside.current = id === "arrival";
     if (id === "arrival") id = "reception";
     setMenu(false);
     if (!list && !loading && floors.some((d) => d.id === id)) {
@@ -379,7 +387,7 @@ export default function App() {
         setList(false);
       });
       window.scrollTo({ top: 0, behavior: "instant" });
-      useTour.getState().teleport(dest.start);
+      useTour.getState().teleport(dest.id === "reception" ? EXTERIOR_ARRIVAL : dest.start);
     } else {
       flushSync(() => setList(true));
       document
@@ -419,7 +427,11 @@ export default function App() {
         <span />
         <span />
       </div>
-      <div className="scene-scrim" aria-hidden="true" />
+      <div
+        className="scene-scrim"
+        aria-hidden="true"
+        style={!list && floor.id === "reception" && percent > 16 ? { opacity: 0.25 } : undefined}
+      />
       {!list && !loading && (
         <>
           <AboutWelcome
@@ -438,6 +450,7 @@ export default function App() {
           <JourneyGuide
             key={floor.id}
             floor={floor}
+            locationLabel={locationLabel}
             rtl={rtl}
             jump={jump}
             cinematic={cinematic}
@@ -510,13 +523,13 @@ export default function App() {
               {list && (
                 <img
                   className="hero-photo"
-                  src={assetUrl("cooling.webp")}
-                  alt="Industrial engineering and equipment from FAST"
+                  src={assetUrl("exterior/tower-arrival.webp")}
+                  alt={t("FAST Tower and its visitor entrance", "برج فاست ومدخل الزوار")}
                 />
               )}
               <div className="hero-topline">
                 <p>
-                  {t("Ground floor · Reception", "الطابق الأرضي · الاستقبال")}
+                  {t("FAST Tower · Visitor entrance", "برج فاست · مدخل الزوار")}
                 </p>
                 <span>
                   {t(
@@ -542,17 +555,17 @@ export default function App() {
                 <div className="hero-bottom">
                   <p>
                     {t(
-                      "Welcome to FAST. Follow your engineer to the lift, or choose a floor now.",
-                      "مرحباً بكم في فاست. رافق المهندس إلى المصعد أو اختر طابقاً الآن.",
+                      list ? "Explore the services engineered inside FAST Tower." : "Scroll through the main gate to reception. Your engineer will guide you to the lifts.",
+                      list ? "استكشف الخدمات الهندسية داخل برج فاست." : "مرّ عبر البوابة الرئيسية إلى الاستقبال، ثم رافق مهندس فاست إلى المصاعد.",
                     )}
                   </p>
                   <button
                     className="enter-button"
-                    onClick={() => (list ? jump("electrical") : openLift())}
+                    onClick={() => (list ? jump("electrical") : scrollToProgress(11.89))}
                   >
                     {t(
-                      list ? "Explore our capabilities" : "Choose a floor",
-                      "استكشف إمكاناتنا",
+                      list ? "Explore our capabilities" : "Approach the gate",
+                      list ? "استكشف إمكاناتنا" : "توجّه إلى البوابة",
                     )}
                     <span>{down}</span>
                   </button>
@@ -765,7 +778,7 @@ export default function App() {
         <div className="journey-label">
           <span className="live-dot" />
           <button onClick={() => setMenu(true)} aria-haspopup="dialog">
-            {rtl ? currentFloor.ar : currentFloor.title}
+            {locationLabel}
           </button>
         </div>
         <nav
@@ -863,7 +876,7 @@ export default function App() {
             </button>
           </div>
           <button className="dialog-arrival" onClick={() => jump("arrival")}>
-            {t("Start at reception", "ابدأ من المدخل")}
+            {t("Start outside the tower", "ابدأ من خارج البرج")}
             {arrow}
           </button>
           <div className="dialog-services">
@@ -897,11 +910,14 @@ export default function App() {
         }}
         onArrive={(dest) => {
           flushSync(() => setFloor(dest));
+          const at = dest.id === "reception" && replayFromOutside.current ? EXTERIOR_ARRIVAL : dest.start;
+          replayFromOutside.current = false;
+          const top = floorFraction(dest, at) * scrollRange();
           lenis.current?.resize();
           if (lenis.current)
-            lenis.current.scrollTo(0, { immediate: true, force: true });
-          else window.scrollTo({ top: 0, behavior: "instant" });
-          useTour.getState().teleport(dest.start);
+            lenis.current.scrollTo(top, { immediate: true, force: true });
+          else window.scrollTo({ top, behavior: "instant" });
+          useTour.getState().teleport(at);
         }}
       />
 
@@ -917,7 +933,7 @@ export default function App() {
         )}
       </AnimatePresence>
       <span className="sr-only" role="status" aria-live="polite">
-        {rtl ? currentFloor.ar : currentFloor.title}
+        {locationLabel}
       </span>
     </div>
   );

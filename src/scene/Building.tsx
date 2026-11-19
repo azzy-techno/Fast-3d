@@ -7,9 +7,77 @@ import { Cooling } from "./Equipment";
 import { useSurface } from "./Exterior";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Mesh } from "three";
+import { Group, Mesh, MathUtils } from "three";
 import { ExteriorSurfaces, groundSurface } from "./ExteriorSurfaces";
 import { StaticInstances } from "./StaticInstances";
+
+import { Wayfinding } from "./Architecture";
+import { journeyState } from "./journey";
+
+function EntranceGate() {
+  const leaves = useRef<Group>(null);
+  useFrame(() => {
+    if (!leaves.current) return;
+    const opening =
+      1 - MathUtils.smoothstep(journeyState.progress, 11.865, 11.91);
+    for (const [i, leaf] of leaves.current.children.entries()) {
+      leaf.position.x = (i === 0 ? -1 : 1) * (1.35 + opening * 2.85);
+    }
+  });
+  return (
+    <group position={[3, 0.15, 20.6]} name="visitor-gate">
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <Box
+            p={[side * 3.15, 2.05, 0]}
+            s={[0.85, 4.1, 0.92]}
+            c="#cdbfa6"
+            metal={0.12}
+          />
+          <Box
+            p={[side * 2.92, 2.1, 0.47]}
+            s={[0.035, 3.8, 0.035]}
+            c="#ffdeb2"
+            glow
+          />
+          <Box
+            p={[side * 5, 0.7, -0.25]}
+            s={[3.3, 1.4, 0.52]}
+            c="#b9aa90"
+            metal={0.1}
+          />
+        </group>
+      ))}
+      <Box p={[0, 4.05, 0]} s={[7.3, 0.5, 1.02]} c="#29404a" />
+      <Wayfinding
+        text="VISITOR ENTRANCE"
+        sub="FAST / MAIN GATE"
+        p={[0, 4.07, 0.525]}
+        width={4.8}
+        height={0.64}
+      />
+      <group ref={leaves} userData={{ dynamic: true }}>
+        {[-1, 1].map((side) => (
+          <group key={side} position={[side * 1.35, 0, 0]}>
+            <StaticInstances>
+              {[0.19, 1.68].map((y) => (
+                <Box key={y} p={[0, y, 0]} s={[2.68, 0.08, 0.09]} c="#4a5351" />
+              ))}
+              {Array.from({ length: 14 }, (_, i) => (
+                <Box
+                  key={i}
+                  p={[-1.235 + i * 0.19, 0.94, 0]}
+                  s={[0.055, 1.52, 0.09]}
+                  c="#867656"
+                />
+              ))}
+            </StaticInstances>
+          </group>
+        ))}
+      </group>
+    </group>
+  );
+}
 
 export function Building() {
   const logo = useTexture(assetUrl("fast-logo.png"));
@@ -25,23 +93,23 @@ export function Building() {
       <Box p={[0, -0.5, -8]} s={[53, 0.7, 63]} c="#a7a99f" metal={0} />
       <Box p={[0, -0.09, -8]} s={[49, 0.12, 59]} c="#aeb8b5" metal={0} />
       <Box p={[0, 0.05, 5]} s={[36, 0.35, 22]} c="#cad0cb" metal={0} />
-      <Box p={[0, 40.8, -1]} s={[32, 81.6, 19]} c="#264557" metal={0.6} />
+      <Box p={[0, 43.6, -1]} s={[32, 76, 19]} c="#264557" metal={0.6} />
       <ExteriorSurfaces
         texture="facade-tower-glass"
         glass
         surfaces={[
-          { p: [0, 40.85, 8.56], size: [32, 81.7], repeat: [2, 5.6] },
+          { p: [0, 43.65, 8.56], size: [32, 76.1], repeat: [2, 5.2] },
           {
-            p: [16.06, 40.85, -1],
-            size: [19, 81.7],
+            p: [16.06, 43.65, -1],
+            size: [19, 76.1],
             rotation: [0, Math.PI / 2, 0],
-            repeat: [19 / 16, 5.6],
+            repeat: [19 / 16, 5.2],
           },
           {
-            p: [-16.06, 40.85, -1],
-            size: [19, 81.7],
+            p: [-16.06, 43.65, -1],
+            size: [19, 76.1],
             rotation: [0, -Math.PI / 2, 0],
-            repeat: [19 / 16, 5.6],
+            repeat: [19 / 16, 5.2],
           },
         ]}
       />
@@ -106,10 +174,7 @@ export function Building() {
           c="#b5b9b2"
         />
       ))}
-      <Box p={[3, 2.8, 9]} s={[7, 5.5, 0.2]} c="#2b5064" metal={0.8} />
-      {[-0.5, 3, 6.5].map((x) => (
-        <Box key={x} p={[x, 2.8, 9.15]} s={[0.09, 5.5, 0.1]} c="#bac9ce" />
-      ))}
+      <EntranceGate />
       <Box p={[8, 78.3, 9.1]} s={[10, 3.6, 0.3]} c="#eff0e9" metal={0.05} />
       <mesh position={[8, 78.3, 9.28]}>
         <planeGeometry args={[8, 2.3]} />
@@ -212,10 +277,10 @@ export function Building() {
           </mesh>
         </group>
       ))}
-      {Array.from({ length: 8 }, (_, i) => (
+      {[-7, -4, -1, 7, 10, 13].map((x) => (
         <Cylinder
-          key={i}
-          p={[-7 + i * 3, 0.5, 23]}
+          key={x}
+          p={[x, 0.5, 22.1]}
           height={1}
           radius={0.09}
           c="#51595a"

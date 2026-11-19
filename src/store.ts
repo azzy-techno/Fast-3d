@@ -1,3 +1,4 @@
+import { EXTERIOR_ARRIVAL } from "./lib/journeyScroll";
 import { create } from "zustand";
 import type { AboutPanel } from "./data/about";
 export type LiftPhase =
@@ -22,7 +23,7 @@ export const useTour = create<{
   teleport: (progress: number) => void;
   setProgress: (progress: number) => void;
 }>((set) => ({
-  progress: 11.69,
+  progress: EXTERIOR_ARRIVAL,
   liftPhase: "idle",
   setLiftPhase: (liftPhase) => set({ liftPhase }),
   liftFrameReady: -1,

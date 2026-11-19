@@ -784,6 +784,7 @@ footer p {
   overflow: hidden;
 }
 .hero-photo {
+  object-position: 69% center;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2595,7 +2596,7 @@ footer p,
 
 /* Each visit has its own scroll distance. Native touch and keyboard scrolling
    cover the same camera path as the eased wheel input. */
-.tour-view .reception-approach {height: 400svh; min-height: 2400px;}
+.tour-view .reception-approach {height: 900svh; min-height: 5400px;}
 .tour-view .chapter:not(#electrical):not(#cooling) {height: 520svh; min-height: 3100px;}
 .tour-view .chapter#electrical {height: 3000svh; min-height: 22000px;}
 .lift-dialog[data-phase="travelling"] .lift-journey {background: #152a36;}

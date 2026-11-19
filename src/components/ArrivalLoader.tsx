@@ -90,7 +90,7 @@ export function ArrivalLoader({
                 : "نهيّئ المشهد من أجلك…"
               : ready
                 ? "Opening the doors…"
-                : "Preparing reception…"}
+                : "Preparing the tower…"}
           </p>
         </div>
         <div

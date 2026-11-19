@@ -210,8 +210,22 @@ try {
   assert(p.y < 2.1 && p.z > -1, "Reception reached at walking height");
   sampleJourney(11.81, p, target);
   assert(p.z > 9 && p.y < 2.1, "Walk outside before drone ascent");
-  sampleGuide(11.86, host, hostTarget);
-  assert.equal(host.z, 18, "Host stays on forecourt during farewell");
+  for (let n = 12000; n >= 11610; n--) {
+    sampleJourney(n / 1000, p, target);
+    sampleGuide(n / 1000, host, hostTarget);
+    assert(target.z < p.z, "Look into the building during the arrival");
+    assert(n === 12000 || p.z <= previous.z, "Travel inward through reception");
+    if (Math.abs(p.z - 20.6) < 1 || Math.abs(p.z - 9) < 0.5)
+      assert(
+        Math.abs(p.x - 3) < 1.3 && p.y < 3.7,
+        "Pass through the clear entrance",
+      );
+    if (Math.abs(host.z - 9) < 0.5)
+      assert(Math.abs(host.x - 3) < 1.3, "Guide clears the open door");
+    previous.copy(p);
+  }
+  sampleGuide(11.89, host, hostTarget);
+  assert.equal(host.z, 18, "Guide waits inside the gate to greet visitors");
   sampleGuide(12, host, hostTarget);
   assert.equal(host.y, 0.25, "Host does not fly with drone");
   console.log(

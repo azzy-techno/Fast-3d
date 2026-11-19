@@ -78,13 +78,44 @@ try {
     "reception",
   );
   await wait(
-    "reception camera",
+    "exterior opening",
     () =>
-      Math.abs(+document.querySelector("canvas").dataset.journey - 11.69) <
+      Math.abs(+document.querySelector("canvas").dataset.journey - 12) < 0.001,
+  );
+  await capture("tower-exterior");
+  const visitArrival = async (fraction, pose, name) => {
+    await page.evaluate(
+      (f) =>
+        window.scrollTo(
+          0,
+          f * (document.documentElement.scrollHeight - innerHeight),
+        ),
+      fraction,
+    );
+    await wait(
+      name,
+      (pose) =>
+        Math.abs(+document.querySelector("canvas").dataset.journey - pose) <
+        0.001,
+      pose,
+    );
+    assert.equal(
+      await page.evaluate(() => document.querySelector(".lift-dialog").open),
+      false,
+    );
+    await capture(name);
+  };
+  await click(".enter-button");
+  await wait(
+    "approach the gate",
+    () =>
+      Math.abs(+document.querySelector("canvas").dataset.journey - 11.89) <
       0.001,
   );
-  await capture("reception");
-  console.log("PASS reception opening");
+  await capture("main-gate");
+  await visitArrival(0.64, 11.77, "lobby-doors");
+  await visitArrival(0.75, 11.69, "reception");
+  console.log("PASS exterior, visitor gate, lobby doors and reception");
   const toLanding = async () => {
     await page.evaluate(() =>
       window.scrollTo({
@@ -177,6 +208,20 @@ try {
     () =>
       document.querySelector("main").dataset.floor === "reception" &&
       !document.querySelector(".lift-dialog").open,
+  );
+  await wait(
+    "replay exterior",
+    () => +document.querySelector("canvas").dataset.journey === 12,
+  );
+  await capture("phone-exterior");
+  await click(".lift-toggle");
+  await click('[data-destination="reception"]');
+  await wait(
+    "lift returns directly to desk",
+    () =>
+      !document.querySelector(".lift-dialog").open &&
+      Math.abs(+document.querySelector("canvas").dataset.journey - 11.69) <
+        0.001,
   );
   await click(".view-button");
   assert.equal(

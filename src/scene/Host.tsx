@@ -73,7 +73,7 @@ export function Host() {
     state.previous.copy(state.p);
     state.initialized = true;
     const walking =
-      distance / Math.max(dt, 0.001) > 0.06 && p > 0.7 && p < 11.84 ? 1 : 0;
+      distance / Math.max(dt, 0.001) > 0.06 && p > 0.7 && p < 11.87 ? 1 : 0;
     state.walking = MathUtils.damp(
       state.walking,
       walking,
@@ -87,7 +87,7 @@ export function Host() {
     rig.idle.setEffectiveWeight(1 - state.walking);
     rig.mixer.update(0);
     standHuman(rig, 1 - state.walking);
-    const waving = p < 0.7 || p > 11.84 || (p >= 11.68 && p <= 11.69);
+    const waving = p < 0.7 || p >= 11.87 || (p >= 11.68 && p <= 11.69);
     if (arriving) state.wave = waving ? 1 : 0;
     state.wave = MathUtils.damp(
       state.wave,
