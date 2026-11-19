@@ -205,20 +205,25 @@ export default function App() {
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
       );
       let previousRange = scrollRange();
-      let previousFraction = Math.min(1, window.scrollY / previousRange);
+      let previousY = window.scrollY;
       const update = () => {
         const range = scrollRange();
         if (!list && range !== previousRange) {
           // Anchor the tour pose when rotation or browser chrome resizes a floor.
+          const limit = document.documentElement.scrollHeight - innerHeight;
+          // A visitor may also scroll during the resize. Preserve that input.
+          if (Math.abs(window.scrollY - Math.min(previousY, limit)) <= 1) {
+            const y = (Math.min(previousY, previousRange) / previousRange) * range
+              + Math.max(0, previousY - previousRange);
+            if (lenis.current) {
+              lenis.current.resize();
+              lenis.current.scrollTo(y, { immediate: true, force: true });
+            } else window.scrollTo({ top: y, behavior: "instant" });
+          }
           previousRange = range;
-          const y = previousFraction * range;
-          if (lenis.current) {
-            lenis.current.resize();
-            lenis.current.scrollTo(y, { immediate: true, force: true });
-          } else window.scrollTo({ top: y, behavior: "instant" });
         }
         const fraction = Math.max(0, Math.min(1, window.scrollY / range));
-        previousFraction = fraction;
+        previousY = window.scrollY;
         if (list) {
           const current = [...floors].reverse().find((d) => {
             const el = document.getElementById(
