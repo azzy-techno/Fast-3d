@@ -690,8 +690,8 @@ export default function App() {
               </h2>
               <p>
                 {t(
-                  "From the foundations to the intelligence within. Bring your next project to FAST Operations & Maintenance.",
-                  "من الأساسات إلى التقنيات الذكية. شارك مشروعك القادم مع FAST للتشغيل والصيانة.",
+                  "Bring your next project to FAST Operations & Maintenance.",
+                  "شارك مشروعك القادم مع فاست للتشغيل والصيانة.",
                 )}
               </p>
               <a className="primary-link" href={`${source}/contact?type=rfq`}>
@@ -702,6 +702,11 @@ export default function App() {
                 {t("Replay the journey", "إعادة الجولة")}{" "}
                 <span aria-hidden="true">↺</span>
               </button>
+            </div>
+            <details className="closing-contacts" open={list || undefined}>
+              <summary>
+                {t("Contact & company details", "التواصل وبيانات الشركة")}
+              </summary>
               <div className="credentials">
                 <span>
                   {t("ISO 9001 · 14001 · 45001", "ISO 9001 · 14001 · 45001")}
@@ -713,37 +718,37 @@ export default function App() {
                   )}
                 </span>
               </div>
-            </div>
-            <footer>
-              <div>
-                <img
-                  src={assetUrl("fast-logo.png")}
-                  alt="FAST"
-                  width="110"
-                  height="32"
-                />
-                <p>{t("Operations & Maintenance", "التشغيل والصيانة")}</p>
-              </div>
-              <div>
-                <a href="mailto:info@fast-arabia.com">info@fast-arabia.com</a>
-                <a href="tel:+966138311137" dir="ltr">
-                  +966 13 831 1137
-                </a>
-              </div>
-              <div>
-                <a href={`${source}/contact`}>
-                  {t("Find us in Dammam", "موقعنا في الدمام")}
-                  {arrow}
-                </a>
-                <p>© {new Date().getFullYear()} FAST</p>
-                <a
-                  className="asset-credit"
-                  href={assetUrl("interior/ATTRIBUTION.txt")}
-                >
-                  {t("3D asset credits", "حقوق النماذج ثلاثية الأبعاد")}
-                </a>
-              </div>
-            </footer>
+              <footer>
+                <div>
+                  <img
+                    src={assetUrl("fast-logo.png")}
+                    alt="FAST"
+                    width="110"
+                    height="32"
+                  />
+                  <p>{t("Operations & Maintenance", "التشغيل والصيانة")}</p>
+                </div>
+                <div>
+                  <a href="mailto:info@fast-arabia.com">info@fast-arabia.com</a>
+                  <a href="tel:+966138311137" dir="ltr">
+                    +966 13 831 1137
+                  </a>
+                </div>
+                <div>
+                  <a href={`${source}/contact`}>
+                    {t("Find us in Dammam", "موقعنا في الدمام")}
+                    {arrow}
+                  </a>
+                  <p>© {new Date().getFullYear()} FAST</p>
+                  <a
+                    className="asset-credit"
+                    href={assetUrl("interior/ATTRIBUTION.txt")}
+                  >
+                    {t("3D asset credits", "حقوق النماذج ثلاثية الأبعاد")}
+                  </a>
+                </div>
+              </footer>
+            </details>
           </section>
         )}
       </main>

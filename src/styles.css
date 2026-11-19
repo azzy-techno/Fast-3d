@@ -2604,12 +2604,17 @@ footer p,
 .tour-view .enter-button {white-space:nowrap;flex-shrink:0;}
 .tour-view .closing {background:linear-gradient(90deg,#091d2ae8, #091d2a25 80%);}
 .tour-view .closing footer {background:#0c2331eb;padding:18px;}
+ .closing-contacts summary {cursor:pointer; color:#d4e4e7;font-size:13px;padding:14px 18px;}
+.closing-contacts {max-width:900px;background:#102633ee;}
+.closing-contacts .credentials {padding:0 18px 16px;margin-top:12px;}
+.tour-view .closing {justify-content:flex-end;gap:12px;}
 @media(max-width:700px){
-  .tour-view .closing {background:linear-gradient(0deg,#0a2030 2%,#0a2030de 58%,transparent 90%);gap:26px;padding-bottom:100px;}
-  .tour-view .closing-content {margin-top:24svh;background:#0c2432eb;padding:18px;}
-  .tour-view .closing h2 {font-size:36px;}
-  .tour-view .closing-content >p:not(.closing-intro) {margin-top:12px;}
-  .tour-view .closing .credentials {margin-top:16px;}
+  .tour-view .closing {min-height:100svh;padding:35svh var(--page) 104px;background:linear-gradient(0deg,#0b2230b3,transparent 63%);}
+  .tour-view .closing-content {padding:18px;background:#0c2432ed;}
+  .tour-view .closing h2 {font-size:30px;}
+  .tour-view .closing-content >p:not(.closing-intro) {margin-top:8px;font-size:14px;}
+  .tour-view .closing .primary-link {margin-top:14px;padding:12px 16px;}
+  .tour-view .replay-tour {margin-top:12px;}
 }
 
 .floor-plan {max-height:calc(100dvh - 215px);overflow-y:auto;overscroll-behavior:contain;}

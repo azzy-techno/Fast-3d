@@ -78,5 +78,14 @@ export const floorProgress = (floor: Floor, fraction: number) =>
   interpolate(fraction, floorStops(floor), false);
 export const floorFraction = (floor: Floor, pose: number) =>
   interpolate(pose, floorStops(floor), true);
-export const scrollRange = () =>
-  Math.max(1, document.documentElement.scrollHeight - innerHeight);
+export function scrollRange() {
+  const end = document.querySelector<HTMLElement>(".tour-view #together");
+  // Hold the rooftop shot while visitors read or expand the closing contacts.
+  return Math.max(
+    1,
+    Math.min(
+      document.documentElement.scrollHeight - innerHeight,
+      end?.offsetTop ?? Infinity,
+    ),
+  );
+}
