@@ -66,6 +66,19 @@ function Fan({ p, radius = 1 }: { p: Point; radius?: number }) {
         height={0.05}
         c="#142d3d"
       />
+      {[0, 1, 2, 3].map((i) => (
+        <Cylinder
+          key={i}
+          p={[
+            Math.cos((i * Math.PI) / 2) * radius * 0.84,
+            0.31,
+            Math.sin((i * Math.PI) / 2) * radius * 0.84,
+          ]}
+          radius={0.038}
+          height={0.24}
+          c="#9aa4a7"
+        />
+      ))}
       <ArchitecturalAsset
         name="fan-guard"
         position={[0, 0.43, 0]}
@@ -199,6 +212,33 @@ export function Cooling() {
       ))}
       <Label text="DESIGN / SUPPLY / RETROFIT" p={[0, 0.38, 4.1]} width={5} />
       <Pipe a={[-5.5, 1, 3.4]} b={[5.5, 1, 3.4]} radius={0.23} />
+      {[-4.8, -1.8, 1.8, 4.8].map((x) => (
+        <group key={x} position={[x, 1, 3.4]} rotation={[0, 0, Math.PI / 2]}>
+          <Cylinder radius={0.306} height={0.035} c="#3d535c" />
+          {[-0.048, 0.048].map((y) => (
+            <Cylinder
+              key={y}
+              p={[0, y, 0]}
+              radius={0.315}
+              height={0.06}
+              c="#77949b"
+            />
+          ))}
+          {Array.from({ length: 6 }, (_, i) => (
+            <Cylinder
+              key={i}
+              p={[
+                0.272 * Math.cos((i * Math.PI) / 3),
+                0,
+                0.272 * Math.sin((i * Math.PI) / 3),
+              ]}
+              radius={0.023}
+              height={0.195}
+              c="#a8abad"
+            />
+          ))}
+        </group>
+      ))}
       <Pipe a={[-5.5, 1, 3.4]} b={[-5.5, 0, 3.4]} radius={0.23} />
       <Pipe a={[-5.7, 0, -3]} b={[-5.7, 0, 3]} c="#babfc3" radius={0.05} />
       {[-5.9, 5.9].map((x) => (

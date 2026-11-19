@@ -240,7 +240,7 @@ function ServiceFloor({ index }: { index: number }) {
       <Wayfinding
         text={`${String(11 - index).padStart(2, "0")} / ${chapters[room.index].title.toUpperCase()}`}
         sub="FAST / ENGINEERING FLOORS"
-        p={[room.x, 4.52, -7.04]}
+        p={[room.x, 3.63, -6.97]}
         width={7}
       />
       {index !== 0 && (
