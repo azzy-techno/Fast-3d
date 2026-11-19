@@ -233,7 +233,9 @@ const World = memo(function World({
     const offsetY = mobile
       ? (0.19 - 0.18 * skyline) * outside + 0.1 * inside
       : 0;
-    const nextFov = fov + (mobile ? inside * 8 : 0);
+    // Leave room above the closing card for both the roof and the street on phones.
+    const pullback = Math.min(1, Math.max(0, (0.55 - p) / 0.55));
+    const nextFov = fov + (mobile ? inside * 8 + 8 * pullback : 0);
     if (
       Math.abs(cam.fov - nextFov) > 0.02 ||
       !cam.view ||

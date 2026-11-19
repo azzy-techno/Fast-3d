@@ -1523,8 +1523,8 @@ footer p,
   min-height: 1400px;
 }
 .tour-view #cooling {
-  height: 580svh;
-  min-height: 3600px;
+  height: 520svh;
+  min-height: 3500px;
 }
 .tour-view .chapter-copy {
   max-width: 350px;
@@ -1765,10 +1765,6 @@ footer p,
     height: 245svh;
     min-height: 1700px;
     padding-top: 48svh;
-  }
-  .tour-view #cooling {
-    height: 660svh;
-    min-height: 4300px;
   }
   .tour-view .chapter-copy {
     top: 48svh;

@@ -38,8 +38,12 @@ const shot = (at: number, p: Point, target: Point, fov = 62) =>
       at >= 0.55 && at < 2 ? [target[0], target[1] + 60, target[2]] : target,
     fov,
   });
-shot(0, [115, 80, 160], [0, 40, -5], 42);
-shot(0.22, [108, 82, 150], [0, 43, -4], 42);
+// Played in descending pose order: rise away from the waving guide, then
+// tilt down as the full tower and its surrounding streets come into frame.
+shot(0, [103, 117, 133], [0, 44, -3], 48);
+shot(0.12, [89, 112, 111], [0, 51, -2], 48);
+shot(0.28, [58, 104, 71], [1, 66, 0], 47);
+shot(0.42, [34, 96, 35], [2.5, 79, 1], 47);
 shot(0.55, [17, 29, 14], [2.4, 24.3, 0.9], 48);
 shot(0.7, [11, 25.1, 10], [8, 24.1, 5], 54);
 shot(0.86, [10, 25.05, 9], [3, 24.2, -1], 58);

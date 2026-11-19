@@ -186,6 +186,16 @@ try {
   await ride("cooling", 1.12);
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
   await page.evaluate(() =>
+    window.scrollTo(0, document.getElementById("together").offsetTop * 0.68),
+  );
+  await wait("rooftop farewell", () => {
+    const pose = document.querySelector("canvas").dataset;
+    return Math.abs(+pose.journey - 0.55) < 0.002 && pose.guide === "waving";
+  });
+  const waveDistance = await page.evaluate(
+    () => +document.querySelector("canvas").dataset.guideCameraDistance,
+  );
+  await page.evaluate(() =>
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: "instant",
@@ -193,9 +203,14 @@ try {
   );
   await wait(
     "roof finale",
-    () =>
-      Math.abs(+document.querySelector("canvas").dataset.journey - 0.55) <
-      0.002,
+    () => +document.querySelector("canvas").dataset.journey < 0.002,
+  );
+  assert(
+    (await page.evaluate(
+      () => +document.querySelector("canvas").dataset.guideCameraDistance,
+    )) >
+      waveDistance * 6,
+    "Camera pulls back to a wide shot",
   );
   await capture("roof-finale");
   assert.equal(

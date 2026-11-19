@@ -35,7 +35,7 @@ export const floors = [
     ar: chapters[0].ar,
     floor: "R",
     start: 1.12,
-    end: 0.55,
+    end: 0,
   },
 ];
 export type Floor = (typeof floors)[number];
@@ -43,9 +43,9 @@ export function floorStops(floor: Floor): [number, number][] {
   if (floor.id === "cooling")
     return [
       [0, 1.12],
-      [0.48, 0.94],
-      [0.7, 0.68],
-      [0.85, 0.6],
+      [0.34, 0.94],
+      [0.5, 0.68],
+      [0.68, 0.55],
       [1, floor.end],
     ];
   if (floor.id === "reception")
@@ -86,7 +86,7 @@ export const floorFraction = (floor: Floor, pose: number) =>
   interpolate(pose, floorStops(floor), true);
 export function scrollRange() {
   const end = document.querySelector<HTMLElement>(".tour-view #together");
-  // Hold the rooftop shot while visitors read or expand the closing contacts.
+  // Hold the final skyline shot while visitors read or expand the closing contacts.
   return Math.max(
     1,
     Math.min(
