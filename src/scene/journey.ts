@@ -343,9 +343,9 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   position.z -= liftBlend * 0.85;
   if (p > 0.7 && p < 1.28) {
     const weight = smooth(0.7, 0.86) * (1 - smooth(1.14, 1.28));
-    sampleJourney(1, arcP, arcTarget);
-    arcTarget.sub(arcP).setY(0).normalize().multiplyScalar(2.8).add(arcP);
-    arcTarget.y = 83;
+    // The guide presents from the clear service aisle, to the side of the
+    // camera-to-plant sight line and beyond the foreground pipe manifold.
+    arcTarget.set(7.2, 83, 3.45);
     position.lerp(arcTarget, weight);
     if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }

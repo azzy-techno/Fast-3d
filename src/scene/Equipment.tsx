@@ -1,3 +1,5 @@
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
+import { ContactShadow } from "./ContactShadow";
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group, SRGBColorSpace, Object3D } from "three";
@@ -64,6 +66,11 @@ function Fan({ p, radius = 1 }: { p: Point; radius?: number }) {
         height={0.05}
         c="#142d3d"
       />
+      <ArchitecturalAsset
+        name="fan-guard"
+        position={[0, 0.43, 0]}
+        scale={[radius, 1, radius]}
+      />
       <group userData={{ dynamic: true }} ref={blades} position={[0, 0.27, 0]}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <group key={i} rotation={[0, (i * Math.PI) / 3, 0]}>
@@ -84,30 +91,7 @@ function Motor({ p, c = "#2f88b0" }: { p: Point; c?: string }) {
   return (
     <group position={p}>
       <Box p={[0, 0.13, 0]} s={[1.8, 0.25, 1.25]} c="#b6c1c6" />
-      <Cylinder
-        p={[-0.3, 0.7, 0]}
-        radius={0.5}
-        height={1.25}
-        r={[0, 0, Math.PI / 2]}
-        c={c}
-      />
-      {Array.from({ length: 7 }, (_, i) => (
-        <Cylinder
-          key={i}
-          p={[-0.8 + i * 0.16, 0.7, 0]}
-          radius={0.56}
-          height={0.035}
-          r={[0, 0, Math.PI / 2]}
-          c={c}
-        />
-      ))}
-      <Cylinder
-        p={[0.55, 0.7, 0]}
-        radius={0.23}
-        height={0.45}
-        r={[0, 0, Math.PI / 2]}
-        c="#c7cfd1"
-      />
+      <ArchitecturalAsset name="induction-motor" />
       <Cylinder
         p={[0.95, 0.7, 0]}
         radius={0.64}
@@ -206,6 +190,7 @@ export function Cooling() {
               c="#b84d3e"
             />
           </group>
+          <ContactShadow width={4.5} length={5.2} height={0.024} />
           <Fan p={[0, 3.14, 0]} radius={1.25} />
           <Label text={`CT — 0${i + 1}`} p={[0, 2.77, 1.82]} />
           <Pipe a={[1.38, 1, 0]} b={[1.38, 1, 3.4]} radius={0.19} />

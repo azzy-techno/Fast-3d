@@ -1,3 +1,5 @@
+import { ContactShadow } from "./ContactShadow";
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { ElectricalFloor } from "./ElectricalFloor";
 import { InteriorFloor } from "./InteriorFloor";
 import { useRef } from "react";
@@ -152,15 +154,6 @@ function ServiceFloor({ index }: { index: number }) {
             glow
           />
         ))}
-        {Array.from({ length: 25 }, (_, i) => (
-          <Box
-            key={i}
-            p={[room.x - 3.5 + i * 0.28, 2.8, -7.48]}
-            s={[0.06, 4.4, 0.08]}
-            c="#8c856e"
-            metal={0.1}
-          />
-        ))}
         {Array.from({ length: 13 }, (_, i) => (
           <Box
             key={i}
@@ -247,7 +240,7 @@ function ServiceFloor({ index }: { index: number }) {
       <Wayfinding
         text={`${String(11 - index).padStart(2, "0")} / ${chapters[room.index].title.toUpperCase()}`}
         sub="FAST / ENGINEERING FLOORS"
-        p={[room.x, 4.4, -7.35]}
+        p={[room.x, 4.52, -7.04]}
         width={7}
       />
       {index !== 0 && (
@@ -258,6 +251,7 @@ function ServiceFloor({ index }: { index: number }) {
           width={7}
         />
       )}
+      <ArchitecturalAsset name="gallery-alcove" position={[room.x, 0, -7.43]} />
       <Planter p={[-13, 0, 6]} scale={1.25} />
       <Planter p={[13, 0, 6]} scale={1.25} />
       <ImportedFurniture kind="sofa" p={[-8, 0, 6.5]} rotation={Math.PI} />
@@ -267,6 +261,7 @@ function ServiceFloor({ index }: { index: number }) {
         name={`service-equipment-${room.index}`}
       >
         <StaticInstances>
+          <ContactShadow width={11} length={7} />
           <Equipment />
         </StaticInstances>
         <SystemAnimation

@@ -38,32 +38,8 @@ export function Atmosphere({ mobile }: { mobile: boolean }) {
       <group ref={cloudGroup}>
         <Clouds
           texture={assetUrl("exterior/cloud.png")}
-          limit={mobile ? 28 : 64}
+          limit={mobile ? 8 : 16}
         >
-          <Cloud
-            seed={7}
-            position={[-80, 85, -110]}
-            bounds={[70, 5, 24]}
-            segments={mobile ? 10 : 24}
-            volume={34}
-            opacity={0.25}
-            color="#f4e8d9"
-            speed={0.025}
-            growth={1}
-            fade={90}
-          />
-          <Cloud
-            seed={13}
-            position={[95, 105, -160]}
-            bounds={[60, 4, 26]}
-            segments={mobile ? 10 : 24}
-            volume={30}
-            opacity={0.18}
-            color="#eee9dc"
-            speed={0.02}
-            growth={1}
-            fade={90}
-          />
           <Cloud
             seed={21}
             position={[-2.8, 88, -1]}

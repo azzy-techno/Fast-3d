@@ -1,3 +1,4 @@
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group } from "three";
@@ -157,6 +158,11 @@ export function ElectricalFloor() {
           height={1.3}
         />
       </StaticInstances>
+      {[-15, 0, 15].map((x) => (
+        <group key={x} position={[x, 0, 53.8]} rotation={[0, Math.PI, 0]}>
+          <ArchitecturalAsset name="gallery-alcove" />
+        </group>
+      ))}
       <ElectricalInterior />
       <ElectricalIntro />
       {[-29, 29].flatMap((x) =>

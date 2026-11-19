@@ -1,3 +1,4 @@
+import { ContactShadow } from "./ContactShadow";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
@@ -28,6 +29,9 @@ export function Host() {
       walking: 0,
       initialized: false,
       angle: 0,
+      gaze: 0,
+      rightPresents: true,
+      telemetry: 0,
       phase: 0,
       wave: 1,
       presentation: 0,
@@ -41,6 +45,9 @@ export function Host() {
   useFrame(({ clock, camera, gl }, dt) => {
     if (!root.current) return;
     const p = journeyState.progress;
+    state.telemetry += dt;
+    const report = state.telemetry >= 0.1;
+    if (report) state.telemetry = 0;
     root.current.visible = !(p >= 1.602 && p < 1.67);
     if (!root.current.visible) {
       state.initialized = false;
@@ -85,9 +92,8 @@ export function Host() {
       Math.min(dt, 0.1),
     );
     const presentingHere = guideIsPresenting(p);
-    const electrical = p >= 2 && p < 2.735 && presentingHere;
-    const about = p >= 1.53 && p < 1.74 && presentingHere;
-    const settled = (electrical || about) && state.walking < 0.2;
+
+    const settled = presentingHere && state.walking < 0.2;
     state.presentation = MathUtils.damp(
       state.presentation,
       settled ? 1 : 0,
@@ -106,9 +112,24 @@ export function Host() {
       rig.bones
         .get("Spine2")
         ?.rotateY(Math.sin(rhythm * 0.45) * 0.045 * gestureWeight);
-      rig.bones
-        .get("Head")
-        ?.rotateY(Math.sin(rhythm * 0.6) * 0.19 * gestureWeight);
+      // Alternate eye contact with the visitor and a glance along the pointing arm.
+      const visitor = MathUtils.smoothstep(
+        Math.cos(rhythm * 0.52),
+        -0.45,
+        0.45,
+      );
+      state.a.copy(state.face).sub(state.p).setY(0).normalize();
+      state.b.copy(camera.position).sub(state.p).setY(0).normalize();
+      state.a.lerp(state.b, visitor);
+      const azimuth = Math.atan2(state.a.x, state.a.z) - state.angle;
+      const glance = Math.atan2(Math.sin(azimuth), Math.cos(azimuth));
+      state.gaze = MathUtils.damp(
+        state.gaze,
+        MathUtils.clamp(glance, -0.52, 0.52),
+        5,
+        Math.min(dt, 0.1),
+      );
+      rig.bones.get("Head")?.rotateY(state.gaze * gestureWeight);
       rig.bones
         .get("Head")
         ?.rotateX(Math.sin(rhythm * 1.4) * 0.055 * gestureWeight);
@@ -120,7 +141,7 @@ export function Host() {
         : presentingHere
           ? state.delta.copy(state.face).sub(state.p)
           : state.delta.set(Math.sin(state.angle), 0, Math.cos(state.angle));
-    if (!walking && presentingHere && (electrical || about)) {
+    if (!walking && presentingHere) {
       // Stand side-on between the visitor and the exhibit, so the presenting
       // arm is visible instead of disappearing behind the engineer's torso.
       state.a.copy(state.face).sub(state.p).setY(0).normalize();
@@ -168,25 +189,50 @@ export function Host() {
       bone.quaternion.slerp(state.q, weight);
       bone.updateMatrixWorld(true);
     };
+    // Choose the exhibit-side arm in the guide's local frame. Hysteresis
+    // keeps the arm stable for exhibits almost directly ahead.
+    if (settled) {
+      const localX = state.a
+        .copy(state.face)
+        .sub(state.p)
+        .normalize()
+        .applyAxisAngle(state.up, -state.angle).x;
+      if (Math.abs(localX) > 0.25) state.rightPresents = localX < 0;
+    }
+    const lead = state.rightPresents ? "Right" : "Left";
+    const support = state.rightPresents ? "Left" : "Right";
+    const supportSide = state.rightPresents ? 1 : -1;
     // A previous station's aim must not masquerade as a settled new gesture.
-    delete gl.domElement.dataset.guideAim;
+    if (report) delete gl.domElement.dataset.guideAim;
     if (state.wave > 0.01) {
-      aim("RightArm", "RightForeArm", -0.7, 0.48, 0.1, state.wave);
+      const beat = Math.sin(clock.elapsedTime * 4.8);
+      const waveArc =
+        0.18 + 0.82 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.25));
+      aim(
+        "RightArm",
+        "RightForeArm",
+        -0.73,
+        0.45 + 0.07 * waveArc,
+        0.17,
+        state.wave,
+      );
       aim(
         "RightForeArm",
         "RightHand",
-        Math.sin(clock.elapsedTime * 5) * 0.35,
+        beat * 0.42 * waveArc,
         1,
         0.12,
         state.wave,
       );
       rig.bones
         .get("RightHand")
-        ?.rotateY(Math.sin(clock.elapsedTime * 5) * 0.18 * state.wave);
+        ?.rotateY(
+          Math.sin(clock.elapsedTime * 4.8 - 0.4) * 0.21 * waveArc * state.wave,
+        );
     } else if (state.walking < 0.2 && presentingHere) {
       // Aim in world space at this exhibit, then transform into the guide frame.
       // The hand extends along the same ray, not a fixed local "point right" pose.
-      const shoulder = rig.bones.get("RightArm")!;
+      const shoulder = rig.bones.get(lead + "Arm")!;
       shoulder.getWorldPosition(state.a);
       state.direction
         .copy(state.face)
@@ -200,14 +246,14 @@ export function Host() {
       // Vary the elbow's emphasis while keeping the forearm aimed at the
       // actual equipment surface, including overhead lighting fixtures.
       aim(
-        "RightArm",
-        "RightForeArm",
+        lead + "Arm",
+        lead + "ForeArm",
         dx,
         dy - 0.25 - emphasis * 0.22 * gestureWeight,
         dz,
         presenting,
       );
-      const elbow = rig.bones.get("RightForeArm")!;
+      const elbow = rig.bones.get(lead + "ForeArm")!;
       elbow.getWorldPosition(state.a);
       state.direction
         .copy(state.face)
@@ -215,55 +261,70 @@ export function Host() {
         .normalize()
         .applyAxisAngle(state.up, -state.angle);
       aim(
-        "RightForeArm",
-        "RightHand",
+        lead + "ForeArm",
+        lead + "Hand",
         state.direction.x,
         state.direction.y,
         state.direction.z,
         presenting,
       );
-      const hand = rig.bones.get("RightHand")!;
+      const hand = rig.bones.get(lead + "Hand")!;
+      // Direct the index knuckle at the equipment after the shoulder and elbow settle.
+      hand.getWorldPosition(state.a);
+      state.direction
+        .copy(state.face)
+        .sub(state.a)
+        .normalize()
+        .applyAxisAngle(state.up, -state.angle);
+      aim(
+        lead + "Hand",
+        lead + "HandIndex1",
+        state.direction.x,
+        state.direction.y,
+        state.direction.z,
+        presenting * 0.9,
+      );
       elbow.getWorldPosition(state.a);
       hand.getWorldPosition(state.b);
       state.direction.copy(state.face).sub(state.a).normalize();
-      gl.domElement.dataset.guideAim = state.b
-        .sub(state.a)
-        .normalize()
-        .dot(state.direction)
-        .toFixed(4);
+      if (report)
+        gl.domElement.dataset.guideAim = state.b
+          .sub(state.a)
+          .normalize()
+          .dot(state.direction)
+          .toFixed(4);
     }
     if (gestureWeight > 0.001) {
       aim(
-        "LeftArm",
-        "LeftForeArm",
-        0.55,
-        -0.65 + emphasis * 0.28,
+        support + "Arm",
+        support + "ForeArm",
+        supportSide * 0.35,
+        -0.83 + emphasis * 0.17,
         0.5,
         gestureWeight,
       );
       aim(
-        "LeftForeArm",
-        "LeftHand",
-        0.32 + emphasis * 0.3,
-        0.2 + emphasis * 0.35,
+        support + "ForeArm",
+        support + "Hand",
+        supportSide * (0.18 + emphasis * 0.22),
+        -0.08 + emphasis * 0.34,
         0.85,
         gestureWeight,
       );
       rig.bones
-        .get("LeftHand")
-        ?.rotateZ((-0.5 + emphasis * 0.25) * gestureWeight);
-      rig.bones
-        .get("RightHand")
-        ?.rotateY(Math.sin(rhythm) * 0.12 * gestureWeight);
+        .get(support + "Hand")
+        ?.rotateZ(supportSide * (-0.5 + emphasis * 0.25) * gestureWeight);
+      if (!report) return;
       root.current.updateMatrixWorld(true);
-      rig.bones.get("LeftHand")?.getWorldPosition(state.a);
+      rig.bones.get(support + "Hand")?.getWorldPosition(state.a);
       gl.domElement.dataset.guidePresentationHand = state.a
         .toArray()
         .map((n) => n.toFixed(4))
         .join(",");
-    } else {
+    } else if (report) {
       delete gl.domElement.dataset.guidePresentationHand;
     }
+    if (!report) return;
     state.b.set(state.p.x, state.p.y + 1, state.p.z).project(camera);
     gl.domElement.dataset.guideScreen = [state.b.x, state.b.y]
       .map((n) => n.toFixed(3))
@@ -288,6 +349,7 @@ export function Host() {
   });
   return (
     <group ref={root} name="FAST-human-guide">
+      <ContactShadow width={1.12} length={1.45} height={0.045} />
       <primitive object={rig.model} />
     </group>
   );

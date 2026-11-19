@@ -1,7 +1,10 @@
+import { ContactShadow } from "./ContactShadow";
+import cityBlocks from "../data/cityBlocks.json";
+import { useTexture } from "@react-three/drei";
 import { trafficPosition } from "./travelMotion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
+import { useHumanRig, groundHuman, WALK_STRIDE } from "./HumanRig";
 import {
   BufferGeometry,
   CanvasTexture,
@@ -180,54 +183,38 @@ function Repeated({
   );
 }
 
+function DistrictShadows() {
+  const map = useTexture(assetUrl("exterior/optimized/district-shade.webp"));
+  const layer = useRef<Mesh>(null);
+  useFrame(({ gl }) => {
+    if (layer.current) layer.current.visible = !gl.shadowMap.enabled;
+  });
+  return (
+    <mesh
+      ref={layer}
+      position={[-16, 0.035, -168]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      renderOrder={1}
+    >
+      <planeGeometry args={[480, 480]} />
+      <meshBasicMaterial
+        map={map}
+        color="#343b4b"
+        transparent
+        opacity={0.45}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
 function City() {
   const { masses, facades, bands, rooftops } = useMemo(() => {
     const masses: Instance[] = [],
       facades: Record<string, Surface[]> = {},
       bands: Instance[] = [],
       rooftops: Instance[] = [];
-    const sites = [
-      [-56, -24, 13, 18, 22],
-      [-51, -61, 22, 17, 32],
-      [-12, -60, 19, 16, 45],
-      [0, -81, 17, 18, 38],
-      [40, -86, 16, 17, 54],
-      [56, -59, 24, 21, 30],
-      [62, -25, 21, 18, 37],
-      [105, -25, 17, 18, 58],
-      [-85, -65, 17, 23, 49],
-      [-80, -22, 20, 15, 14],
-      [92, -90, 19, 19, 65],
-      [-107, -115, 25, 22, 55],
-      [-62, -120, 24, 24, 70],
-      [-10, -130, 20, 20, 63],
-      [48, -133, 21, 21, 76],
-      [70, -130, 20, 20, 51],
-      // Fill the left-hand district in staggered rows, with clear street corridors.
-      [-42, 23, 19, 18, 21],
-      [-69, 23, 20, 18, 29],
-      [-99, 23, 23, 18, 24],
-      [-127, 23, 20, 18, 36],
-      [-156, 23, 24, 18, 27],
-      [-108, -23, 20, 17, 33],
-      [-137, -23, 24, 17, 42],
-      [-166, -23, 22, 17, 30],
-      [-114, -65, 22, 23, 47],
-      [-145, -65, 23, 23, 37],
-      [-177, -65, 22, 23, 56],
-      [-141, -115, 21, 22, 64],
-      [-175, -115, 23, 22, 43],
-      [-108, -166, 22, 23, 62],
-      [-65, -166, 24, 24, 57],
-      [-10, -181, 20, 22, 70],
-      [65, -181, 22, 22, 63],
-      [-151, -173, 23, 24, 58],
-      [-198, -165, 24, 24, 74],
-    ];
-    sites.forEach(([x, z, w, d, h], n) => {
-      x *= 1.22;
-      z -= 24;
-      h *= 0.82;
+    cityBlocks.forEach(([x, z, w, d, h], n) => {
       masses.push({
         p: [x, h / 2 - 0.3, z],
         s: [w, h, d],
@@ -279,6 +266,65 @@ function City() {
           ],
         })),
       );
+      if (style === "facade-tower-glass") {
+        for (const fraction of [-0.38, -0.15, 0.15, 0.38]) {
+          bands.push({
+            p: [x + w * fraction, base + height / 2, z + d / 2 + 0.2],
+            s: [0.26, height, 0.6],
+            color: "#64777b",
+          });
+        }
+        rooftops.push({
+          p: [x, h + 1.8, z],
+          s: [w * 0.76, 3.6, d * 0.74],
+          color: "#6b8589",
+        });
+      } else if (style.startsWith("facade-apartment")) {
+        for (let level = base + 3.3; level < h - 1; level += 3.3) {
+          for (const bay of [-0.27, 0.27]) {
+            const center = x + w * bay;
+            const front = z + d / 2;
+            bands.push({
+              p: [center, level, front + 0.6],
+              s: [w * 0.3, 0.23, 1.55],
+              color: "#cfbd9e",
+            });
+            bands.push({
+              p: [center, level + 0.46, front + 1.3],
+              s: [w * 0.3, 0.77, 0.13],
+              color: "#ab9b84",
+            });
+          }
+        }
+      } else {
+        for (let level = base + 4; level < h; level += 6.5) {
+          bands.push({
+            p: [x, level, z],
+            s: [w + 0.68, 0.23, d + 0.68],
+            color: "#c3baa6",
+          });
+        }
+      }
+      // Planted forecourts and covered shopfronts give each block a street edge.
+      bands.push({
+        p: [x, 0.58, z + d / 2 + 1.55],
+        s: [w + 2.6, 0.13, 1.55],
+        color: "#a89e85",
+      });
+      for (const side of [-1, 1]) {
+        bands.push({
+          p: [x + side * w * 0.34, 0.85, z + d / 2 + 1.9],
+          s: [w * 0.2, 0.45, 0.62],
+          color: "#626e46",
+        });
+      }
+      if (retail) {
+        bands.push({
+          p: [x, 3.4, z + d / 2 + 0.72],
+          s: [w + 0.45, 0.25, 1.75],
+          color: "#64594a",
+        });
+      }
       if (retail)
         (facades["facade-retail-ground"] ??= []).push({
           p: [x, 2.05, z + d / 2 + 0.025],
@@ -369,11 +415,6 @@ function palmGeometry() {
 function Landscaping({ mobile }: { mobile: boolean }) {
   const foliage = useMemo(palmGeometry, []);
   useEffect(() => () => foliage.dispose(), [foliage]);
-  const crowns = useRef<Group>(null);
-  useFrame(({ clock }) => {
-    if (crowns.current && exteriorVisible())
-      crowns.current.rotation.z = Math.sin(clock.elapsedTime * 0.65) * 0.008;
-  });
   const palms = useMemo(
     () => [
       [-23, 20, 6.7],
@@ -399,6 +440,22 @@ function Landscaping({ mobile }: { mobile: boolean }) {
     ],
     [],
   );
+  const crowns = useRef<InstancedMesh>(null);
+  const crown = useMemo(() => new Object3D(), []);
+  useFrame(({ clock }) => {
+    if (!crowns.current || !exteriorVisible()) return;
+    for (const [i, [x, z, h]] of palms.entries()) {
+      crown.position.set(x, h, z);
+      crown.rotation.set(
+        0,
+        i * 1.6,
+        0.025 * Math.sin(clock.elapsedTime * 0.65 + x * 0.11),
+      );
+      crown.updateMatrix();
+      crowns.current.setMatrixAt(i, crown.matrix);
+    }
+    crowns.current.instanceMatrix.needsUpdate = true;
+  });
   const shrubs = useMemo(
     () =>
       Array.from({ length: mobile ? 90 : 180 }, (_, i) => {
@@ -447,23 +504,14 @@ function Landscaping({ mobile }: { mobile: boolean }) {
         metal={0}
         roughness={0.95}
       />
-      <group ref={crowns}>
-        {palms.map(([x, z, h], i) => (
-          <mesh
-            key={i}
-            position={[x, h, z]}
-            geometry={foliage}
-            rotation={[0, i * 1.6, 0]}
-            castShadow
-          >
-            <meshStandardMaterial
-              vertexColors
-              side={DoubleSide}
-              roughness={0.82}
-            />
-          </mesh>
-        ))}
-      </group>
+      <instancedMesh
+        ref={crowns}
+        args={[foliage, undefined, palms.length]}
+        frustumCulled={false}
+        castShadow
+      >
+        <meshStandardMaterial vertexColors side={DoubleSide} roughness={0.82} />
+      </instancedMesh>
       <Repeated items={shrubs} shape="shrub" metal={0} roughness={1} />
       {[-18, -4, 10].map((x) => (
         <group key={x} position={[x, 0.1, 36]}>
@@ -495,56 +543,49 @@ function Pedestrian({ index }: { index: number }) {
     index,
   );
   const root = useRef<Group>(null);
-  const motion = useRef({
-    distance: index * 9.7,
-    phase: index * 0.23,
-    angle: Math.PI / 2,
-    previousX: 0,
-    initialized: false,
-  });
+  const distance = useRef(index * 13.71);
   useFrame((_, dt) => {
     if (!root.current || !exteriorVisible()) return;
-    const state = motion.current,
-      delta = Math.min(dt, 0.1) * (0.72 + (index % 3) * 0.09);
-    state.distance += delta;
-    const lap = state.distance % 92,
-      forward = lap < 46;
-    const t = (lap % 46) / 46,
-      ease = t * t * (3 - 2 * t);
-    const x = forward ? -23 + 46 * ease : 23 - 46 * ease;
-    const moved = state.initialized ? Math.abs(x - state.previousX) : 0;
-    state.previousX = x;
-    state.initialized = true;
-    const speed = Math.min(1, moved / Math.max(dt, 0.001) / 0.15);
-    state.phase += (moved / WALK_STRIDE) * rig.walk.getClip().duration;
-    rig.walk.time = state.phase % rig.walk.getClip().duration;
-    rig.walk.setEffectiveWeight(speed);
-    rig.idle.setEffectiveWeight(1 - speed);
+    const step = Math.min(dt, 0.12) * (0.96 + (index % 3) * 0.13);
+    distance.current += step;
+    // A stadium-shaped sidewalk path has a continuous tangent at both turns.
+    const radius = 0.65,
+      straight = 44,
+      bend = Math.PI * radius;
+    const lap = distance.current % (2 * (straight + bend));
+    const returning = lap >= straight + bend;
+    const along = returning ? lap - straight - bend : lap;
+    const turn = Math.max(0, along - straight) / radius;
+    const sign = returning ? -1 : 1;
+    const x =
+      sign * (-22 + Math.min(straight, along) + radius * Math.sin(turn));
+    const z = (index % 2 ? 34 : 21.1) + sign * radius * Math.cos(turn);
+    const heading = (returning ? -Math.PI / 2 : Math.PI / 2) + turn;
+    const phase =
+      (distance.current / WALK_STRIDE) * rig.walk.getClip().duration;
+    rig.walk.time = phase % rig.walk.getClip().duration;
+    rig.walk.setEffectiveWeight(1);
+    rig.idle.setEffectiveWeight(0);
     rig.mixer.update(0);
-    standHuman(rig, 1 - speed);
-    const desired = forward ? Math.PI / 2 : -Math.PI / 2;
-    state.angle +=
-      Math.atan2(
-        Math.sin(desired - state.angle),
-        Math.cos(desired - state.angle),
-      ) *
-      (1 - Math.exp(-dt * 9));
-    root.current.position.set(x, 0.12, index % 2 ? 34 : 21.8);
-    root.current.rotation.y = state.angle;
+    root.current.position.set(x, index % 2 ? 0.087 : 0.023, z);
+    root.current.rotation.y = heading;
     root.current.updateMatrixWorld(true);
-    groundHuman(rig, 0.12);
-    root.current.userData.travelDirection = forward ? 1 : -1;
-    root.current.userData.stride = state.phase;
+    groundHuman(rig, root.current.position.y);
+    root.current.userData.travelDirection = sign;
+    root.current.userData.stride = phase;
   });
   return (
     <group ref={root} name="civilian-pedestrian">
+      <ContactShadow width={0.83} length={1.16} />
       <primitive object={rig.model} />
     </group>
   );
 }
 function Birds() {
-  const root = useRef<Group>(null);
-  const wings = useRef<(Group | null)[]>([]);
+  const count = 11;
+  const bodies = useRef<InstancedMesh>(null);
+  const wings = useRef<InstancedMesh>(null);
+  const [bird, part] = useMemo(() => [new Object3D(), new Object3D()], []);
   const wing = useMemo(() => {
     const g = new BufferGeometry();
     g.setAttribute(
@@ -562,54 +603,65 @@ function Birds() {
   }, []);
   useEffect(() => () => wing.dispose(), [wing]);
   useFrame(({ clock }) => {
-    if (!root.current || !exteriorVisible()) return;
-    const t = clock.elapsedTime * 0.07;
-    root.current.position.set(
-      Math.cos(t) * 29,
-      29 + Math.sin(t * 2) * 3,
-      -12 + Math.sin(t) * 24,
-    );
-    root.current.rotation.y = -t;
-    wings.current.forEach((w, i) => {
-      if (w)
-        w.rotation.z =
-          Math.sin(clock.elapsedTime * 4.2 + Math.floor(i / 2) * 1.3) *
-          (Math.sin(clock.elapsedTime * 0.38 + Math.floor(i / 2)) > 0.35
-            ? 0.08
-            : 0.42) *
-          (i % 2 ? -1 : 1);
-    });
+    if (!bodies.current || !wings.current || !exteriorVisible()) return;
+    const seconds = clock.elapsedTime;
+    for (let i = 0; i < count; i++) {
+      const t = seconds * (0.09 + 0.002 * Math.sin(i)) + i * 0.085;
+      const radius = 38 + (i % 3) * 2.1;
+      const rise = 0.44 * seconds + i * 0.7;
+      bird.position.set(
+        radius * Math.cos(t),
+        65 + (i % 4) * 2.6 + 2 * Math.sin(rise),
+        -2 + 32 * Math.sin(t),
+      );
+      bird.rotation.order = "YXZ";
+      bird.rotation.y = Math.atan2(-radius * Math.sin(t), 32 * Math.cos(t));
+      bird.rotation.x = -0.17 * Math.cos(rise);
+      bird.rotation.z = -0.17 - 0.07 * Math.cos(t + i);
+      bird.scale.setScalar(0.65);
+      bird.updateMatrix();
+      part.scale.set(0.12, 0.1, 0.42);
+      part.rotation.set(0, 0, 0);
+      part.updateMatrix();
+      bodies.current.setMatrixAt(i, part.matrix.premultiply(bird.matrix));
+      const beat =
+        Math.sin(seconds * 8.2 + i * 1.3) *
+        (0.055 + 0.55 * Math.max(0, Math.sin(seconds * 0.77 + i)));
+      for (let side = 0; side < 2; side++) {
+        // Roll the left wing about its chord so both tips sweep aft.
+        part.scale.set(1, 1, 1);
+        part.rotation.set(0, 0, side ? beat : Math.PI - beat);
+        part.updateMatrix();
+        wings.current.setMatrixAt(
+          i * 2 + side,
+          part.matrix.premultiply(bird.matrix),
+        );
+      }
+    }
+    bodies.current.instanceMatrix.needsUpdate = true;
+    wings.current.instanceMatrix.needsUpdate = true;
   });
   return (
-    <group ref={root} name="flying-birds">
-      {Array.from({ length: 11 }, (_, i) => (
-        <group
-          key={i}
-          position={[i * 1.7, Math.sin(i) * 1.3, Math.abs(i - 5) * 1.2]}
-          scale={0.65}
-        >
-          <mesh scale={[0.12, 0.1, 0.42]}>
-            <sphereGeometry args={[1, 10, 8]} />
-            <meshStandardMaterial color="#c6cbc5" roughness={0.9} />
-          </mesh>
-          {[-1, 1].map((side, j) => (
-            <group
-              key={side}
-              ref={(el) => {
-                wings.current[i * 2 + j] = el;
-              }}
-            >
-              <mesh geometry={wing} scale={[side, 1, 1]}>
-                <meshStandardMaterial
-                  color="#b7bbb4"
-                  side={DoubleSide}
-                  roughness={0.9}
-                />
-              </mesh>
-            </group>
-          ))}
-        </group>
-      ))}
+    <group name="flying-birds">
+      <instancedMesh
+        ref={bodies}
+        args={[undefined, undefined, count]}
+        frustumCulled={false}
+      >
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshStandardMaterial color="#c6cbc5" roughness={0.9} />
+      </instancedMesh>
+      <instancedMesh
+        ref={wings}
+        args={[wing, undefined, count * 2]}
+        frustumCulled={false}
+      >
+        <meshStandardMaterial
+          color="#b7bbb4"
+          side={DoubleSide}
+          roughness={0.9}
+        />
+      </instancedMesh>
     </group>
   );
 }
@@ -671,6 +723,7 @@ function Car({ index, parked = false }: { index: number; parked?: boolean }) {
       rotation={[0, parked ? Math.PI / 2 : 0, 0]}
       name={parked ? "parked-car" : "moving-car"}
     >
+      <ContactShadow width={3.2} length={6.1} height={0.014} />
       <StaticInstances>
         <mesh geometry={body} castShadow>
           <meshPhysicalMaterial
@@ -721,8 +774,11 @@ function Car({ index, parked = false }: { index: number; parked?: boolean }) {
 export function Exterior({ mobile }: { mobile: boolean }) {
   const markings = useMemo(() => {
     const items: Instance[] = [];
-    for (let i = 0; i < 144; i++)
-      items.push({ p: [-500 + i * 7, 0.02, 27], s: [3, 0.018, 0.12] });
+    for (let i = 0; i < 144; i++) {
+      const x = -500 + i * 7;
+      if (Math.abs(x - 30) > 6 && Math.abs(x + 31) > 5.5)
+        items.push({ p: [x, 0.02, 27], s: [3, 0.018, 0.12] });
+    }
     for (let i = 0; i < 9; i++)
       items.push({ p: [34, 0.025, 23 + i], s: [3.6, 0.02, 0.46] });
     for (let i = 0; i < 168; i++) {
@@ -741,6 +797,20 @@ export function Exterior({ mobile }: { mobile: boolean }) {
         surfaces={[groundSurface([0, -0.5, -25], [1400, 1400], 12)]}
       />
       <City />
+      <DistrictShadows />
+      <ExteriorSurfaces
+        texture="boulevard"
+        surfaces={[
+          ...[
+            [-1200, -34.5],
+            [-27.5, 26],
+            [34, 1200],
+          ].map(([start, end]) => ({
+            ...groundSurface([(start + end) / 2, -0.025, 27], [end - start, 9]),
+            repeat: [(end - start) / 20, 1] as [number, number],
+          })),
+        ]}
+      />
       <ExteriorSurfaces
         texture="ground-asphalt"
         color="#b9b9bc"
@@ -748,7 +818,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
           groundSurface([-267, -0.025, -32], [466, 8]),
           groundSurface([267, -0.025, -32], [466, 8]),
           groundSurface([0, -0.025, -65], [1000, 8]),
-          groundSurface([0, -0.025, 27], [2400, 9]),
+
           groundSurface([30, -0.03, 0], [8, 2400]),
           groundSurface([-31, -0.03, 0], [7, 2400]),
         ]}

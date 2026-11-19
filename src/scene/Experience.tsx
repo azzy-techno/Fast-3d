@@ -7,13 +7,16 @@ import {
   Group,
   ACESFilmicToneMapping,
   Color,
+  BackSide,
+  SRGBColorSpace,
+  Mesh,
   Fog,
   DirectionalLight,
   HemisphereLight,
   AmbientLight,
   SpotLight,
 } from "three";
-import { Environment, Sky, PerformanceMonitor } from "@react-three/drei";
+import { Environment, useTexture, PerformanceMonitor } from "@react-three/drei";
 import { Host } from "./Host";
 import { Reception } from "./PremiumInterior";
 import { Exterior } from "./Exterior";
@@ -28,6 +31,27 @@ import { installRenderProbe } from "./renderProbe";
 import { useVisibilityUpdates } from "./useVisibilityUpdates";
 import { compileVisible } from "./compileVisible";
 import { LiftRender } from "./LiftRender";
+
+function CoastalSky() {
+  const sky = useTexture(assetUrl("exterior/optimized/coastal-sky.webp"));
+  sky.colorSpace = SRGBColorSpace;
+  const dome = useRef<Mesh>(null);
+  useFrame(({ camera }) => {
+    if (dome.current) dome.current.position.copy(camera.position);
+  });
+  return (
+    <mesh ref={dome} renderOrder={-10} frustumCulled={false}>
+      <sphereGeometry args={[820, 48, 24]} />
+      <meshBasicMaterial
+        map={sky}
+        side={BackSide}
+        fog={false}
+        toneMapped={false}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
 
 const World = memo(function World({
   onReady,
@@ -63,7 +87,7 @@ const World = memo(function World({
     () => ({
       p: new Vector3(),
       target: new Vector3(),
-      exterior: new Color("#aebfc1"),
+      exterior: new Color("#d4c9b6"),
       interior: new Color("#bdc4bc"),
     }),
     [],
@@ -232,7 +256,7 @@ const World = memo(function World({
     }
     if (scene.fog instanceof Fog) {
       scene.fog.color.copy(vectors.interior).lerp(vectors.exterior, outside);
-      scene.fog.near = 35 + outside * 165;
+      scene.fog.near = 35 + outside * 80;
       scene.fog.far = 100 + outside * 400;
     }
     if (scene.background instanceof Color)
@@ -269,7 +293,7 @@ const World = memo(function World({
       <hemisphereLight ref={hemisphere} args={["#d4e6eb", "#82745e", 0.85]} />
       <directionalLight
         ref={sun}
-        position={[-60, 120, 65]}
+        position={[-76, 64, 78]}
         intensity={2.6}
         color="#ffdfb1"
         castShadow
@@ -306,14 +330,7 @@ const World = memo(function World({
         environmentIntensity={0.65}
       />
       <group ref={city}>
-        <Sky
-          distance={450}
-          sunPosition={[-100, 40, -70]}
-          turbidity={3.2}
-          rayleigh={1.5}
-          mieCoefficient={0.005}
-          mieDirectionalG={0.8}
-        />
+        <CoastalSky />
         <Exterior mobile={mobile} />
       </group>
       <Atmosphere mobile={mobile} />

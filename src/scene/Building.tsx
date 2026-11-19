@@ -1,3 +1,4 @@
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
 import { Box, Cylinder } from "./Primitives";
@@ -72,6 +73,7 @@ export function Building() {
       ))}
       <Box p={[0, 82.3, -1]} s={[34, 0.7, 21]} c="#d3d6cd" metal={0.1} />
       <Box p={[0, 82.8, -1]} s={[31.5, 0.3, 18.5]} c="#899b9c" />
+      <ArchitecturalAsset name="tower-brise-soleil" />
       <RooftopPlant />
       <ExteriorSurfaces
         texture="facade-industrial"

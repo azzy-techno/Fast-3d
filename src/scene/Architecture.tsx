@@ -369,6 +369,27 @@ export function Lift({
           <Box p={[x, 0.15, 0]} s={[0.025, 0.03, 3.2]} c="#b9d0c4" glow />
         </group>
       ))}
+      <StaticInstances>
+        {[-1, 1].map((side) => (
+          <group key={side}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <Box
+                key={i}
+                p={[side * 1.75, 2.48, -1.3 + i * 0.48]}
+                s={[0.08, 1.18, 0.38]}
+                c="#756653"
+                metal={0.55}
+              />
+            ))}
+            <Box
+              p={[side * 1.55, 3.21, 0]}
+              s={[0.07, 0.04, 2.92]}
+              c="#f1deb5"
+              glow
+            />
+          </group>
+        ))}
+      </StaticInstances>
       <group ref={panels} position={[0, 1.5, 1.75]}>
         <Box p={[-0.63, 0, 0]} s={[1.28, 3, 0.06]} c="#899897" metal={0.6} />
         <Box p={[0.63, 0, 0.01]} s={[1.28, 3, 0.06]} c="#899897" metal={0.6} />

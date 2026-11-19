@@ -1,3 +1,4 @@
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
@@ -194,6 +195,13 @@ export function AboutHall() {
           height={1.2}
         />
       </StaticInstances>
+      {[-21, -11, 11, 21].map((x) => (
+        <ArchitecturalAsset
+          key={x}
+          name="gallery-alcove"
+          position={[x, 0, -11.6]}
+        />
+      ))}
       <BinocularStation />
       <group position={[0, 3.6, 40]}>
         <mesh>

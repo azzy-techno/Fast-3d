@@ -1,3 +1,4 @@
+import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, Group, RepeatWrapping, SRGBColorSpace } from "three";
@@ -175,6 +176,7 @@ export function Reception() {
         <Lift p={[0, 12, -37]} exit />
       </group>
       <group ref={root} visible={false} name="ground-floor-reception">
+        <ArchitecturalAsset name="gallery-alcove" position={[-8, 0, -9.8]} />
         <StaticInstances>
           <Box p={[0, 0.18, -23]} s={[4.6, 0.14, 30]} c="#c5bca7" metal={0.2} />
           <Box p={[0, 5.5, -22]} s={[4.6, 0.18, 26]} c="#d8d1c1" metal={0} />

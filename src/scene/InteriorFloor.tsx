@@ -1,75 +1,76 @@
-import { useEffect, useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useTexture } from "@react-three/drei";
 import {
-  CanvasTexture,
+  BufferAttribute,
   PlaneGeometry,
   RepeatWrapping,
   SRGBColorSpace,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { assetUrl } from "../lib/assets";
 
-/** Subtle terrazzo grain and thin grout, sampled in world units. */
+/** Four continuous slabs surround the shaft. The finish repeats in metres and the
+ * daylight bake spans the room, so grout and shadows line up across the joins. */
 export function InteriorFloor({ office = false }: { office?: boolean }) {
+  const [stone, daylight] = useTexture([
+    assetUrl("architecture/terrazzo.webp"),
+    assetUrl("architecture/gallery-daylight.webp"),
+  ]);
   const map = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 512;
-    const context = canvas.getContext("2d")!;
-    const data = context.createImageData(512, 512);
-    for (let y = 0; y < 512; y++)
-      for (let x = 0; x < 512; x++) {
-        const i = (y * 512 + x) * 4;
-        const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-        const value = 199 + (n - Math.floor(n) - 0.5) * 12;
-        const grout = x < 2 || y < 2 ? 0.82 : 1;
-        data.data[i] = (value + 8) * grout;
-        data.data[i + 1] = (value + 5) * grout;
-        data.data[i + 2] = (value - 5) * grout;
-        data.data[i + 3] = 255;
-      }
-    context.putImageData(data, 0, 0);
-    const texture = new CanvasTexture(canvas);
+    const texture = stone.clone();
     texture.wrapS = texture.wrapT = RepeatWrapping;
     texture.colorSpace = SRGBColorSpace;
     texture.anisotropy = 4;
+    texture.needsUpdate = true;
     return texture;
-  }, []);
+  }, [stone]);
+  daylight.channel = 1;
   const geometry = useMemo(() => {
-    const planes = [];
-    const minX = office ? -15.5 : -11.5,
-      maxX = office ? 15.5 : 11.5;
-    const minZ = office ? -10.5 : -37.5,
-      maxZ = office ? 8.5 : 1.5;
-    for (let x = minX; x < maxX; x++)
-      for (let z = minZ; z < maxZ; z++) {
-        if (
-          Math.abs(x + 0.5) < 2.5 &&
-          ((office && Math.abs(z + 0.5 + 7) < 2.5) || (!office && z < -35))
-        )
-          continue;
-        const plane = new PlaneGeometry(1, 1);
-        plane.rotateX(-Math.PI / 2);
-        plane.translate(x + 0.5, office ? 16.025 : 6.025, z + 0.5);
-        const uv = plane.attributes.uv,
-          position = plane.attributes.position;
-        for (let i = 0; i < uv.count; i++)
-          uv.setXY(i, position.getX(i) / 1.5, position.getZ(i) / 1.5);
-        planes.push(plane);
+    const halfWidth = office ? 15.5 : 11.5;
+    const back = office ? -10.5 : -37.5;
+    const front = office ? 8.5 : 1.5;
+    const shaftFront = office ? -4.5 : -34.5;
+    const bounds = [
+      [-halfWidth, -2.5, back, front],
+      [2.5, halfWidth, back, front],
+      [-2.5, 2.5, shaftFront, front],
+    ];
+    if (office) bounds.push([-2.5, 2.5, back, -9.5]);
+    const parts = bounds.map(([left, right, minZ, maxZ]) => {
+      const part = new PlaneGeometry(right - left, maxZ - minZ);
+      part.rotateX(-Math.PI / 2);
+      part.translate(
+        (left + right) / 2,
+        office ? 16.025 : 6.025,
+        (minZ + maxZ) / 2,
+      );
+      const position = part.attributes.position;
+      const uv1 = new BufferAttribute(new Float32Array(position.count * 2), 2);
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i),
+          z = position.getZ(i);
+        part.attributes.uv.setXY(i, x / 1.5, z / 1.5);
+        uv1.setXY(
+          i,
+          (x + halfWidth) / (2 * halfWidth),
+          (front - z) / (front - back),
+        );
       }
-    const geometry = mergeGeometries(planes);
-    planes.forEach((plane) => plane.dispose());
-    return geometry;
+      part.setAttribute("uv1", uv1);
+      return part;
+    });
+    const result = mergeGeometries(parts);
+    parts.forEach((part) => part.dispose());
+    return result;
   }, [office]);
-  useEffect(
-    () => () => {
-      map.dispose();
-    },
-    [map],
-  );
+  useEffect(() => () => map.dispose(), [map]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return (
     <mesh geometry={geometry} receiveShadow>
       <meshStandardMaterial
         map={map}
-        roughness={0.45}
+        aoMap={office ? daylight : null}
+        roughness={0.48}
         metalness={0.12}
         envMapIntensity={0.7}
       />
