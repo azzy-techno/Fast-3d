@@ -207,11 +207,21 @@ export default function App() {
       const copies = Array.from(
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
       );
+      let previousRange = scrollRange();
+      let previousFraction = Math.min(1, window.scrollY / previousRange);
       const update = () => {
-        const fraction = Math.max(
-          0,
-          Math.min(1, window.scrollY / scrollRange()),
-        );
+        const range = scrollRange();
+        if (!list && range !== previousRange) {
+          // Anchor the tour pose when rotation or browser chrome resizes a floor.
+          previousRange = range;
+          const y = previousFraction * range;
+          if (lenis.current) {
+            lenis.current.resize();
+            lenis.current.scrollTo(y, { immediate: true, force: true });
+          } else window.scrollTo({ top: y, behavior: "instant" });
+        }
+        const fraction = Math.max(0, Math.min(1, window.scrollY / range));
+        previousFraction = fraction;
         if (list) {
           const current = [...floors].reverse().find((d) => {
             const el = document.getElementById(

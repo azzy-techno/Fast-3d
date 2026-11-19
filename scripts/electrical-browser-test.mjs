@@ -47,7 +47,13 @@ try {
       if (await page.evaluate(fn)) return;
       await delay(200);
     }
-    throw Error(`Timeout: ${label}`);
+    const state = await page.evaluate(() => ({
+      journey: document.querySelector("canvas")?.dataset.journey,
+      scroll: scrollY,
+      height: document.documentElement.scrollHeight,
+      liftOpen: document.querySelector(".lift-dialog")?.open,
+    }));
+    throw Error(`Timeout: ${label} ${JSON.stringify(state)}`);
   }
   await wait(
     () =>
@@ -157,15 +163,8 @@ try {
       );
   }
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
-  await delay(1000);
-  // Reposition after the viewport change: the chapter's svh-based length and
-  // the height of the preceding roof/workplace chapter have both changed.
-  await page.evaluate(() => {
-    scrollTo(
-      0,
-      ((document.documentElement.scrollHeight - innerHeight) * 0.711) / 0.8,
-    );
-  });
+  // Allow resize observers and camera smoothing to settle before checking.
+  await delay(1800);
   await wait(() => {
     const d = document.querySelector("canvas").dataset;
     return +d.electricalStation === 16 && d.guide === "presenting";
