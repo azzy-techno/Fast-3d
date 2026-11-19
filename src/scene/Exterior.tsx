@@ -567,7 +567,7 @@ function Pedestrian({ index }: { index: number }) {
     rig.walk.setEffectiveWeight(1);
     rig.idle.setEffectiveWeight(0);
     rig.mixer.update(0);
-    root.current.position.set(x, index % 2 ? 0.087 : 0.023, z);
+    root.current.position.set(x, index % 2 ? 0.087 : 0.138, z);
     root.current.rotation.y = heading;
     root.current.updateMatrixWorld(true);
     groundHuman(rig, root.current.position.y);
@@ -826,6 +826,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
       <ExteriorSurfaces
         texture="ground-paving-corniche"
         surfaces={[
+          groundSurface([-0.75, 0.13, 21], [53.5, 3]),
           groundSurface([-267.25, 0.08, 35], [465.5, 6]),
           groundSurface([-0.75, 0.08, 35], [53.5, 6]),
           groundSurface([267, 0.08, 35], [466, 6]),
@@ -847,6 +848,7 @@ export function Exterior({ mobile }: { mobile: boolean }) {
           />
         </group>
       ))}
+      <Box p={[-0.75, 0.002, 21]} s={[53.5, 0.247, 3]} c="#c5bfab" metal={0} />
       <Repeated items={markings} color="#ddd8c3" metal={0} />
       <Landscaping mobile={mobile} />
       {Array.from({ length: mobile ? 3 : 6 }, (_, i) => (

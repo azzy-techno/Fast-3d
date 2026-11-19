@@ -27,7 +27,9 @@ export function useHumanRig(
   variant = -1,
 ) {
   const logo = useTexture(assetUrl("fast-logo.png"));
-  const { scene } = useGLTF(assetUrl("guide/host.glb"));
+  const { scene } = useGLTF(
+    assetUrl(variant < 0 ? "guide/host.glb" : "guide/pedestrian.glb"),
+  );
   const data = useLoader(FileLoader, assetUrl("guide/motion.json")) as string;
   const rig = useMemo(() => {
     const model = clone(scene);
