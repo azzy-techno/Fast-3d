@@ -4,7 +4,7 @@ import { useTexture } from "@react-three/drei";
 import { trafficPosition } from "./travelMotion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useHumanRig, groundHuman, WALK_STRIDE } from "./HumanRig";
+import { useHumanRig, groundHuman } from "./HumanRig";
 import {
   BufferGeometry,
   CanvasTexture,
@@ -562,7 +562,7 @@ function Pedestrian({ index }: { index: number }) {
     const z = (index % 2 ? 34 : 21.1) + sign * radius * Math.cos(turn);
     const heading = (returning ? -Math.PI / 2 : Math.PI / 2) + turn;
     const phase =
-      (distance.current / WALK_STRIDE) * rig.walk.getClip().duration;
+      (distance.current / rig.strideLength) * rig.walk.getClip().duration;
     rig.walk.time = phase % rig.walk.getClip().duration;
     rig.walk.setEffectiveWeight(1);
     rig.idle.setEffectiveWeight(0);

@@ -2,7 +2,7 @@ import { ContactShadow } from "./ContactShadow";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Quaternion, Vector3, MathUtils } from "three";
-import { useHumanRig, groundHuman, standHuman, WALK_STRIDE } from "./HumanRig";
+import { useHumanRig, groundHuman, standHuman } from "./HumanRig";
 import { electricalStationAt, ELECTRICAL_EXIT } from "./electricalTour";
 import { useTour } from "../store";
 import {
@@ -77,7 +77,7 @@ export function Host() {
       10,
       Math.min(dt, 0.1),
     );
-    state.phase += (distance / WALK_STRIDE) * rig.walk.getClip().duration;
+    state.phase += (distance / rig.strideLength) * rig.walk.getClip().duration;
     rig.walk.time = state.phase % rig.walk.getClip().duration;
     rig.idle.time = clock.elapsedTime % rig.idle.getClip().duration;
     rig.walk.setEffectiveWeight(state.walking);

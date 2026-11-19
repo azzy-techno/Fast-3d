@@ -19,7 +19,9 @@ import {
   Vector3,
 } from "three";
 import { assetUrl } from "../lib/assets";
-export const WALK_STRIDE = 1.25;
+// Median backward toe travel per cycle during stance, measured on the
+// unscaled walk clip. Apply each character's model scale to match the pavement.
+const WALK_STRIDE = 1.786;
 export function useHumanRig(
   tint = "#526b85",
   height = 1.76,
@@ -253,6 +255,7 @@ export function useHumanRig(
       bones,
       mixer,
       walk,
+      strideLength: WALK_STRIDE * scale,
       idle,
       ownedMaterials,
       ownedGeometry,
