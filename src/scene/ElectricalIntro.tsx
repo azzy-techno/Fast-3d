@@ -25,7 +25,7 @@ export function ElectricalIntro() {
     }
     c.fillStyle = "#dfbe7c";
     c.font = "500 26px sans-serif";
-    c.fillText("FAST O&M     /     LEVEL 11", 90, 100);
+    c.fillText("FAST O&M     /     LEVEL 01", 90, 100);
     c.fillStyle = "#f2f1e8";
     c.font = "600 116px sans-serif";
     c.fillText("ELECTRICAL", 80, 280);

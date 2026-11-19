@@ -55,6 +55,17 @@ try {
       !document.querySelector(".loader"),
     "ready",
   );
+  await page.evaluate(() => document.querySelector(".lift-toggle").click());
+  await wait(() => document.querySelector(".lift-dialog").open, "floor picker");
+  await page.evaluate(() =>
+    document.querySelector('[data-destination="electrical"]').click(),
+  );
+  await wait(
+    () =>
+      document.querySelector("main").dataset.floor === "electrical" &&
+      !document.querySelector(".lift-dialog").open,
+    "electrical arrival",
+  );
   assert(
     await page.evaluate(
       () => document.getElementById("electrical").offsetHeight >= 18000,
@@ -63,9 +74,12 @@ try {
   );
   const initialStop = process.env.ELECTRICAL_MOBILE_ONLY ? 16 : 1;
   await page.evaluate((initialStop) => {
-    const a = document.getElementById("electrical").offsetTop,
-      b = document.getElementById("mechanical").offsetTop;
-    scrollTo(0, a + (b - a) * (0.051 + (initialStop - 1) * 0.044));
+    scrollTo(
+      0,
+      ((document.documentElement.scrollHeight - innerHeight) *
+        (0.051 + (initialStop - 1) * 0.044)) /
+        0.8,
+    );
   }, initialStop);
   const axeSource = await fs.readFile(
     "node_modules/axe-core/axe.min.js",
@@ -147,9 +161,10 @@ try {
   // Reposition after the viewport change: the chapter's svh-based length and
   // the height of the preceding roof/workplace chapter have both changed.
   await page.evaluate(() => {
-    const a = document.getElementById("electrical").offsetTop;
-    const b = document.getElementById("mechanical").offsetTop;
-    scrollTo(0, a + (b - a) * 0.711);
+    scrollTo(
+      0,
+      ((document.documentElement.scrollHeight - innerHeight) * 0.711) / 0.8,
+    );
   });
   await wait(() => {
     const d = document.querySelector("canvas").dataset;
@@ -203,7 +218,9 @@ try {
       .click(),
   );
   await wait(
-    () => +document.querySelector("canvas").dataset.journey > 2.84,
+    () =>
+      document.querySelector(".lift-dialog").open &&
+      Math.abs(+document.querySelector("canvas").dataset.journey - 2.8) < 0.001,
     "leave gallery",
   );
   assert.deepEqual(await page.evaluate(() => window.__errors), []);

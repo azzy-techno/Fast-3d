@@ -37,8 +37,8 @@ export const chapters: Chapter[] = [
     id: "electrical",
     title: "Electrical",
     ar: "المقاولات الكهربائية",
-    place: "Level 11 / 16 guided stations",
-    placeAr: "الطابق 11 / 16 محطة إرشادية",
+    place: "Level 01 / 16 guided stations",
+    placeAr: "الطابق 01 / 16 محطة إرشادية",
     description:
       "Step into a 62 × 64 m electrical exhibition. Follow your FAST engineer through all 16 capabilities, from power installations to automation, lighting and industrial fans.",
     descriptionAr:
@@ -228,9 +228,4 @@ export const chapters: Chapter[] = [
     color: "#95d9a9",
     origin: [6.6, 12, -4],
   },
-];
-export const destinations = [
-  "arrival",
-  ...chapters.map((c) => c.id),
-  "together",
 ];

@@ -26,7 +26,7 @@ export const serviceRooms = Array.from({ length: 10 }, (_, i) => ({
   y: serviceLevel(i),
   side: i % 2 === 0 ? -1 : 1,
 }));
-export const journeyState = { progress: 0, section: "arrival" };
+export const journeyState = { progress: 11.69, section: "reception" };
 type Shot = { at: number; p: Point; target: Point; fov: number };
 const frames: Shot[] = [];
 const shot = (at: number, p: Point, target: Point, fov = 62) =>
@@ -39,7 +39,7 @@ const shot = (at: number, p: Point, target: Point, fov = 62) =>
   });
 shot(0, [115, 80, 160], [0, 40, -5], 42);
 shot(0.22, [108, 82, 150], [0, 43, -4], 42);
-shot(0.55, [15, 27, 14], [8, 24, 5], 48);
+shot(0.55, [17, 29, 14], [2.4, 24.3, 0.9], 48);
 shot(0.7, [11, 25.1, 10], [8, 24.1, 5], 54);
 shot(0.86, [10, 25.05, 9], [3, 24.2, -1], 58);
 shot(1, [9, 25.05, 8], [0, 24.4, -1], 62);
@@ -119,9 +119,13 @@ shot(11.49, [0, 13.7, -34], [0, 13.7, -40], 66);
 shot(11.53, [0, 13.7, -37], [0, 13.7, -41], 66);
 shot(11.55, [0, 8.2, -37], [4, 8.2, -37], 66);
 shot(11.58, [0, 1.95, -37], [3, 1.95, -32], 66);
-shot(11.61, [0, 1.95, -31], [0, 1.8, -26], 66);
-shot(11.65, [0, 1.95, -11], [-4, 1.8, -3], 66);
-shot(11.69, [0, 1.95, 4.5], [-6, 1.6, 1.8], 66);
+// Reception is visited in descending pose order, from the desk to the lift lobby.
+shot(11.61, [0, 1.95, -29.8], [0.4, 1.65, -35.8], 58);
+shot(11.627, [0, 1.95, -20], [0.5, 1.64, -28], 58);
+shot(11.65, [0, 1.95, -6], [0.65, 1.65, -12], 60);
+shot(11.665, [1.5, 1.95, 2], [0, 1.65, -5.8], 60);
+shot(11.68, [2.1, 1.98, 5.7], [-2.0, 1.55, 1.5], 59);
+shot(11.69, [2.5, 2.02, 6.2], [-3.5, 1.52, 1.25], 58);
 shot(11.715, [1, 1.95, 4.5], [9, 1.5, 2.5], 66);
 shot(11.73, [2.4, 1.95, 4.8], [3, 1.8, 10], 64);
 shot(11.77, [3, 1.95, 8], [3, 1.6, 16], 62);
@@ -278,7 +282,28 @@ export function routeDistance(p: number) {
     i = Math.floor(n);
   return arc[i] + (arc[Math.min(12000, i + 1)] - arc[i]) * (n - i);
 }
+const receptionGuide = [
+  [11.61, 0.85, -33.1],
+  [11.627, 0.7, -23.6],
+  [11.65, 0.7, -9.7],
+  [11.665, 0.25, -2.4],
+  [11.68, -2.05, 1.7],
+  [11.69, -2.05, 1.7],
+];
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
+  if (p >= 11.61 && p <= 11.69) {
+    // Follow the centre aisle past the desk and wait at the call panel.
+    const keys = receptionGuide;
+    let i = 0;
+    while (i < keys.length - 2 && p > keys[i + 1][0]) i++;
+    const [at, x, z] = keys[i],
+      [next, nx, nz] = keys[i + 1];
+    const t = (p - at) / (next - at),
+      ease = t * t * (3 - 2 * t);
+    position.set(x + (nx - x) * ease, 0.25, z + (nz - z) * ease);
+    facing.set(0.85, 1.55, -34.7);
+    return;
+  }
   if (p >= ABOUT_START && p <= ABOUT_END) {
     sampleAboutGuide(p, position, facing);
     return;
@@ -349,6 +374,10 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     position.lerp(arcTarget, weight);
     if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }
+  if (p > 11.6 && p < 11.61)
+    position.lerp(arcTarget.set(0.85, 0.25, -33.1), smooth(11.6, 11.61));
+  if (p > 11.69 && p < 11.71)
+    position.lerp(arcTarget.set(-2.05, 0.25, 1.7), 1 - smooth(11.69, 11.71));
   if (p > 11.81) position.set(3, 0.25, Math.min(18, position.z));
 
   if (p < 0.86)

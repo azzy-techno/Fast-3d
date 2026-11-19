@@ -21,10 +21,11 @@ The browser suite checks rendered equipment in all 11 service scenes, verifies s
 
 ## The journey
 
-Arrival → cooling towers → roof lift → furnished workplace → service lift → connected service gallery → electrical → mechanical → fabrication → civil & structural → fire & protection → IT → smart manufacturing → Industry 4.0 → industrial IoT → computer vision → project enquiry.
+The tour opens at reception. The floor directory starts with Electrical and Mechanical, continues through the remaining services and About FAST, and ends at the cooling-tower roof.
 
-- Scroll or use the chapter controls/menu; reverse scrolling retraces the route.
-- Cinema view clears the copy; the interactive floor plan jumps to service rooms.
+- Scroll at your own pace within a floor. When the guide reaches the lift landing, choose any destination. The doors mask the change until its first frame is ready.
+- Use **Choose floor** or the floor plan at any time. The roof tour finishes with a farewell and a project enquiry.
+- Run `npm run test:floor-visits` against the production build to check the greeting, lift selection, direct rides, roof finale and mobile replay.
 - Offices, a lounge and meeting room lead into a corridor with real room openings. Signals, flow particles, sparks, articulated robotics and inspection sweeps animate the systems.
 - Camera continuity and doorway clearance are sampled at 12,001 route positions by `npm run test:journey`.
 - Service headings are native links, with actual FAST destinations.
@@ -65,7 +66,7 @@ This is a conceptual architectural visualization of FAST's service capabilities,
 
 GitHub Pages deployment is configured in `.github/workflows/deploy-pages.yml`. See [deployment instructions](docs/deployment.md) for activation and the public address. The existing FAST website remains separate.
 
-The guided tour adds a rigged rooftop host, distance-driven walking, greeting/presentation/farewell gestures, and a third-person approach to cooling. The exit descends through a rear lift to a furnished reception, opens the front doors, then switches to a drone pullback while the guide stays outside. Office and reception details include stone finishes, brass trim, pendants, rugs, art and meeting-table accessories. Character sources and limitations are documented in `docs/immersive-journey.md` and the public asset credits.
+The engineer greets visitors at the reception desk, walks to each landing, presents the selected exhibits and waves farewell from the roof. Office and reception details include stone finishes, brass trim, pendants, rugs, art and meeting-table accessories. Character sources and limitations are documented in `docs/immersive-journey.md` and the public asset credits.
 
 The FAST rooftop now uses modeled plant equipment instead of the roof photo. Service exhibits have reserved visitor aisles and dedicated guide positions; pedestrians share the guide’s civilian rig. Enable **Sound on** to hear service-specific work ambience. Run `npm run test:sound` for audio lifecycle checks and `npm run test:journey` for camera/guide clearances.
 

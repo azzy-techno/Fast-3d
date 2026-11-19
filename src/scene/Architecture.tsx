@@ -307,23 +307,23 @@ export function Lift({
           exit
             ? "WELCOME / RECEPTION"
             : roof
-              ? "ABOUT FAST / LEVEL 12"
+              ? "ABOUT FAST / LEVEL 11"
               : "ENGINEERING FLOORS"
         }
         sub={
           exit
-            ? "FAST / LEVEL 02 → GROUND FLOOR"
+            ? "FAST / GROUND FLOOR"
             : roof
-              ? "FAST / ROOF → LEVEL 12"
+              ? "FAST / ROOF LOBBY"
               : stack || rear
                 ? "FAST / VERTICAL JOURNEY"
-                : "FAST / LEVEL 12 → LEVEL 11"
+                : "FAST / SERVICE LIFT"
         }
         p={[0, 2.2, -1.6]}
         width={2.8}
       />
       <Wayfinding
-        text={exit ? "G" : stack ? "↓" : roof ? "12" : "11"}
+        text={exit ? "G" : stack ? "↓" : roof ? "11" : "01"}
         sub="DESTINATION"
         p={[1.75, 1.75, 0]}
         rotation={[0, -Math.PI / 2, 0]}

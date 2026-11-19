@@ -1,99 +1,24 @@
-import { useEffect, useRef, useState } from "react";
-import { chapters } from "../data/chapters";
-import { useTour } from "../store";
-import { journeyBeat } from "../scene/journey";
-
+import { useState } from "react";
+import { floors, type Floor } from "../lib/journeyScroll";
 export function JourneyGuide({
   rtl,
   jump,
   cinematic,
   setCinematic,
   openLift,
+  floor,
 }: {
   rtl: boolean;
   jump: (id: string) => void;
   cinematic: boolean;
   setCinematic: (value: boolean) => void;
   openLift: () => void;
+  floor: Floor;
 }) {
-  const root = useRef<HTMLDivElement>(null),
-    copy = useRef<HTMLDivElement>(null),
-    marker = useRef<SVGCircleElement>(null);
-  const [hostCue, setHostCue] = useState("");
   const [mapOpen, setMapOpen] = useState(false);
-  const [beat, setBeat] = useState(journeyBeat(0));
-  const [floor, setFloor] = useState("CITY / ARRIVAL");
-  const active = useTour((s) => s.active);
-  useEffect(() => {
-    const update = () => {
-      const p = useTour.getState().progress;
-      const beat = journeyBeat(p);
-      setHostCue(p > 0.4 && p < 0.74 ? "welcome" : p > 11.84 ? "farewell" : "");
-      setBeat((previous) => (previous[0] === beat[0] ? previous : beat));
-      const floor =
-        p < 0.7
-          ? "CITY / ARRIVAL"
-          : p < 1.43
-            ? "ROOF / 83 M"
-            : p < 1.85
-              ? "12 / ABOUT FAST"
-              : p < 2.929 && p >= 1.85
-                ? "11 / ELECTRICAL EXHIBITION"
-                : p < 11.6
-                  ? `${Math.max(2, 13 - Math.round(p))
-                      .toString()
-                      .padStart(2, "0")} / SERVICE FLOOR`
-                  : p < 11.83
-                    ? "G / RECEPTION"
-                    : "CITY / FAREWELL";
-      setFloor((previous) => (previous === floor ? previous : floor));
-      if (root.current)
-        root.current.dataset.phase =
-          p > 1.22 && p < 1.96 ? "interlude" : "service";
-      const local = p % 1;
-      const visible =
-        (p > 1.22 && p < 1.51) ||
-        (p >= 1.74 && p < 1.96) ||
-        (p > 11.4 && p < 11.94) ||
-        (p >= 3 && p < 11.5 && local > 0.38 && local < 0.84) ||
-        (p > 2.84 && p < 2.97);
-      if (copy.current) copy.current.style.opacity = visible ? "1" : "0";
-      if (marker.current)
-        marker.current.setAttribute(
-          "cy",
-          String(28 + Math.min(1, Math.max(0, (p - 2) / 9)) * 156),
-        );
-    };
-    update();
-    return useTour.subscribe(update);
-  }, []);
-  const arabicBeat = beat[0].startsWith("04")
-    ? [
-        "داخل المبنى",
-        "مساحات صممت للناس.",
-        "مكاتب وقاعات اجتماعات ومساحات عمل مترابطة.",
-      ]
-    : [
-        "رحلة داخل المبنى",
-        "اتبع الأنظمة المترابطة.",
-        "من السطح إلى مساحات العمل والبنية التحتية الذكية.",
-      ];
+  const row = floors.indexOf(floor);
   return (
-    <div className="journey-guide" ref={root}>
-      {hostCue && (
-        <div className="host-cue">
-          <span>{rtl ? "مرشدك في فاست" : "YOUR FAST GUIDE"}</span>
-          <p>
-            {rtl
-              ? hostCue === "welcome"
-                ? "أهلاً بك. هيا نبدأ الجولة."
-                : "إلى اللقاء. شكراً لزيارتك."
-              : hostCue === "welcome"
-                ? "Hi. Let me show you around."
-                : "Until next time. Thanks for joining me."}
-          </p>
-        </div>
-      )}
+    <div className="journey-guide">
       <div className="journey-toolbar">
         <button
           className="lift-toggle"
@@ -105,7 +30,7 @@ export function JourneyGuide({
         </button>
         <span className="floor-indicator">
           <i />
-          {rtl ? "جولة داخل المبنى" : floor}
+          {floor.floor} / {rtl ? floor.ar : floor.title}
         </span>
         <button
           className="cinema-toggle"
@@ -131,18 +56,10 @@ export function JourneyGuide({
           <span aria-hidden="true">{mapOpen ? "−" : "+"}</span>
         </button>
       </div>
-      <div className="journey-interlude" ref={copy} aria-hidden="true">
-        <p className="journey-eyebrow">{rtl ? arabicBeat[0] : beat[0]}</p>
-        <p className="journey-headline">{rtl ? arabicBeat[1] : beat[1]}</p>
-        <p className="journey-description">{rtl ? arabicBeat[2] : beat[2]}</p>
-        <span className="journey-scroll-cue">
-          {rtl ? "تابع التمرير للاستكشاف" : "Continue scrolling to explore"}
-          <span>↓</span>
-        </span>
-      </div>
       <aside
         id="journey-floor-plan"
         className="floor-plan"
+        data-lenis-prevent
         hidden={!mapOpen}
         aria-label={rtl ? "مخطط رحلة المبنى" : "Building journey floor plan"}
       >
@@ -166,21 +83,21 @@ export function JourneyGuide({
               stroke="currentColor"
               strokeWidth="0.7"
             />
-            {Array.from({ length: 10 }, (_, row) => (
+            {Array.from({ length: floors.length }, (_, row) => (
               <g key={row}>
                 <path
-                  d={`M16 ${34 + row * 18}H118`}
+                  d={`M16 ${29 + row * 13.6}H118`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth=".7"
                 />
                 <rect
                   x="21"
-                  y={20 + row * 18}
+                  y={17 + row * 13.6}
                   width="92"
-                  height="12"
+                  height="10"
                   rx="1"
-                  fill={active === row + 2 ? "#91d8da" : "#789ca41c"}
+                  fill={floor === floors[row] ? "#91d8da" : "#789ca41c"}
                 />
               </g>
             ))}
@@ -191,31 +108,20 @@ export function JourneyGuide({
               strokeWidth="1"
               strokeDasharray="2 4"
             />
-            <circle ref={marker} cx="130" cy="28" r="3.5" fill="#e1c69b" />
+            <circle cx="130" cy={22 + row * 13.6} r="3.5" fill="#e1c69b" />
           </svg>
           <ol>
-            <li>
-              <button
-                onClick={() => {
-                  jump("about");
-                  setMapOpen(false);
-                }}
-              >
-                <span>12</span>
-                {rtl ? "عن فاست" : "About FAST"}
-              </button>
-            </li>
-            {chapters.slice(1).map((chapter, i) => (
-              <li key={chapter.id}>
+            {floors.map((d) => (
+              <li key={d.id}>
                 <button
+                  aria-current={d.id === floor.id ? "location" : undefined}
                   onClick={() => {
-                    jump(chapter.id);
                     setMapOpen(false);
+                    jump(d.id);
                   }}
-                  aria-current={active === i + 2 ? "location" : undefined}
                 >
-                  <span>{String(11 - i).padStart(2, "0")}</span>
-                  {rtl ? chapter.ar : chapter.title}
+                  <span>{d.floor}</span>
+                  {rtl ? d.ar : d.title}
                 </button>
               </li>
             ))}

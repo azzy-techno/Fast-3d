@@ -1,9 +1,11 @@
 import { Fragment } from "react";
+import { flushSync } from "react-dom";
 import {
-  journeyScrollStops,
-  progressAtScroll,
-  scrollAtProgress,
-  type ScrollStop,
+  floors,
+  floorProgress,
+  floorFraction,
+  scrollRange,
+  type Floor,
 } from "./lib/journeyScroll";
 import { Observatory } from "./components/Observatory";
 import { ArrivalLoader } from "./components/ArrivalLoader";
@@ -15,7 +17,7 @@ import {
 import type { AboutPanel } from "./data/about";
 import { ElectricalTour } from "./components/ElectricalTour";
 import { ElectricalWelcome } from "./components/ElectricalWelcome";
-import { LiftNavigator, LiftPrompt } from "./components/LiftNavigator";
+import { LiftNavigator } from "./components/LiftNavigator";
 import { ElectricalScope } from "./components/ElectricalScope";
 import {
   Component,
@@ -33,7 +35,7 @@ import { Howl } from "howler";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { chapters, destinations } from "./data/chapters";
+import { chapters } from "./data/chapters";
 import { useTour } from "./store";
 import { assetUrl } from "./lib/assets";
 import { ServiceSound } from "./lib/serviceSound";
@@ -99,8 +101,12 @@ export default function App() {
   const lenis = useRef<Lenis | null>(null);
   const audio = useRef<Howl | null>(null);
   const soundscapes = useRef<ServiceSound | null>(null);
-  const active = useTour((s) => s.active);
-  const aboutFloor = useTour((s) => s.progress >= 1.51 && s.progress < 1.735);
+  const [floor, setFloor] = useState(floors[0]);
+  const [listFloor, setListFloor] = useState(floors[0]);
+  const currentFloor = list ? listFloor : floor;
+  const orderedChapters = [...chapters.slice(1), chapters[0]];
+  const floorScroll = (pose: number) =>
+    floorFraction(floor, pose) * scrollRange();
   const [percent, setPercent] = useState(0);
   const t = (en: string, ar: string) => (rtl ? ar : en);
   const sceneReady = useCallback(() => setReady(true), []);
@@ -162,7 +168,8 @@ export default function App() {
   useEffect(() => {
     if (reduced || list) return;
     const scroller = new Lenis({
-      duration: 1.15,
+      lerp: 0.065,
+      wheelMultiplier: 0.52,
       smoothWheel: true,
       syncTouch: false,
       anchors: true,
@@ -197,54 +204,53 @@ export default function App() {
 
   useGSAP(
     () => {
-      let stops: ScrollStop[] = [];
-      let totalScroll = 1;
       const copies = Array.from(
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
       );
-      const measure = () => {
-        stops = journeyScrollStops();
-        totalScroll = Math.max(
-          1,
-          document.documentElement.scrollHeight - window.innerHeight,
-        );
-      };
       const update = () => {
-        if (!stops.length) return;
-        const y = window.scrollY;
-        const progress = progressAtScroll(y, stops);
-        useTour.getState().setProgress(progress);
-        if (!list)
-          copies.forEach((copy, index) => {
-            const local = progress - (index + 1);
-            const opacity =
-              index === 1 && local >= 0
-                ? Math.max(0, Math.min(1, (0.035 - local) / 0.012))
-                : index === 2 && local < -0.025
-                  ? 0
-                  : local < 0
-                    ? Math.max(0, Math.min(1, (local + 0.12) / 0.12))
-                    : Math.max(0, Math.min(1, (0.3 - local) / 0.1));
-            const value = String(opacity),
-              visibility = opacity < 0.01 ? "hidden" : "visible";
-            if (copy.style.opacity !== value) copy.style.opacity = value;
-            if (copy.style.visibility !== visibility)
-              copy.style.visibility = visibility;
+        const fraction = Math.max(
+          0,
+          Math.min(1, window.scrollY / scrollRange()),
+        );
+        if (list) {
+          const current = [...floors].reverse().find((d) => {
+            const el = document.getElementById(
+              d.id === "reception" ? "arrival" : d.id,
+            );
+            return el && el.getBoundingClientRect().top <= innerHeight * 0.45;
           });
-        else
+          setListFloor(current ?? floors[0]);
           copies.forEach((copy) => {
             copy.style.opacity = "";
             copy.style.visibility = "";
           });
-        setPercent(Math.round((y / totalScroll) * 100));
+        } else {
+          const progress = floorProgress(floor, fraction);
+          useTour.getState().setProgress(progress);
+          const opacity =
+            floor.id === "electrical"
+              ? 0
+              : Math.min(
+                  1,
+                  Math.max(
+                    0,
+                    (floor.id === "cooling"
+                      ? 0.56 - fraction
+                      : 0.78 - fraction) / 0.14,
+                  ),
+                );
+          copies.forEach((copy) => {
+            copy.style.opacity = String(opacity);
+            copy.style.visibility = opacity < 0.01 ? "hidden" : "visible";
+          });
+        }
+        setPercent(Math.round(fraction * 100));
       };
-      measure();
       const trigger = ScrollTrigger.create({
         start: 0,
         end: "max",
         onUpdate: update,
         onRefresh: () => {
-          measure();
           update();
         },
       });
@@ -257,7 +263,7 @@ export default function App() {
         resize.disconnect();
       };
     },
-    { dependencies: [list, rtl], scope: main, revertOnUpdate: true },
+    { dependencies: [list, rtl, floor], scope: main, revertOnUpdate: true },
   );
 
   useEffect(() => {
@@ -296,17 +302,14 @@ export default function App() {
     setSound(!sound);
   };
   const jump = (id: string) => {
+    if (id === "arrival") id = "reception";
     setMenu(false);
-    if (
-      !list &&
-      !loading &&
-      (id === "about" || chapters.some((c) => c.id === id))
-    ) {
+    if (!list && !loading && floors.some((d) => d.id === id)) {
       setLiftDestination(id);
       setLiftOpen(true);
       return;
     }
-    const target = document.getElementById(id);
+    const target = document.getElementById(id === "reception" ? "arrival" : id);
     if (!target) return;
     const y = Math.max(0, target.offsetTop);
     if (lenis.current) {
@@ -316,7 +319,7 @@ export default function App() {
       window.scrollTo({ top: y, behavior: reduced ? "instant" : "smooth" });
   };
   const scrollToProgress = (at: number, immediate = false) => {
-    const y = scrollAtProgress(at);
+    const y = floorScroll(at);
     if (lenis.current)
       lenis.current.scrollTo(y, { immediate, force: true, duration: 1.8 });
     else window.scrollTo({ top: y, behavior: "instant" });
@@ -325,7 +328,7 @@ export default function App() {
   useEffect(() => {
     if (observatoryPending) {
       if (lenis.current)
-        lenis.current.scrollTo(scrollAtProgress(1.605), {
+        lenis.current.scrollTo(floorScroll(1.605), {
           duration: useTour.getState().progress >= 1.588 ? 3.2 : 9,
           force: true,
           lock: true,
@@ -338,7 +341,7 @@ export default function App() {
     if (lenis.current) {
       // Resume before starting the return: Lenis.start() resets its animation.
       lenis.current.start();
-      lenis.current.scrollTo(scrollAtProgress(1.585), {
+      lenis.current.scrollTo(floorScroll(1.585), {
         duration: 2.2,
         force: true,
         lock: true,
@@ -362,19 +365,27 @@ export default function App() {
     setLiftOpen(true);
   };
   const toggleView = () => {
-    if (list) setReady(false);
-    setList((v) => !v);
-    requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
+    const dest = currentFloor;
+    if (list) {
+      setReady(false);
+      flushSync(() => {
+        setFloor(dest);
+        setList(false);
+      });
+      window.scrollTo({ top: 0, behavior: "instant" });
+      useTour.getState().teleport(dest.start);
+    } else {
+      flushSync(() => setList(true));
       document
-        .getElementById(destinations[active])
+        .getElementById(dest.id === "reception" ? "arrival" : dest.id)
         ?.scrollIntoView({ block: "start" });
-    });
+    }
+    ScrollTrigger.refresh();
   };
 
   return (
     <div
-      className={`app ${observatoryOpen ? "observatory-active" : ""} ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${active === 0 ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
+      className={`app ${observatoryOpen ? "observatory-active" : ""} ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${currentFloor.id === "reception" ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
     >
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
@@ -417,9 +428,11 @@ export default function App() {
             onEnter={() => scrollToProgress(2.05)}
             onLift={openLift}
           />
-          <LiftPrompt rtl={rtl} onOpen={openLift} />
+
           <ElectricalTour rtl={rtl} onSelect={scrollToProgress} />
           <JourneyGuide
+            key={floor.id}
+            floor={floor}
             rtl={rtl}
             jump={jump}
             cinematic={cinematic}
@@ -480,246 +493,259 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main" ref={main}>
-        <section
-          className="hero"
-          id="arrival"
-          aria-labelledby="hero-title"
-          data-chapter="0"
-        >
-          {list && (
-            <img
-              className="hero-photo"
-              src={assetUrl("cooling.webp")}
-              alt="Industrial engineering and equipment from FAST"
-            />
-          )}
-          <div className="hero-topline">
-            <p>
-              {t(
-                "One facility. Every possibility.",
-                "منشأة واحدة. إمكانات متكاملة.",
+      <main id="main" ref={main} data-floor={currentFloor.id}>
+        {(list || floor.id === "reception") && (
+          <div className="reception-approach">
+            <section
+              className="hero"
+              id="arrival"
+              aria-labelledby="hero-title"
+              data-chapter="0"
+            >
+              {list && (
+                <img
+                  className="hero-photo"
+                  src={assetUrl("cooling.webp")}
+                  alt="Industrial engineering and equipment from FAST"
+                />
               )}
-            </p>
-            <span>
-              {t("Dammam, Saudi Arabia", "الدمام، المملكة العربية السعودية")}
-            </span>
-          </div>
-          <div className="hero-content">
-            <h1 id="hero-title">
-              {rtl ? (
-                <>
-                  <span>هندسة تدعم ركائز</span>
-                  <span>الصناعة السعودية.</span>
-                </>
-              ) : (
-                <>
-                  <span>Engineering the backbone</span>
-                  <span>of Saudi industry.</span>
-                </>
-              )}
-            </h1>
-            <div className="hero-bottom">
-              <p>
+              <div className="hero-topline">
+                <p>
+                  {t("Ground floor · Reception", "الطابق الأرضي · الاستقبال")}
+                </p>
+                <span>
+                  {t(
+                    "Dammam, Saudi Arabia",
+                    "الدمام، المملكة العربية السعودية",
+                  )}
+                </span>
+              </div>
+              <div className="hero-content">
+                <h1 id="hero-title">
+                  {rtl ? (
+                    <>
+                      <span>هندسة تدعم ركائز</span>
+                      <span>الصناعة السعودية.</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Engineering the backbone</span>
+                      <span>of Saudi industry.</span>
+                    </>
+                  )}
+                </h1>
+                <div className="hero-bottom">
+                  <p>
+                    {t(
+                      "Welcome to FAST. Follow your engineer to the lift, or choose a floor now.",
+                      "مرحباً بكم في فاست. رافق المهندس إلى المصعد أو اختر طابقاً الآن.",
+                    )}
+                  </p>
+                  <button
+                    className="enter-button"
+                    onClick={() => (list ? jump("electrical") : openLift())}
+                  >
+                    {t(
+                      list ? "Explore our capabilities" : "Choose a floor",
+                      "استكشف إمكاناتنا",
+                    )}
+                    <span>{down}</span>
+                  </button>
+                </div>
+              </div>
+              <p className="scene-note">
                 {t(
-                  "Engineering. Operations. Intelligence.\nConnected from the ground up.",
-                  "الهندسة والتشغيل والذكاء.\nمترابطة من الأساس.",
+                  "An architectural vision of our capabilities",
+                  "تصوّر معماري لإمكاناتنا",
                 )}
               </p>
-              <button className="enter-button" onClick={() => jump("cooling")}>
-                {t(
-                  list ? "Explore our capabilities" : "Scroll to step inside",
-                  "استكشف إمكاناتنا",
-                )}
-                <span>{down}</span>
-              </button>
-            </div>
-          </div>
-          <p className="scene-note">
-            {t(
-              "An architectural vision of our capabilities",
-              "تصوّر معماري لإمكاناتنا",
-            )}
-          </p>
-        </section>
-
-        {list && <AboutList rtl={rtl} onOpen={showAbout} />}
-        {chapters.map((chapter, i) => (
-          <Fragment key={chapter.id}>
-            <section
-              className="chapter"
-              id={chapter.id}
-              key={chapter.id}
-              aria-labelledby={`${chapter.id}-title`}
-              data-chapter={i + 1}
-              style={
-                { "--chapter-color": chapter.color } as React.CSSProperties
-              }
-            >
-              <div className="chapter-copy">
-                <p className="chapter-kicker">
-                  {t("THE CONNECTED BUILDING", "المبنى المترابط")}
-                  <span>{String(i + 1).padStart(2, "0")} / 11</span>
-                </p>
-                <h2 id={`${chapter.id}-title`}>
-                  <a href={chapter.href}>
-                    {rtl ? chapter.ar : chapter.title}
-                    <span className="heading-arrow">{arrow}</span>
-                  </a>
-                </h2>
-                <p className="chapter-place">
-                  <span />
-                  {rtl ? chapter.placeAr : chapter.place}
-                </p>
-                <p className="chapter-description">
-                  {rtl ? chapter.descriptionAr : chapter.description}
-                </p>
-                {!rtl && (
-                  <ul
-                    className="capabilities"
-                    aria-label={`${chapter.title} capabilities`}
-                  >
-                    {chapter.capabilities.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-                {chapter.id === "cooling" && (
-                  <details className="roof-scope">
-                    <summary>
-                      {t("Inside this service", "تفاصيل الخدمة")}
-                    </summary>
-                    <p>
-                      {t(
-                        "Survey → engineering & design → installation or retrofit → testing and handover.",
-                        "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
-                      )}
-                    </p>
-                    <p>
-                      {t(
-                        "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
-                        "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
-                      )}
-                    </p>
-                    <a href="https://fast-arabia.com/services/mechanical">
-                      {t(
-                        "Project references & full scope ↗",
-                        "المشاريع ونطاق العمل الكامل ↗",
-                      )}
-                    </a>
-                  </details>
-                )}
-                {chapter.id === "electrical" && list && (
-                  <ElectricalScope rtl={rtl} />
-                )}
-                <a className="service-link" href={chapter.href}>
-                  {t("Explore this service", "استكشف هذه الخدمة")}
-                  {arrow}
-                </a>
-                <figure className="source-photo">
-                  <img
-                    src={assetUrl(chapter.image)}
-                    alt={chapter.imageAlt}
-                    loading="lazy"
-                    width="640"
-                    height="380"
-                  />
-                  <figcaption>
-                    {t("From the FAST service portfolio.", "من خدمات FAST.")}
-                  </figcaption>
-                </figure>
-              </div>
-              <div className="chapter-location" aria-hidden="true">
-                <span>{i + 1} / 11</span>
-                <span>{t("Explore the building", "استكشف المبنى")}</span>
-              </div>
             </section>
-            {!list && i === 0 && (
-              <>
-                <section
-                  id="about-hall"
-                  className="about-hall-scroll"
-                  aria-label={t("About FAST guided gallery", "جولة معرض فاست")}
-                />
-                <div
-                  id="about-departure"
-                  className="about-departure-scroll"
-                  aria-hidden="true"
-                />
-              </>
-            )}
-          </Fragment>
-        ))}
-
-        <section
-          className="closing"
-          id="together"
-          aria-labelledby="closing-title"
-          data-chapter="12"
-        >
-          <div className="closing-content">
-            <h2 id="closing-title">
-              {t("Let’s engineer", "لنصنع")}
-              <br />
-              {t("what’s next.", "المستقبل معاً.")}
-            </h2>
-            <p>
-              {t(
-                "From the foundations to the intelligence within. Bring your next project to FAST Operations & Maintenance.",
-                "من الأساسات إلى التقنيات الذكية. شارك مشروعك القادم مع FAST للتشغيل والصيانة.",
-              )}
-            </p>
-            <a className="primary-link" href={`${source}/contact?type=rfq`}>
-              {t("Discuss your project", "ناقش مشروعك")}
-              {arrow}
-            </a>
-            <button className="replay-tour" onClick={() => jump("arrival")}>
-              {t("Replay the journey", "إعادة الجولة")}{" "}
-              <span aria-hidden="true">↺</span>
-            </button>
-            <div className="credentials">
-              <span>
-                {t("ISO 9001 · 14001 · 45001", "ISO 9001 · 14001 · 45001")}
-              </span>
-              <span>
-                {t(
-                  "Saudi Aramco registered vendor",
-                  "مورد مسجل لدى أرامكو السعودية",
-                )}
-              </span>
-            </div>
           </div>
-          <footer>
-            <div>
-              <img
-                src={assetUrl("fast-logo.png")}
-                alt="FAST"
-                width="110"
-                height="32"
-              />
-              <p>{t("Operations & Maintenance", "التشغيل والصيانة")}</p>
-            </div>
-            <div>
-              <a href="mailto:info@fast-arabia.com">info@fast-arabia.com</a>
-              <a href="tel:+966138311137" dir="ltr">
-                +966 13 831 1137
-              </a>
-            </div>
-            <div>
-              <a href={`${source}/contact`}>
-                {t("Find us in Dammam", "موقعنا في الدمام")}
+        )}
+        {orderedChapters
+          .filter((c) => list || c.id === floor.id)
+          .map((chapter) => (
+            <Fragment key={chapter.id}>
+              {list && chapter.id === "cooling" && (
+                <div id="about">
+                  <AboutList rtl={rtl} onOpen={showAbout} />
+                </div>
+              )}
+              <section
+                className="chapter"
+                id={chapter.id}
+                key={chapter.id}
+                aria-labelledby={`${chapter.id}-title`}
+                data-chapter={chapters.indexOf(chapter) + 1}
+                style={
+                  { "--chapter-color": chapter.color } as React.CSSProperties
+                }
+              >
+                <div className="chapter-copy">
+                  <p className="chapter-kicker">
+                    {t("THE CONNECTED BUILDING", "المبنى المترابط")}
+                    <span>
+                      {String(orderedChapters.indexOf(chapter) + 1).padStart(
+                        2,
+                        "0",
+                      )}{" "}
+                      / 11
+                    </span>
+                  </p>
+                  <h2 id={`${chapter.id}-title`}>
+                    <a href={chapter.href}>
+                      {rtl ? chapter.ar : chapter.title}
+                      <span className="heading-arrow">{arrow}</span>
+                    </a>
+                  </h2>
+                  <p className="chapter-place">
+                    <span />
+                    {rtl ? chapter.placeAr : chapter.place}
+                  </p>
+                  <p className="chapter-description">
+                    {rtl ? chapter.descriptionAr : chapter.description}
+                  </p>
+                  {!rtl && (
+                    <ul
+                      className="capabilities"
+                      aria-label={`${chapter.title} capabilities`}
+                    >
+                      {chapter.capabilities.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {chapter.id === "cooling" && (
+                    <details className="roof-scope">
+                      <summary>
+                        {t("Inside this service", "تفاصيل الخدمة")}
+                      </summary>
+                      <p>
+                        {t(
+                          "Survey → engineering & design → installation or retrofit → testing and handover.",
+                          "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
+                        )}
+                      </p>
+                      <p>
+                        {t(
+                          "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
+                          "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
+                        )}
+                      </p>
+                      <a href="https://fast-arabia.com/services/mechanical">
+                        {t(
+                          "Project references & full scope ↗",
+                          "المشاريع ونطاق العمل الكامل ↗",
+                        )}
+                      </a>
+                    </details>
+                  )}
+                  {chapter.id === "electrical" && list && (
+                    <ElectricalScope rtl={rtl} />
+                  )}
+                  <a className="service-link" href={chapter.href}>
+                    {t("Explore this service", "استكشف هذه الخدمة")}
+                    {arrow}
+                  </a>
+                  <figure className="source-photo">
+                    <img
+                      src={assetUrl(chapter.image)}
+                      alt={chapter.imageAlt}
+                      loading="lazy"
+                      width="640"
+                      height="380"
+                    />
+                    <figcaption>
+                      {t("From the FAST service portfolio.", "من خدمات FAST.")}
+                    </figcaption>
+                  </figure>
+                </div>
+                <div className="chapter-location" aria-hidden="true">
+                  <span>{orderedChapters.indexOf(chapter) + 1} / 11</span>
+                  <span>{t("Explore the building", "استكشف المبنى")}</span>
+                </div>
+              </section>
+            </Fragment>
+          ))}
+
+        {!list && floor.id === "about" && (
+          <section
+            id="about-hall"
+            className="about-hall-scroll"
+            aria-label={t("About FAST", "عن فاست")}
+          />
+        )}
+        {(list || floor.id === "cooling") && (
+          <section
+            className="closing"
+            id="together"
+            aria-labelledby="closing-title"
+            data-chapter="12"
+          >
+            <div className="closing-content">
+              <h2 id="closing-title">
+                {t("Let’s engineer", "لنصنع")}
+                <br />
+                {t("what’s next.", "المستقبل معاً.")}
+              </h2>
+              <p>
+                {t(
+                  "From the foundations to the intelligence within. Bring your next project to FAST Operations & Maintenance.",
+                  "من الأساسات إلى التقنيات الذكية. شارك مشروعك القادم مع FAST للتشغيل والصيانة.",
+                )}
+              </p>
+              <a className="primary-link" href={`${source}/contact?type=rfq`}>
+                {t("Discuss your project", "ناقش مشروعك")}
                 {arrow}
               </a>
-              <p>© {new Date().getFullYear()} FAST</p>
-              <a
-                className="asset-credit"
-                href={assetUrl("interior/ATTRIBUTION.txt")}
-              >
-                {t("3D asset credits", "حقوق النماذج ثلاثية الأبعاد")}
-              </a>
+              <button className="replay-tour" onClick={() => jump("arrival")}>
+                {t("Replay the journey", "إعادة الجولة")}{" "}
+                <span aria-hidden="true">↺</span>
+              </button>
+              <div className="credentials">
+                <span>
+                  {t("ISO 9001 · 14001 · 45001", "ISO 9001 · 14001 · 45001")}
+                </span>
+                <span>
+                  {t(
+                    "Saudi Aramco registered vendor",
+                    "مورد مسجل لدى أرامكو السعودية",
+                  )}
+                </span>
+              </div>
             </div>
-          </footer>
-        </section>
+            <footer>
+              <div>
+                <img
+                  src={assetUrl("fast-logo.png")}
+                  alt="FAST"
+                  width="110"
+                  height="32"
+                />
+                <p>{t("Operations & Maintenance", "التشغيل والصيانة")}</p>
+              </div>
+              <div>
+                <a href="mailto:info@fast-arabia.com">info@fast-arabia.com</a>
+                <a href="tel:+966138311137" dir="ltr">
+                  +966 13 831 1137
+                </a>
+              </div>
+              <div>
+                <a href={`${source}/contact`}>
+                  {t("Find us in Dammam", "موقعنا في الدمام")}
+                  {arrow}
+                </a>
+                <p>© {new Date().getFullYear()} FAST</p>
+                <a
+                  className="asset-credit"
+                  href={assetUrl("interior/ATTRIBUTION.txt")}
+                >
+                  {t("3D asset credits", "حقوق النماذج ثلاثية الأبعاد")}
+                </a>
+              </div>
+            </footer>
+          </section>
+        )}
       </main>
 
       <div
@@ -729,36 +755,20 @@ export default function App() {
         <div className="journey-label">
           <span className="live-dot" />
           <button onClick={() => setMenu(true)} aria-haspopup="dialog">
-            {aboutFloor && !list
-              ? t("About FAST", "عن فاست")
-              : active === 0
-                ? t("The arrival", "الوصول")
-                : active === 12
-                  ? t("What’s next", "الخطوة التالية")
-                  : rtl
-                    ? chapters[active - 1].ar
-                    : chapters[active - 1].title}
+            {rtl ? currentFloor.ar : currentFloor.title}
           </button>
         </div>
         <nav
           className="chapter-track"
           aria-label={t("Jump to a chapter", "انتقل إلى فصل")}
         >
-          {destinations.map((id, i) => (
+          {floors.map((d) => (
             <button
-              key={id}
-              className={active === i ? "selected" : ""}
-              aria-label={
-                i === 0
-                  ? t("Arrival", "الوصول")
-                  : i === 12
-                    ? t("Contact", "تواصل معنا")
-                    : rtl
-                      ? chapters[i - 1].ar
-                      : chapters[i - 1].title
-              }
-              aria-current={active === i ? "step" : undefined}
-              onClick={() => jump(id)}
+              key={d.id}
+              className={currentFloor.id === d.id ? "selected" : ""}
+              aria-label={rtl ? d.ar : d.title}
+              aria-current={currentFloor.id === d.id ? "step" : undefined}
+              onClick={() => jump(d.id)}
             >
               <span />
             </button>
@@ -843,11 +853,11 @@ export default function App() {
             </button>
           </div>
           <button className="dialog-arrival" onClick={() => jump("arrival")}>
-            {t("Start at the entrance", "ابدأ من المدخل")}
+            {t("Start at reception", "ابدأ من المدخل")}
             {arrow}
           </button>
           <div className="dialog-services">
-            {chapters.map((chapter, i) => (
+            {floors.slice(1).map((chapter, i) => (
               <button key={chapter.id} onClick={() => jump(chapter.id)}>
                 <span className="dialog-number">{i + 1}</span>
                 <span>{rtl ? chapter.ar : chapter.title}</span>
@@ -864,6 +874,7 @@ export default function App() {
       <AboutProjection rtl={rtl} />
       <LiftNavigator
         open={liftOpen}
+        currentFloor={floor.id}
         initialDestination={liftDestination}
         rtl={rtl}
         onClose={() => {
@@ -874,7 +885,14 @@ export default function App() {
             setPendingAbout(null);
           }
         }}
-        onArrive={(at) => scrollToProgress(at, true)}
+        onArrive={(dest) => {
+          flushSync(() => setFloor(dest));
+          lenis.current?.resize();
+          if (lenis.current)
+            lenis.current.scrollTo(0, { immediate: true, force: true });
+          else window.scrollTo({ top: 0, behavior: "instant" });
+          useTour.getState().teleport(dest.start);
+        }}
       />
 
       <AnimatePresence>
@@ -889,11 +907,7 @@ export default function App() {
         )}
       </AnimatePresence>
       <span className="sr-only" role="status" aria-live="polite">
-        {active > 0 && active < 12
-          ? rtl
-            ? chapters[active - 1].ar
-            : chapters[active - 1].title
-          : ""}
+        {rtl ? currentFloor.ar : currentFloor.title}
       </span>
     </div>
   );

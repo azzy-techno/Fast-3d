@@ -22,8 +22,9 @@ try {
     sampleGuide,
     guideIsPresenting,
     Vector3,
-    scrollAtProgress,
-    progressAtScroll,
+    floors,
+    floorFraction,
+    floorProgress,
   } = await import(pathToFileURL(dir + "/route.mjs"));
   assert.equal(aboutItems.length, 33);
   assert.equal(aboutItems.filter((s) => s.panel === "partners").length, 13);
@@ -77,20 +78,16 @@ try {
   sampleJourney(1.605, camera, target);
   sampleJourney(1.65, previous, prevGuide);
   assert(camera.equals(previous), "Steady first-person binocular hold");
-  const stops = [
-    { at: 0, y: 0 },
-    { at: 1, y: 2000 },
-    { at: 1.53, y: 5000 },
-    { at: 1.74, y: 39000 },
-    { at: 2, y: 41000 },
-    { at: 3, y: 60000 },
-  ];
-  for (let i = 0; i <= 3000; i++) {
-    const p = i / 1000;
-    assert(
-      Math.abs(progressAtScroll(scrollAtProgress(p, stops), stops) - p) < 1e-10,
-      "Scroll mapping round trip",
-    );
+  for (const floor of floors) {
+    for (let i = 0; i <= 1000; i++) {
+      const fraction = i / 1000;
+      assert(
+        Math.abs(
+          floorFraction(floor, floorProgress(floor, fraction)) - fraction,
+        ) < 1e-9,
+        "Floor scroll mapping round trip for " + floor.id,
+      );
+    }
   }
   console.log({
     passed: true,

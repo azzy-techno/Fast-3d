@@ -56,7 +56,10 @@ export function Host() {
     sampleGuide(p, state.p, state.face);
     const cut =
       state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
-    if (cut || state.jumpVersion !== useTour.getState().jumpVersion) {
+    const arriving =
+      state.jumpVersion !== useTour.getState().jumpVersion ||
+      !state.initialized;
+    if (cut || arriving) {
       state.previous.copy(state.p);
       state.walking = 0;
       if (cut) state.angle += Math.PI;
@@ -84,7 +87,8 @@ export function Host() {
     rig.idle.setEffectiveWeight(1 - state.walking);
     rig.mixer.update(0);
     standHuman(rig, 1 - state.walking);
-    const waving = p < 0.7 || p > 11.84;
+    const waving = p < 0.7 || p > 11.84 || (p >= 11.68 && p <= 11.69);
+    if (arriving) state.wave = waving ? 1 : 0;
     state.wave = MathUtils.damp(
       state.wave,
       waving ? 1 : 0,
@@ -150,6 +154,7 @@ export function Host() {
     }
     if (direction.lengthSq() > 0.000001) {
       const desired = Math.atan2(direction.x, direction.z);
+      if (arriving) state.angle = desired;
       state.angle +=
         Math.atan2(
           Math.sin(desired - state.angle),

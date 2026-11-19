@@ -1,37 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { chapters } from "../data/chapters";
+import { floors, type Floor } from "../lib/journeyScroll";
 import { useTour } from "../store";
-
-export const liftDestinations = [
-  ...chapters.map((c, i) => ({
-    id: c.id,
-    title: c.title,
-    ar: c.ar,
-    floor: i === 0 ? "R" : String(12 - i).padStart(2, "0"),
-    at: i + 1,
-  })),
-  { id: "about", title: "About FAST", ar: "عن فاست", floor: "12", at: 1.535 },
-  {
-    id: "reception",
-    title: "Reception & exit",
-    ar: "الاستقبال والخروج",
-    floor: "G",
-    at: 11.69,
-  },
-].sort((a, b) => a.at - b.at);
 
 export function LiftNavigator({
   open,
   initialDestination,
+  currentFloor,
   rtl,
   onClose,
   onArrive,
 }: {
   open: boolean;
+  currentFloor: string;
   initialDestination: string | null;
   rtl: boolean;
   onClose: () => void;
-  onArrive: (at: number) => void;
+  onArrive: (floor: Floor) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [phase, setPhase] = useState<
@@ -39,16 +23,11 @@ export function LiftNavigator({
   >("select");
   const [selected, setSelected] = useState<string | null>(null);
   const frameReady = useTour((s) => s.liftFrameReady);
-  const currentDestination = useTour(
-    (s) =>
-      [...liftDestinations].reverse().find((d) => s.progress >= d.at - 0.015)
-        ?.id,
-  );
   const arrival = useRef(onArrive);
   arrival.current = onArrive;
   const close = useRef(onClose);
   close.current = onClose;
-  const destination = liftDestinations.find((d) => d.id === selected);
+  const destination = floors.find((d) => d.id === selected);
   useEffect(() => {
     useTour.getState().setLiftPhase(open ? phase : "idle");
   }, [open, phase]);
@@ -64,7 +43,7 @@ export function LiftNavigator({
     if (!open || !destination || phase === "select") return;
     if (phase === "closing") {
       const timer = setTimeout(() => {
-        arrival.current(destination.at);
+        arrival.current(destination);
         setPhase("travelling");
       }, 450);
       return () => clearTimeout(timer);
@@ -111,13 +90,11 @@ export function LiftNavigator({
             : "Choose any service. Your FAST engineer will guide you on arrival."}
         </p>
         <div className="lift-floor-buttons">
-          {liftDestinations.map((d) => (
+          {floors.map((d) => (
             <button
               key={d.id}
               data-destination={d.id}
-              aria-current={
-                currentDestination === d.id ? "location" : undefined
-              }
+              aria-current={currentFloor === d.id ? "location" : undefined}
               onClick={() => {
                 setSelected(d.id);
                 setPhase("closing");
@@ -153,40 +130,5 @@ export function LiftNavigator({
         </div>
       )}
     </dialog>
-  );
-}
-
-export function LiftPrompt({
-  rtl,
-  onOpen,
-}: {
-  rtl: boolean;
-  onOpen: () => void;
-}) {
-  const visible = useTour((s) => {
-    const p = s.progress,
-      local = p % 1;
-    return (
-      (p > 1.27 && p < 1.51) ||
-      (p >= 1.735 && p < 1.94) ||
-      (p > 2.77 && p < 2.94) ||
-      (p >= 3 && p < 11.4 && local > 0.46 && local < 0.82) ||
-      (p > 11.46 && p < 11.61)
-    );
-  });
-  if (!visible) return null;
-  return (
-    <aside className="lift-prompt">
-      <span>{rtl ? "المصعد جاهز" : "YOUR LIFT IS READY"}</span>
-      <p>
-        {rtl
-          ? "اختر الطابق التالي أو تابع الجولة."
-          : "Choose your next floor, or keep scrolling to continue the tour."}
-      </p>
-      <button onClick={onOpen}>
-        {rtl ? "اختر الخدمة" : "Choose a service"}
-        <span aria-hidden="true">↕</span>
-      </button>
-    </aside>
   );
 }

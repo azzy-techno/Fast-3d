@@ -30,7 +30,7 @@ export function useHumanRig(
 ) {
   const logo = useTexture(assetUrl("fast-logo.png"));
   const { scene } = useGLTF(
-    assetUrl(variant < 0 ? "guide/host.glb" : "guide/pedestrian.glb"),
+    assetUrl(variant < 0 ? "guide/engineer.glb" : "guide/pedestrian.glb"),
   );
   const data = useLoader(FileLoader, assetUrl("guide/motion.json")) as string;
   const rig = useMemo(() => {
@@ -87,7 +87,7 @@ export function useHumanRig(
           const surface = material as MeshStandardMaterial;
           if (o.name.includes("Outfit_Top")) {
             surface.map = null;
-            surface.color.set(variant < 0 ? "#4d9ba9" : tint);
+            surface.color.set(variant < 0 ? "#205580" : tint);
             surface.roughness = 0.88;
             surface.metalness = 0;
           } else if (o.name.includes("Outfit_Bottom")) {
@@ -141,20 +141,6 @@ export function useHumanRig(
         variant % 2 ? 0.94 : 1,
       );
     if (variant < 0) {
-      attach(
-        "Head",
-        new SphereGeometry(1, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-        "#eee9dc",
-        [0, 0.165, 0.015],
-        [0.115, 0.085, 0.13],
-      );
-      attach(
-        "Head",
-        new SphereGeometry(1, 24, 12),
-        "#e1dac7",
-        [0, 0.16, 0.035],
-        [0.135, 0.012, 0.16],
-      );
       const badge = new Mesh(
         new PlaneGeometry(0.145, 0.06),
         new MeshBasicMaterial({

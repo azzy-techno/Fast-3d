@@ -102,7 +102,7 @@ export function ElectricalTour({
         <span>{rtl ? "اتبع مهندس فاست" : "Follow your FAST engineer"}</span>
         <button
           onClick={() =>
-            onSelect(i === 15 ? 2.85 : electricalStations[i + 1].at + 0.005)
+            onSelect(i === 15 ? 2.8 : electricalStations[i + 1].at + 0.005)
           }
         >
           {i === 15

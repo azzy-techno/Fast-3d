@@ -198,8 +198,8 @@ export function Reception() {
             </group>
           ))}
           <Wayfinding
-            text="RECEPTION →"
-            sub="GROUND FLOOR / WELCOME"
+            text="TOWER LIFTS"
+            sub="GROUND FLOOR / SELECT A DESTINATION"
             p={[0, 4.7, -10]}
             width={3}
           />

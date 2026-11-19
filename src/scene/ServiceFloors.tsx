@@ -238,7 +238,7 @@ function ServiceFloor({ index }: { index: number }) {
         />
       </mesh>
       <Wayfinding
-        text={`${String(11 - index).padStart(2, "0")} / ${chapters[room.index].title.toUpperCase()}`}
+        text={`${String(index + 1).padStart(2, "0")} / ${chapters[room.index].title.toUpperCase()}`}
         sub="FAST / ENGINEERING FLOORS"
         p={[room.x, 3.63, -6.97]}
         width={7}
@@ -246,7 +246,7 @@ function ServiceFloor({ index }: { index: number }) {
       {index !== 0 && (
         <Wayfinding
           text="CONNECTED ENGINEERING"
-          sub={`LEVEL ${11 - index} / ${room.y} M`}
+          sub={`LEVEL ${String(index + 1).padStart(2, "0")} / FAST`}
           p={[7, 4, -10.25]}
           width={7}
         />

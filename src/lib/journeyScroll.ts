@@ -1,39 +1,82 @@
-import { destinations } from "../data/chapters";
-export type ScrollStop = { at: number; y: number };
-/** Separate scroll space for the long gallery, without lengthening the roof or lift. */
-export function journeyScrollStops(): ScrollStop[] {
-  const stops = destinations.map((id, i) => ({
-    at: i,
-    y:
-      i === 12
-        ? document.documentElement.scrollHeight - innerHeight
-        : (document.getElementById(id)?.offsetTop ?? 0),
-  }));
-  for (const [id, at] of [
-    ["about-hall", 1.53],
-    ["about-departure", 1.74],
-  ] as const) {
-    const e = document.getElementById(id);
-    if (e) stops.push({ at, y: e.offsetTop });
+import { chapters } from "../data/chapters";
+
+/** Each floor is an independent visit. Values reference the authored camera and
+ * guide poses; the end of each visit is on the landing outside the lift. */
+export const floors = [
+  {
+    id: "reception",
+    title: "Reception",
+    ar: "الاستقبال",
+    floor: "G",
+    start: 11.69,
+    end: 11.61,
+  },
+  ...chapters.slice(1).map((c, i) => ({
+    id: c.id,
+    title: c.title,
+    ar: c.ar,
+    floor: String(i + 1).padStart(2, "0"),
+    start: i + 2,
+    end: i === 0 ? 2.8 : i === 9 ? 11.48 : i + 2 + 0.46,
+  })),
+  {
+    id: "about",
+    title: "About FAST",
+    ar: "عن فاست",
+    floor: "11",
+    start: 1.535,
+    end: 1.74,
+  },
+  {
+    id: "cooling",
+    title: chapters[0].title,
+    ar: chapters[0].ar,
+    floor: "R",
+    start: 1.12,
+    end: 0.55,
+  },
+];
+export type Floor = (typeof floors)[number];
+export function floorStops(floor: Floor): [number, number][] {
+  if (floor.id === "cooling")
+    return [
+      [0, 1.12],
+      [0.48, 0.94],
+      [0.7, 0.68],
+      [0.85, 0.6],
+      [1, floor.end],
+    ];
+  if (floor.id === "reception")
+    return [
+      [0, 11.69],
+      [0.2, 11.686],
+      [0.56, 11.662],
+      [1, 11.61],
+    ];
+  return [
+    [0, floor.start],
+    [1, floor.end],
+  ];
+}
+function interpolate(
+  value: number,
+  stops: [number, number][],
+  reverse: boolean,
+) {
+  const input = reverse ? 1 : 0,
+    output = reverse ? 0 : 1;
+  for (let i = 1; i < stops.length; i++) {
+    const a = stops[i - 1],
+      b = stops[i];
+    const t = (value - a[input]) / (b[input] - a[input]);
+    if (t <= 1 || i === stops.length - 1)
+      return a[output] + (b[output] - a[output]) * Math.min(1, Math.max(0, t));
   }
-  return stops.sort((a, b) => a.at - b.at);
+  return stops[0][output];
 }
-export function progressAtScroll(y: number, stops = journeyScrollStops()) {
-  let i = 0;
-  while (i < stops.length - 2 && y >= stops[i + 1].y) i++;
-  const a = stops[i],
-    b = stops[i + 1];
-  return (
-    a.at +
-    (b.at - a.at) * Math.max(0, Math.min(1, (y - a.y) / Math.max(1, b.y - a.y)))
-  );
-}
-export function scrollAtProgress(p: number, stops = journeyScrollStops()) {
-  let i = 0;
-  while (i < stops.length - 2 && p > stops[i + 1].at) i++;
-  const a = stops[i],
-    b = stops[i + 1];
-  return (
-    a.y + (b.y - a.y) * Math.max(0, Math.min(1, (p - a.at) / (b.at - a.at)))
-  );
-}
+export const floorProgress = (floor: Floor, fraction: number) =>
+  interpolate(fraction, floorStops(floor), false);
+export const floorFraction = (floor: Floor, pose: number) =>
+  interpolate(pose, floorStops(floor), true);
+export const scrollRange = () =>
+  Math.max(1, document.documentElement.scrollHeight - innerHeight);

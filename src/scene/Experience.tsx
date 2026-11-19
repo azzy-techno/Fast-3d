@@ -1,3 +1,4 @@
+import { floors } from "../lib/journeyScroll";
 import { electricalStationAt } from "./electricalTour";
 import { Suspense, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -73,6 +74,7 @@ const World = memo(function World({
   const scene = useThree((s) => s.scene);
   const invalidate = useThree((s) => s.invalidate);
   const observatoryArmed = useRef(true);
+  const landingPrompt = useRef<number | null>(null);
   const ready = useRef(false),
     initialized = useRef(false),
     warmed = useRef(false);
@@ -137,6 +139,22 @@ const World = memo(function World({
       (requested - progress.current) * (1 - Math.exp(-Math.min(dt, 0.1) * 13));
     const p = progress.current;
     const tour = useTour.getState();
+    const landing = floors.find(
+      (d) => d.id !== "cooling" && Math.abs(requested - d.end) < 0.00001,
+    );
+    if (!landing) landingPrompt.current = null;
+    if (
+      ready.current &&
+      landing &&
+      Math.abs(p - landing.end) < 0.00045 &&
+      landingPrompt.current !== landing.end &&
+      tour.liftPhase === "idle" &&
+      !tour.observatoryOpen &&
+      !tour.aboutPanel
+    ) {
+      landingPrompt.current = landing.end;
+      tour.requestLift();
+    }
     if (
       !tour.observatoryPending &&
       !tour.observatoryOpen &&
@@ -204,7 +222,12 @@ const World = memo(function World({
     // moving the camera out through an interior wall on narrow screens.
     const offsetX = mobile
       ? 0
-      : (rtl ? 1 : -1) * (0.19 * outside + 0.03 * inside);
+      : (rtl ? 1 : -1) *
+        (0.19 * outside +
+          0.03 * inside +
+          0.13 *
+            Math.max(0, Math.min(1, (p - 11.665) / 0.015)) *
+            Number(p <= 11.69));
     const offsetY = mobile ? 0.19 * outside + 0.1 * inside : 0;
     const nextFov = fov + (mobile ? inside * 8 : 0);
     if (

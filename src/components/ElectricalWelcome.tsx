@@ -19,7 +19,7 @@ export function ElectricalWelcome({
         rtl ? "مقدمة الخدمات الكهربائية" : "Electrical service introduction"
       }
     >
-      <span>11 / FAST ELECTRICAL</span>
+      <span>01 / FAST ELECTRICAL</span>
       <h2>{rtl ? "الطاقة. التحكم. الربط." : "Power. Control. Connection."}</h2>
       <p>
         {rtl

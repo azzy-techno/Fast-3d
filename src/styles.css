@@ -2592,3 +2592,24 @@ footer p,
   transform: rotate(-45deg);
   transform-origin: right center;
 }
+
+/* Each visit has its own scroll distance. Native touch and keyboard scrolling
+   cover the same camera path as the eased wheel input. */
+.tour-view .reception-approach {height: 400svh; min-height: 2400px;}
+.tour-view .chapter:not(#electrical):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter#electrical {height: 3000svh; min-height: 22000px;}
+.lift-dialog[data-phase="travelling"] .lift-journey {background: #152a36;}
+
+.tour-view .reception-approach .hero-topline {justify-content:flex-start;gap:1.2rem;}
+.tour-view .enter-button {white-space:nowrap;flex-shrink:0;}
+.tour-view .closing {background:linear-gradient(90deg,#091d2ae8, #091d2a25 80%);}
+.tour-view .closing footer {background:#0c2331eb;padding:18px;}
+@media(max-width:700px){
+  .tour-view .closing {background:linear-gradient(0deg,#0a2030 2%,#0a2030de 58%,transparent 90%);gap:26px;padding-bottom:100px;}
+  .tour-view .closing-content {margin-top:24svh;background:#0c2432eb;padding:18px;}
+  .tour-view .closing h2 {font-size:36px;}
+  .tour-view .closing-content >p:not(.closing-intro) {margin-top:12px;}
+  .tour-view .closing .credentials {margin-top:16px;}
+}
+
+.floor-plan {max-height:calc(100dvh - 215px);overflow-y:auto;overscroll-behavior:contain;}
