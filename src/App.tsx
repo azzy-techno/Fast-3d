@@ -25,6 +25,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -33,15 +34,12 @@ import { AnimatePresence, motion } from "motion/react";
 import Lenis from "lenis";
 import { Howl } from "howler";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { chapters } from "./data/chapters";
 import { useTour } from "./store";
 import { assetUrl } from "./lib/assets";
 import { ServiceSound } from "./lib/serviceSound";
 import { JourneyGuide } from "./components/JourneyGuide";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
 const Experience = lazy(() => import("./scene/Experience"));
 const source = "https://fast-arabia.com";
 const arrow = (
@@ -178,7 +176,6 @@ export default function App() {
     // Keep scroll duration tied to elapsed time even when rendering drops frames.
     // GSAP's lag-smoothed ticker time otherwise stretches Lenis navigation.
     const update = () => scroller.raf(performance.now());
-    scroller.on("scroll", ScrollTrigger.update);
     gsap.ticker.add(update);
     return () => {
       gsap.ticker.remove(update);
@@ -202,7 +199,7 @@ export default function App() {
     if (!menu && dialog.current?.open) dialog.current?.close();
   }, [menu]);
 
-  useGSAP(
+  useLayoutEffect(
     () => {
       const copies = Array.from(
         document.querySelectorAll<HTMLElement>(".chapter-copy"),
@@ -256,24 +253,18 @@ export default function App() {
         }
         setPercent(Math.round(fraction * 100));
       };
-      const trigger = ScrollTrigger.create({
-        start: 0,
-        end: "max",
-        onUpdate: update,
-        onRefresh: () => {
-          update();
-        },
-      });
-      const resize = new ResizeObserver(() => ScrollTrigger.refresh());
+      window.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      const resize = new ResizeObserver(update);
       if (main.current) resize.observe(main.current);
-      ScrollTrigger.refresh();
       update();
       return () => {
-        trigger.kill();
+        window.removeEventListener("scroll", update);
+        window.removeEventListener("resize", update);
         resize.disconnect();
       };
     },
-    { dependencies: [list, rtl, floor], scope: main, revertOnUpdate: true },
+    [list, rtl, floor],
   );
 
   useEffect(() => {
@@ -390,7 +381,6 @@ export default function App() {
         .getElementById(dest.id === "reception" ? "arrival" : dest.id)
         ?.scrollIntoView({ block: "start" });
     }
-    ScrollTrigger.refresh();
   };
 
   return (
