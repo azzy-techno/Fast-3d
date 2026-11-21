@@ -126,7 +126,16 @@ try {
         ),
       ) > 3.5,
     );
-    if ([1, 4, 11, 14, 16].includes(stop)) await screenshot(`stop-${stop}`);
+    assert(
+      await page.evaluate(() => {
+        const label = document.querySelector(".equipment-caption");
+        return (
+          label?.textContent.trim() && label.getBoundingClientRect().height > 0
+        );
+      }),
+      "Active component has a visible caption",
+    );
+    await screenshot(`stop-${stop}`);
     console.log(`PASS stop ${stop}: guide presents beside equipment`);
     if (stop === initialStop) {
       // Observe the live skeleton over time while the camera and feet hold.
@@ -183,6 +192,28 @@ try {
   });
   assert(bounds.top > 135 && bounds.bottom <= bounds.footer);
   await screenshot("phone-stop-16");
+  await page.evaluate(() => document.querySelector(".cinema-toggle").click());
+  assert(
+    await page.evaluate(() => {
+      const label = document.querySelector(".equipment-caption");
+      return (
+        label.textContent === "Ducted axial fan" &&
+        label.getBoundingClientRect().height > 0
+      );
+    }),
+    "Cinema view retains the component name",
+  );
+  await page.evaluate(() => document.querySelector(".language").click());
+  assert(
+    await page.evaluate(() =>
+      /[\u0600-\u06FF]/.test(
+        document.querySelector(".equipment-caption").textContent,
+      ),
+    ),
+    "Arabic component caption",
+  );
+  await page.evaluate(() => document.querySelector(".language").click());
+  await page.evaluate(() => document.querySelector(".cinema-toggle").click());
   const violations = await page.evaluate(async () =>
     (
       await window.axe.run(".electrical-tour", {

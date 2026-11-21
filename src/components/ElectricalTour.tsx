@@ -5,68 +5,68 @@ import {
 } from "../scene/electricalTour";
 const notes = [
   [
-    "LV and power panels, presented as a complete installation bay.",
-    "لوحات الجهد المنخفض والقوى ضمن منطقة تركيب متكاملة.",
+    "The two incoming breaker sections sit beside the stacked outgoing feeder drawers.",
+    "تجاور حجرتا قواطع الدخول أدراج المغذيات الخارجة المكدّسة.",
   ],
   [
-    "Smart ring main units and their switching assemblies.",
-    "وحدات الربط الحلقي الذكية وتجهيزات الفصل والتوصيل.",
+    "The front panels show the ring ways and breaker way. The remote terminal unit sits above the lineup.",
+    "تُظهر الواجهات مفاتيح الحلقة ومخرج القاطع، وتعلوها وحدة التحكم الطرفية.",
   ],
   [
-    "A dedicated test bench beside the RMU installation.",
-    "منضدة فحص مخصصة بجانب وحدات الربط الحلقي.",
+    "A secondary-injection set and test leads beside the RMU protection compartment.",
+    "جهاز حقن ثانوي وأسلاك اختبار بجانب حجرة الحماية في وحدة الربط الحلقي.",
   ],
   [
-    "Transformer installation, mounting and alignment.",
-    "تركيب المحولات وتثبيتها ومحاذاتها.",
+    "The tank sits on wheels and steel rails. Fins line its sides and the insulated bushings rise above its lid.",
+    "يرتكز الخزان على عجلات وقضبان فولاذية، وتحيط به زعانف التبريد وتعلوه عوازل التوصيل.",
   ],
   [
-    "LV/MV joints and heat- and cold-shrink termination samples.",
-    "وصلات الجهد المنخفض والمتوسط ونماذج نهايات الانكماش الحراري والبارد.",
+    "A stepped joint cutaway exposes the jacket, screen and conductor beside three terminated cores.",
+    "يُظهر مقطع الوصلة غلاف الكابل وشاشته وموصله بجانب ثلاث نهايات معزولة.",
   ],
   [
-    "Cable drums, supported routes, pulling and laying.",
-    "بكرات الكابلات ومساراتها وسحبها ومدّها.",
+    "The cable leaves the supported drum and runs across individual laying rollers.",
+    "يمتد الكابل من البكرة المثبّتة على حامل عبر بكرات المدّ المتتابعة.",
   ],
   [
-    "Distribution boards and outgoing circuits.",
-    "لوحات التوزيع والدوائر الخارجة.",
+    "The open enclosure exposes three DIN rails of outgoing miniature circuit breakers.",
+    "تكشف اللوحة المفتوحة ثلاثة صفوف من القواطع المصغّرة على قضبان التثبيت.",
   ],
   [
-    "Feeder pillars and smaller outdoor distribution enclosures.",
-    "خزائن التغذية وخزائن التوزيع الخارجية الصغيرة.",
+    "Vertical fuse ways and outgoing cables are visible in the open pillar beside the closed mini pillar.",
+    "تظهر مخارج المصهرات الرأسية والكابلات في خزانة التغذية المفتوحة بجوار الخزانة الصغيرة المغلقة.",
   ],
   [
-    "The connection from the generator to the distribution board.",
-    "توصيل المولد بلوحة التوزيع.",
+    "Follow the outgoing cables from the louvred generator enclosure to the separate distribution board.",
+    "تتبّع الكابلات الخارجة من الغلاف ذي فتحات التهوية للمولد إلى لوحة التوزيع المنفصلة.",
   ],
   [
-    "Inspection access and instruments for preventive servicing.",
-    "مناطق الفحص وأجهزة الصيانة الوقائية.",
+    "The thermal imager and its display illustrate a hot connection in the busbar inspection bay.",
+    "تُظهر الكاميرا الحرارية وشاشتها مثالاً لوصلة ساخنة في محطة فحص قضبان التوزيع.",
   ],
   [
-    "Energy efficiency and a power-factor management demonstrator.",
-    "كفاءة الطاقة ونموذج توضيحي لإدارة معامل القدرة.",
+    "The controller sits beside two capacitor shelves. Each shelf has switching devices above the cans.",
+    "تجاور وحدة التحكم رفّين من المكثفات، وتعلو المكثفات في كل رف أجهزة الفصل والتوصيل.",
   ],
   [
-    "Smart meter installation and configuration.",
-    "تركيب العدادات الذكية وتهيئتها.",
+    "Each meter has a digital register and a current transformer around its insulated supply conductor.",
+    "لكل عداد شاشة رقمية ومحول تيار يحيط بموصل التغذية المعزول.",
   ],
   [
-    "Test instruments and commissioning checks.",
-    "أجهزة الفحص والتحقق أثناء الاختبار والتشغيل.",
+    "The loop calibrator and engineering laptop accompany the PLC, I/O modules and field terminals.",
+    "ترافق أداة معايرة الحلقات والحاسوب الهندسي المتحكم المبرمج ووحدات الإدخال والإخراج وأطراف التوصيل.",
   ],
   [
-    "Industrial high-bay fixtures and their installation.",
-    "تركيب وحدات الإنارة الصناعية للمساحات المرتفعة.",
+    "Suspended high-bays show their heat sinks. The forward-facing sample exposes the LED optics.",
+    "تظهر مشتتات الحرارة في الوحدات المعلّقة، وتعرض العينة الأمامية عدسات الإنارة.",
   ],
   [
-    "Indoor linear fittings and outdoor lighting assemblies.",
-    "وحدات الإنارة الداخلية وتجهيزات الإنارة الخارجية.",
+    "Compare the linear indoor fitting with the cantilevered street luminaire and its pole base.",
+    "قارن وحدة الإنارة الخطية الداخلية بمصباح الشارع وذراعه وقاعدة عموده.",
   ],
   [
-    "A guarded industrial fan installation display.",
-    "نموذج لتركيب مروحة صناعية مزودة بحماية.",
+    "Swept blades rotate inside the flanged casing, behind a fixed guard on a welded mounting frame.",
+    "تدور الريش المنحنية داخل الغلاف المزود بشفّات، خلف شبكة حماية ثابتة على إطار ملحوم.",
   ],
 ];
 export function ElectricalTour({
@@ -91,6 +91,9 @@ export function ElectricalTour({
         <span>{String(station.number).padStart(2, "0")} / 16</span>
       </p>
       <h2>{rtl ? station.ar : station.title}</h2>
+      <p className="equipment-caption">
+        {rtl ? station.componentAr : station.component}
+      </p>
       <p>{notes[i][rtl ? 1 : 0]}</p>
       <div className="electrical-tour-actions">
         <button

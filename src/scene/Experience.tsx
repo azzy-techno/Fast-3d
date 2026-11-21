@@ -230,8 +230,14 @@ const World = memo(function World({
             Math.max(0, Math.min(1, (p - 11.665) / 0.015)) *
             (1 - Math.min(1, Math.max(0, (p - 11.69) / 0.045))));
     const skyline = Math.min(1, Math.max(0, (p - 11.94) / 0.06));
+    // Keep the suspended exhibit names below the toolbar on portrait screens.
+    const electricalBays = Math.max(
+      0,
+      Math.min(1, (p - 2.025) / 0.02, (2.76 - p) / 0.02),
+    );
     const offsetY = mobile
-      ? (0.19 - 0.18 * skyline) * outside + 0.1 * inside
+      ? (0.19 - 0.18 * skyline) * outside +
+        (0.1 - 0.04 * electricalBays) * inside
       : 0;
     // Leave room above the closing card for both the roof and the street on phones.
     const pullback = Math.min(1, Math.max(0, (0.55 - p) / 0.55));

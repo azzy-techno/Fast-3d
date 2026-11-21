@@ -5,7 +5,11 @@ import { Group } from "three";
 import { Box } from "./Primitives";
 import { StaticInstances } from "./StaticInstances";
 import { Wayfinding, Planter } from "./Architecture";
-import { electricalStations, ELECTRICAL_Y } from "./electricalTour";
+import {
+  electricalSign,
+  electricalStations,
+  ELECTRICAL_Y,
+} from "./electricalTour";
 import { ElectricalStationModel } from "./ElectricalExhibits";
 import { journeyState } from "./journey";
 import { ElectricalIntro } from "./ElectricalIntro";
@@ -92,7 +96,7 @@ export function ElectricalFloor() {
         {[-27.8, 0, 27.8].map((x) => (
           <Box key={x} p={[x, 0.02, 24]} s={[0.05, 0.015, 58]} c="#b79f65" />
         ))}
-        {electricalStations.map((s, i) => (
+        {electricalStations.map((s) => (
           <group
             key={s.number}
             position={[s.x, 0, s.z]}
@@ -138,15 +142,38 @@ export function ElectricalFloor() {
               />
             ))}
             <group position={[0, 0.16, 0]}>
-              <ElectricalStationModel index={i} />
+              <ElectricalStationModel number={s.number} />
             </group>
-            <Wayfinding
-              text={`${String(s.number).padStart(2, "0")} / ${s.title.toUpperCase()}`}
-              sub={s.category.toUpperCase()}
-              p={[0, 4.15, -2.25]}
-              width={8.5}
-              height={1}
-            />
+            <group
+              position={[electricalSign.x, electricalSign.y, electricalSign.z]}
+              rotation={[0, electricalSign.yaw, 0]}
+            >
+              {[-1.55, 1.55].map((x) => (
+                <Box
+                  key={x}
+                  p={[x, 0.85, 0]}
+                  s={[0.033, 0.95, 0.033]}
+                  c="#75807c"
+                  metal={0.65}
+                />
+              ))}
+              <Box
+                s={[
+                  electricalSign.width + 0.06,
+                  electricalSign.height + 0.06,
+                  0.09,
+                ]}
+                c="#9b8766"
+                metal={0.55}
+              />
+              <Wayfinding
+                text={s.component}
+                sub={`${String(s.number).padStart(2, "0")}  /  ${s.category.toUpperCase()}`}
+                p={[0, 0, 0.05]}
+                width={electricalSign.width}
+                height={electricalSign.height}
+              />
+            </group>
           </group>
         ))}
         <Wayfinding

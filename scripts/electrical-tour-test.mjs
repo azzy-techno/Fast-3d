@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { getBounds, NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { MeshoptDecoder } from "meshoptimizer";
 import { build } from "esbuild";
 import { pathToFileURL } from "node:url";
 const out = "/tmp/fast-electrical-tour-check.mjs";
@@ -15,6 +18,8 @@ await build({
 });
 const {
   electricalStations,
+  electricalSign,
+  ELECTRICAL_Y,
   electricalDepartureAt,
   sampleJourney,
   sampleGuide,
@@ -118,6 +123,19 @@ for (let n = 2718; n <= 2840; n++) {
   );
   lastExitZ = guide.z;
 }
+// Test the shipped meshes against the sign plane, including its angled end.
+await MeshoptDecoder.ready;
+const modelFile = await new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ "meshopt.decoder": MeshoptDecoder })
+  .read("public/assets/electrical/exhibits.glb");
+const exhibitNodes = new Map(
+  modelFile
+    .getRoot()
+    .listNodes()
+    .map((node) => [node.getName(), node]),
+);
+assert(exhibitNodes.has("Impeller"));
 for (const s of electricalStations) {
   sampleGuide(s.at + 0.001, guide, face);
   const initial = guide.clone();
@@ -127,6 +145,51 @@ for (const s of electricalStations) {
   assert.equal(face.x, s.x + s.focus[0]);
   assert.equal(face.z, s.z + s.focus[2]);
   sampleJourney(s.at + 0.005, camera, target);
+  const node = exhibitNodes.get("Exhibit" + String(s.number).padStart(2, "0"));
+  assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
+  const bounds = getBounds(node);
+  assert(
+    bounds.max[2] <
+      electricalSign.z -
+        (Math.sin(electricalSign.yaw) * electricalSign.width) / 2,
+    `Equipment overlaps station ${s.number}'s sign`,
+  );
+  for (const [w, h, fov] of [
+    [320, 740, 90],
+    [390, 844, 90],
+    [1440, 1000, 70],
+  ]) {
+    const portrait = w < 900;
+    const view = new PerspectiveCamera(fov, w / h, 0.08, 1000);
+    view.position.copy(camera);
+    view.lookAt(target);
+    view.setViewOffset(
+      w,
+      h,
+      portrait ? 0 : -0.03 * w,
+      portrait ? 0.06 * h : 0,
+      w,
+      h,
+    );
+    view.updateMatrixWorld();
+    for (const dx of [-1, 1])
+      for (const dy of [-1, 1]) {
+        const corner = new Vector3(
+          s.x +
+            electricalSign.x +
+            ((dx * electricalSign.width) / 2) * Math.cos(electricalSign.yaw),
+          ELECTRICAL_Y + electricalSign.y + (dy * electricalSign.height) / 2,
+          s.z +
+            electricalSign.z +
+            0.05 -
+            ((dx * electricalSign.width) / 2) * Math.sin(electricalSign.yaw),
+        ).project(view);
+        assert(
+          Math.abs(corner.x) < 1 && ((1 - corner.y) * h) / 2 > 125,
+          `Sign clipped by viewport or toolbar at station ${s.number} (${w} px)`,
+        );
+      }
+  }
   assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
 }
 for (let i = 0; i <= 100; i++) {

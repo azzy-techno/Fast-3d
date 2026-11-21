@@ -2159,10 +2159,20 @@ footer p,
   outline: 2px solid #f3d99f;
   outline-offset: 2px;
 }
+.electrical-tour .equipment-caption {
+  color: #f0d9ab;
+  font-weight: 600;
+}
 .list-view .electrical-tour,
-.cinematic .electrical-tour {
+.cinematic .electrical-tour > :not(.equipment-caption) {
   display: none;
 }
+.cinematic .electrical-tour {
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  pointer-events: none;
+}
+.cinematic .electrical-tour .equipment-caption { margin: 0; }
 @media (max-width: 600px) {
   .electrical-tour {
     bottom: 103px;
