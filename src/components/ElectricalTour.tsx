@@ -1,3 +1,5 @@
+import { mechanicalStations } from "../data/mechanical";
+import { mechanicalRoute } from "../scene/mechanicalTour";
 import { useTour } from "../store";
 import {
   electricalStationAt,
@@ -72,43 +74,70 @@ const notes = [
 export function ElectricalTour({
   rtl,
   onSelect,
+  mechanical = false,
 }: {
   rtl: boolean;
+  mechanical?: boolean;
   onSelect: (at: number) => void;
 }) {
-  const station = useTour((s) => electricalStationAt(s.progress));
+  const stations = mechanical ? mechanicalStations : electricalStations;
+  const station = useTour((s) =>
+    mechanical
+      ? mechanicalRoute.stationAt(s.progress)
+      : electricalStationAt(s.progress),
+  );
   if (!station) return null;
   const i = station.number - 1;
   return (
     <aside
       className="electrical-tour"
       aria-label={
-        rtl ? "جولة الأعمال الكهربائية" : "Guided electrical floor tour"
+        mechanical
+          ? rtl
+            ? "جولة الخدمات الميكانيكية"
+            : "Guided mechanical floor tour"
+          : rtl
+            ? "جولة الأعمال الكهربائية"
+            : "Guided electrical floor tour"
       }
     >
       <p className="electrical-tour-kicker">
         {rtl ? station.categoryAr : station.category}
-        <span>{String(station.number).padStart(2, "0")} / 16</span>
+        <span>
+          {String(station.number).padStart(2, "0")} / {stations.length}
+        </span>
       </p>
       <h2>{rtl ? station.ar : station.title}</h2>
       <p className="equipment-caption">
         {rtl ? station.componentAr : station.component}
       </p>
-      <p>{notes[i][rtl ? 1 : 0]}</p>
+      <p>
+        {mechanical
+          ? rtl
+            ? mechanicalStations[i].noteAr
+            : mechanicalStations[i].note
+          : notes[i][rtl ? 1 : 0]}
+      </p>
       <div className="electrical-tour-actions">
         <button
           disabled={i === 0}
-          onClick={() => onSelect(electricalStations[i - 1].at + 0.005)}
+          onClick={() => onSelect(stations[i - 1].at + 0.005)}
         >
           {rtl ? "السابق" : "Previous"}
         </button>
         <span>{rtl ? "اتبع مهندس فاست" : "Follow your FAST engineer"}</span>
         <button
           onClick={() =>
-            onSelect(i === 15 ? 2.8 : electricalStations[i + 1].at + 0.005)
+            onSelect(
+              i === stations.length - 1
+                ? mechanical
+                  ? 3.8
+                  : 2.8
+                : stations[i + 1].at + 0.005,
+            )
           }
         >
-          {i === 15
+          {i === stations.length - 1
             ? rtl
               ? "إلى المصعد"
               : "To the lift"
@@ -118,9 +147,17 @@ export function ElectricalTour({
         </button>
       </div>
       <nav
-        aria-label={rtl ? "محطات الجولة الكهربائية" : "Electrical tour stops"}
+        aria-label={
+          mechanical
+            ? rtl
+              ? "محطات الجولة الميكانيكية"
+              : "Mechanical tour stops"
+            : rtl
+              ? "محطات الجولة الكهربائية"
+              : "Electrical tour stops"
+        }
       >
-        {electricalStations.map((s) => (
+        {stations.map((s) => (
           <button
             key={s.number}
             aria-label={rtl ? s.ar : s.title}

@@ -1,10 +1,19 @@
+import { mechanicalScope } from "../data/mechanical";
 import { useState } from "react";
 import { electricalScope } from "../data/electrical";
 import { assetUrl } from "../lib/assets";
 
-export function ElectricalScope({ rtl }: { rtl: boolean }) {
+export function ElectricalScope({
+  rtl,
+  mechanical = false,
+}: {
+  rtl: boolean;
+  mechanical?: boolean;
+}) {
   const [selected, setSelected] = useState(0);
-  const scope = electricalScope[selected];
+  const groups = mechanical ? mechanicalScope : electricalScope;
+  const scope = groups[selected];
+  const service = mechanical ? "mechanical" : "electrical";
   return (
     <details className="electrical-scope" data-lenis-prevent>
       <summary>
@@ -17,7 +26,8 @@ export function ElectricalScope({ rtl }: { rtl: boolean }) {
           </small>
         </span>
         <span className="scope-count">
-          16 <span aria-hidden="true">＋</span>
+          {groups.reduce((sum, g) => sum + g.items.length, 0)}{" "}
+          <span aria-hidden="true">＋</span>
         </span>
       </summary>
       <div className="electrical-scope-body">
@@ -25,15 +35,21 @@ export function ElectricalScope({ rtl }: { rtl: boolean }) {
           className="scope-categories"
           role="group"
           aria-label={
-            rtl ? "مجالات الأعمال الكهربائية" : "Electrical scope categories"
+            mechanical
+              ? rtl
+                ? "مجالات الأعمال الميكانيكية"
+                : "Mechanical scope categories"
+              : rtl
+                ? "مجالات الأعمال الكهربائية"
+                : "Electrical scope categories"
           }
         >
-          {electricalScope.map((category, i) => (
+          {groups.map((category, i) => (
             <button
               key={category.id}
               type="button"
               aria-pressed={selected === i}
-              aria-controls="electrical-scope-content"
+              aria-controls={`${service}-scope-content`}
               onClick={() => setSelected(i)}
             >
               <span>{String(i + 1).padStart(2, "0")}</span>
@@ -42,11 +58,13 @@ export function ElectricalScope({ rtl }: { rtl: boolean }) {
           ))}
         </div>
         <section
-          id="electrical-scope-content"
-          aria-labelledby="electrical-scope-heading"
+          id={`${service}-scope-content`}
+          aria-labelledby={`${service}-scope-heading`}
           key={scope.id}
         >
-          <h3 id="electrical-scope-heading">{rtl ? scope.ar : scope.title}</h3>
+          <h3 id={`${service}-scope-heading`}>
+            {rtl ? scope.ar : scope.title}
+          </h3>
           <ol start={scope.start}>
             {scope.items.map(([en, ar], i) => (
               <li key={en}>
@@ -66,11 +84,15 @@ export function ElectricalScope({ rtl }: { rtl: boolean }) {
           )}
           <figure>
             <img
-              src={assetUrl(`electrical/${scope.image}`)}
+              src={assetUrl(`${service}/${scope.image}`)}
               alt={
-                rtl
-                  ? "أعمال كهربائية من محفظة مشاريع فاست"
-                  : "Electrical work from the FAST project portfolio"
+                mechanical
+                  ? rtl
+                    ? "أعمال ميكانيكية من محفظة مشاريع فاست"
+                    : "Mechanical work from the FAST project portfolio"
+                  : rtl
+                    ? "أعمال كهربائية من محفظة مشاريع فاست"
+                    : "Electrical work from the FAST project portfolio"
               }
               loading="lazy"
               width="640"
@@ -88,10 +110,10 @@ export function ElectricalScope({ rtl }: { rtl: boolean }) {
             ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
             : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
         </p>
-        <a href="https://fast-arabia.com/services/electrical">
+        <a href={`https://fast-arabia.com/services/${service}`}>
           {rtl
             ? "عرض الخدمة الكاملة ↗"
-            : "Explore the full electrical service ↗"}
+            : `Explore the full ${service} service ↗`}
         </a>
       </div>
     </details>

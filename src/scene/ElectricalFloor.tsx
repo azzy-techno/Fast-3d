@@ -1,3 +1,5 @@
+import { mechanicalStations } from "../data/mechanical";
+import { MECHANICAL_Y, isMechanicalVisit } from "./mechanicalTour";
 import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -17,23 +19,31 @@ import { ElectricalInterior } from "./ElectricalInterior";
 import { useVisibilityUpdates } from "./useVisibilityUpdates";
 
 /** Dedicated 62 × 64 m exhibition floor. The lift core retains its real slab opening. */
-export function ElectricalFloor() {
+export function ExhibitionFloor({
+  mechanical = false,
+}: {
+  mechanical?: boolean;
+}) {
+  const level = mechanical ? MECHANICAL_Y : ELECTRICAL_Y;
+  const stations = mechanical ? mechanicalStations : electricalStations;
+  const service = mechanical ? "mechanical" : "electrical";
   const root = useRef<Group>(null);
   useVisibilityUpdates(root);
   useFrame(({ camera }) => {
     if (root.current)
       root.current.visible =
-        journeyState.progress > 1.73 &&
-        journeyState.progress < 3 &&
-        camera.position.y > ELECTRICAL_Y - 1 &&
-        camera.position.y < ELECTRICAL_Y + 6.2;
+        (mechanical
+          ? isMechanicalVisit(journeyState.progress)
+          : journeyState.progress > 1.73 && journeyState.progress < 3) &&
+        camera.position.y > level - 1 &&
+        camera.position.y < level + 6.2;
   });
   return (
     <group
       ref={root}
       visible={false}
-      position={[0, ELECTRICAL_Y, 0]}
-      name="electrical-exhibition-floor"
+      position={[0, level, 0]}
+      name={`${service}-exhibition-floor`}
     >
       <StaticInstances>
         {[0, 5.6].map((y) => (
@@ -96,11 +106,11 @@ export function ElectricalFloor() {
         {[-27.8, 0, 27.8].map((x) => (
           <Box key={x} p={[x, 0.02, 24]} s={[0.05, 0.015, 58]} c="#b79f65" />
         ))}
-        {electricalStations.map((s) => (
+        {stations.map((s) => (
           <group
             key={s.number}
             position={[s.x, 0, s.z]}
-            name={`electrical-station-${s.number}`}
+            name={`${service}-station-${s.number}`}
           >
             {/* Open gallery portals keep the equipment in silhouette and let
                 visitors see through the hall, instead of sixteen solid walls. */}
@@ -142,7 +152,10 @@ export function ElectricalFloor() {
               />
             ))}
             <group position={[0, 0.16, 0]}>
-              <ElectricalStationModel number={s.number} />
+              <ElectricalStationModel
+                mechanical={mechanical}
+                number={s.number}
+              />
             </group>
             <group
               position={[electricalSign.x, electricalSign.y, electricalSign.z]}
@@ -177,7 +190,11 @@ export function ElectricalFloor() {
           </group>
         ))}
         <Wayfinding
-          text="CONTRACTING / AUTOMATION / LV + ELV"
+          text={
+            mechanical
+              ? "THERMAL SYSTEMS / MACHINERY / PIPEWORK"
+              : "CONTRACTING / AUTOMATION / LV + ELV"
+          }
           sub="FAST O&M / ENGINEERING FLOORS"
           p={[0, 3, 53.7]}
           rotation={[0, Math.PI, 0]}
@@ -190,8 +207,8 @@ export function ElectricalFloor() {
           <ArchitecturalAsset name="gallery-alcove" />
         </group>
       ))}
-      <ElectricalInterior />
-      <ElectricalIntro />
+      <ElectricalInterior mechanical={mechanical} />
+      <ElectricalIntro mechanical={mechanical} />
       {[-29, 29].flatMap((x) =>
         [1, 25, 51].map((z) => (
           <Planter key={`${x}-${z}`} p={[x, 0, z]} scale={0.7} />

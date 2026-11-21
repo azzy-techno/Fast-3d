@@ -5,8 +5,18 @@ import { Group, Mesh } from "three";
 import { assetUrl } from "../lib/assets";
 import { journeyState } from "./journey";
 
-function ExhibitMesh({ name }: { name: string }) {
-  const { nodes } = useGLTF(assetUrl("electrical/exhibits.glb"));
+function ExhibitMesh({
+  name,
+  mechanical = false,
+}: {
+  name: string;
+  mechanical?: boolean;
+}) {
+  const { nodes } = useGLTF(
+    assetUrl(
+      mechanical ? "mechanical/exhibits.glb" : "electrical/exhibits.glb",
+    ),
+  );
   const model = useMemo(() => {
     const instance = nodes[name].clone();
     instance.traverse((part) => {
@@ -17,7 +27,7 @@ function ExhibitMesh({ name }: { name: string }) {
   return <primitive object={model} />;
 }
 
-function Impeller() {
+function Impeller({ mechanical }: { mechanical: boolean }) {
   const shaft = useRef<Group>(null);
   const reduced = useMemo(
     () => matchMedia("(prefers-reduced-motion: reduce)"),
@@ -27,23 +37,37 @@ function Impeller() {
     if (
       shaft.current &&
       !reduced.matches &&
-      journeyState.progress >= 1.94 &&
-      journeyState.progress < 2.84
+      (mechanical
+        ? journeyState.progress >= 3.18 && journeyState.progress < 3.24
+        : journeyState.progress >= 1.94 && journeyState.progress < 2.84)
     )
       shaft.current.rotation.z += Math.min(dt, 0.1) * 1.8;
   });
   return (
-    <group position={[0, 1.65, 0]} ref={shaft} userData={{ dynamic: true }}>
-      <ExhibitMesh name="Impeller" />
+    <group
+      position={mechanical ? [1.49, 1.51, 0.37] : [0, 1.65, 0]}
+      ref={shaft}
+      userData={{ dynamic: true }}
+    >
+      <ExhibitMesh mechanical={mechanical} name="Impeller" />
     </group>
   );
 }
 
-export function ElectricalStationModel({ number }: { number: number }) {
+export function ElectricalStationModel({
+  number,
+  mechanical = false,
+}: {
+  number: number;
+  mechanical?: boolean;
+}) {
   return (
     <>
-      <ExhibitMesh name={`Exhibit${String(number).padStart(2, "0")}`} />
-      {number === 16 && <Impeller />}
+      <ExhibitMesh
+        mechanical={mechanical}
+        name={`Exhibit${String(number).padStart(2, "0")}`}
+      />
+      {number === (mechanical ? 3 : 16) && <Impeller mechanical={mechanical} />}
     </>
   );
 }

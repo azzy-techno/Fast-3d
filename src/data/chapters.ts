@@ -58,12 +58,12 @@ export const chapters: Chapter[] = [
     id: "mechanical",
     title: "Mechanical",
     ar: "المقاولات الميكانيكية",
-    place: "Inside the plant room",
-    placeAr: "داخل غرفة المعدات",
+    place: "Level 02 / 10 guided stations",
+    placeAr: "الطابق 02 / 10 محطات إرشادية",
     description:
-      "Every pipe, pump and connection has a purpose. Integrated mechanical equipment, piping and HVAC systems, from installation through long-term maintenance.",
+      "Explore ten mechanical services with a FAST engineer. Look inside a cooling tower, trace a pump alignment and follow the pipework to a water treatment skid.",
     descriptionAr:
-      "توريد وتركيب وصيانة المعدات الميكانيكية وأنظمة الأنابيب والتكييف لدعم تشغيل المنشآت بكفاءة.",
+      "استكشف عشر خدمات ميكانيكية مع مهندس فاست. شاهد مقطع برج التبريد ومحاذاة المضخة، وتتبّع الأنابيب وصولاً إلى وحدة معالجة المياه.",
     capabilities: [
       "Piping & HVAC",
       "Pumps & equipment",

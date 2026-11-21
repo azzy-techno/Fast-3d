@@ -1,9 +1,25 @@
+import { useTexture } from "@react-three/drei";
+import { assetUrl } from "../lib/assets";
 import { useEffect, useMemo } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { Box } from "./Primitives";
 
+function RetrofitPhotograph() {
+  const photo = useTexture(assetUrl("mechanical/retrofit.webp"));
+  return (
+    <mesh position={[0, 0, -0.19]} rotation={[0, Math.PI, 0]}>
+      <planeGeometry args={[9, 4.5]} />
+      <meshBasicMaterial map={photo} toneMapped={false} />
+    </mesh>
+  );
+}
+
 /** An entrance poster, facing visitors as the lift doors open. */
-export function ElectricalIntro() {
+export function ElectricalIntro({
+  mechanical = false,
+}: {
+  mechanical?: boolean;
+}) {
   const map = useMemo(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 1536;
@@ -25,47 +41,71 @@ export function ElectricalIntro() {
     }
     c.fillStyle = "#dfbe7c";
     c.font = "500 26px sans-serif";
-    c.fillText("FAST O&M     /     LEVEL 01", 90, 100);
+    c.fillText(
+      mechanical
+        ? "FAST O&M     /     LEVEL 02"
+        : "FAST O&M     /     LEVEL 01",
+      90,
+      100,
+    );
     c.fillStyle = "#f2f1e8";
     c.font = "600 116px sans-serif";
-    c.fillText("ELECTRICAL", 80, 280);
+    c.fillText(mechanical ? "MECHANICAL" : "ELECTRICAL", 80, 280);
     c.font = "400 76px sans-serif";
     c.fillText("SERVICES", 86, 365);
     c.font = "400 30px sans-serif";
     c.fillStyle = "#c2d8da";
-    c.fillText("Powering the building. Connecting every system.", 90, 440);
+    c.fillText(
+      mechanical
+        ? "A guided walk through industrial plant and pipework."
+        : "Powering the building. Connecting every system.",
+      90,
+      440,
+    );
     c.font = "400 32px Cairo, sans-serif";
-    c.fillText("الخدمات الكهربائية — الطاقة والتحكم والربط", 90, 505);
+    c.fillText(
+      mechanical
+        ? "الخدمات الميكانيكية — المعدات والأنابيب والمعالجة"
+        : "الخدمات الكهربائية — الطاقة والتحكم والربط",
+      90,
+      505,
+    );
     c.strokeStyle = "#a58e60";
     c.beginPath();
     c.moveTo(90, 560);
     c.lineTo(1446, 560);
     c.stroke();
-    ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"].forEach(
-      (label, i) => {
-        c.font = "500 24px sans-serif";
-        c.fillStyle = "#e4ca92";
-        c.fillText(label, 90 + i * 465, 625);
-      },
-    );
+    (mechanical
+      ? ["01  THERMAL SYSTEMS", "02  PLANT & MACHINERY", "03  PIPING & WATER"]
+      : ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"]
+    ).forEach((label, i) => {
+      c.font = "500 24px sans-serif";
+      c.fillStyle = "#e4ca92";
+      c.fillText(label, 90 + i * 465, 625);
+    });
     c.font = "400 23px sans-serif";
     c.fillStyle = "#bdd0d3";
     c.fillText(
-      "16 guided stations   /   Choose your pace   /   Exit lift at the end",
+      `${mechanical ? 10 : 16} guided stations   /   Choose your pace   /   Exit lift at the end`,
       90,
       700,
     );
     const texture = new CanvasTexture(canvas);
     texture.colorSpace = SRGBColorSpace;
     return texture;
-  }, []);
+  }, [mechanical]);
   useEffect(() => () => map.dispose(), [map]);
   return (
     <group
       position={[0, 2.7, 3.8]}
       rotation={[0, Math.PI, 0]}
-      name="electrical-introduction-poster"
+      name={
+        mechanical
+          ? "mechanical-introduction-poster"
+          : "electrical-introduction-poster"
+      }
     >
+      {mechanical && <RetrofitPhotograph />}
       <Box p={[0, 0, -0.1]} s={[9.4, 4.8, 0.16]} c="#30464e" metal={0.6} />
       <mesh position={[0, 0, 0.01]}>
         <planeGeometry args={[9, 4.5]} />

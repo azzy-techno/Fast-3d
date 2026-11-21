@@ -778,26 +778,31 @@ builders = [
     site_lighting,
     fan,
 ]
-for i, build in enumerate(builders, 1):
-    build()
-    export_part(f"Exhibit{i:02}")
-impeller()
-export_part("Impeller")
-with tempfile.TemporaryDirectory() as work:
-    raw = Path(work) / "exhibits.glb"
-    bpy.ops.export_scene.gltf(
-        filepath=str(raw), export_materials="EXPORT", export_yup=True
-    )
-    subprocess.run(
-        [
-            str(root / "node_modules/.bin/gltf-transform"),
-            "meshopt",
-            str(raw),
-            str(output),
-            "--level",
-            "medium",
-            "--quantize-position",
-            "16",
-        ],
-        check=True,
-    )
+def write_glb(output):
+    with tempfile.TemporaryDirectory() as work:
+        raw = Path(work) / "exhibits.glb"
+        bpy.ops.export_scene.gltf(
+            filepath=str(raw), export_materials="EXPORT", export_yup=True
+        )
+        subprocess.run(
+            [
+                str(root / "node_modules/.bin/gltf-transform"),
+                "meshopt",
+                str(raw),
+                str(output),
+                "--level",
+                "medium",
+                "--quantize-position",
+                "16",
+            ],
+            check=True,
+        )
+
+
+if __name__ == "__main__":
+    for i, build in enumerate(builders, 1):
+        build()
+        export_part(f"Exhibit{i:02}")
+    impeller()
+    export_part("Impeller")
+    write_glb(output)

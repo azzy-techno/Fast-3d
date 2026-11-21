@@ -1,6 +1,6 @@
 import { ContactShadow } from "./ContactShadow";
 import { ArchitecturalAsset } from "./ArchitecturalAsset";
-import { ElectricalFloor } from "./ElectricalFloor";
+import { ExhibitionFloor } from "./ElectricalFloor";
 import { InteriorFloor } from "./InteriorFloor";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -276,8 +276,8 @@ export function ServiceFloors() {
   return (
     <group name="stacked-service-floors">
       {serviceRooms.map((_, i) =>
-        i === 0 ? (
-          <ElectricalFloor key={i} />
+        i < 2 ? (
+          <ExhibitionFloor key={i} mechanical={i === 1} />
         ) : (
           <ServiceFloor key={i} index={i} />
         ),

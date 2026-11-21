@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
+const mechanical = process.argv.includes("--mechanical");
+const gallery = mechanical ? "mechanical" : "electrical";
+const last = mechanical ? 10 : 16;
 const server = spawn(
   process.execPath,
   [
@@ -63,51 +66,64 @@ try {
   );
   await page.evaluate(() => document.querySelector(".lift-toggle").click());
   await wait(() => document.querySelector(".lift-dialog").open, "floor picker");
-  await page.evaluate(() =>
-    document.querySelector('[data-destination="electrical"]').click(),
+  await page.evaluate(
+    ({ gallery, last }) => {
+      window.__gallery = gallery;
+      window.__last = last;
+      document.querySelector(`[data-destination="${gallery}"]`).click();
+    },
+    { gallery, last },
   );
   await wait(
     () =>
-      document.querySelector("main").dataset.floor === "electrical" &&
-      !document.querySelector(".lift-dialog").open,
-    "electrical arrival",
+      document.querySelector("main").dataset.floor === window.__gallery &&
+      !document.querySelector(".lift-dialog").open &&
+      !!document.querySelector(".electrical-welcome"),
+    "gallery arrival",
   );
   assert(
     await page.evaluate(
-      () => document.getElementById("electrical").offsetHeight >= 18000,
+      () =>
+        document.getElementById(window.__gallery).offsetHeight >=
+        (window.__gallery === "mechanical" ? 14000 : 18000),
     ),
-    "Electrical has enough scroll length for 16 guided stops",
+    "Gallery provides a paced scroll",
   );
-  const initialStop = process.env.ELECTRICAL_MOBILE_ONLY ? 16 : 1;
-  await page.evaluate((initialStop) => {
-    scrollTo(
-      0,
-      ((document.documentElement.scrollHeight - innerHeight) *
-        (0.051 + (initialStop - 1) * 0.044)) /
-        0.8,
+  const initialStop = process.env.ELECTRICAL_MOBILE_ONLY ? last : 1;
+  if (initialStop === 1) {
+    await page.evaluate(() =>
+      document.querySelector(".electrical-welcome button").click(),
     );
-  }, initialStop);
+  } else {
+    await page.evaluate(() => {
+      const finalHold = window.__gallery === "mechanical" ? 0.703 : 0.711;
+      scrollTo(
+        0,
+        (document.getElementById("together").offsetTop * finalHold) / 0.8,
+      );
+    });
+  }
   const axeSource = await fs.readFile(
     "node_modules/axe-core/axe.min.js",
     "utf8",
   );
   await page.evaluate((s) => (0, eval)(s), axeSource);
-  await fs.mkdir("artifacts/electrical-tour", { recursive: true });
+  await fs.mkdir(`artifacts/${gallery}-tour`, { recursive: true });
   async function screenshot(name) {
     const r = await page
       ._client()
       .send("Page.captureScreenshot", { format: "png" });
     await fs.writeFile(
-      `artifacts/electrical-tour/${name}.png`,
+      `artifacts/${gallery}-tour/${name}.png`,
       Buffer.from(r.value.data, "base64"),
     );
   }
-  for (let stop = initialStop; stop <= 16; stop++) {
+  for (let stop = initialStop; stop <= last; stop++) {
     await page.evaluate((n) => (window.__expectedStop = n), stop);
     await wait(() => {
       const d = document.querySelector("canvas").dataset;
       return (
-        Number(d.electricalStation) === window.__expectedStop &&
+        Number(d[window.__gallery + "Station"]) === window.__expectedStop &&
         d.guide === "presenting" &&
         Number(d.guideAim) > 0.98
       );
@@ -164,7 +180,7 @@ try {
         `PASS live presentation gesture: ${excursion.toFixed(3)} m movement`,
       );
     }
-    if (stop < 16)
+    if (stop < last)
       await page.evaluate(() =>
         document
           .querySelector(".electrical-tour-actions button:last-child")
@@ -176,8 +192,11 @@ try {
   await delay(1800);
   await wait(() => {
     const d = document.querySelector("canvas").dataset;
-    return +d.electricalStation === 16 && d.guide === "presenting";
-  }, "phone station 16");
+    return (
+      +d[window.__gallery + "Station"] === window.__last &&
+      d.guide === "presenting"
+    );
+  }, "phone final station");
   assert(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -191,14 +210,16 @@ try {
     return { top: a.top, bottom: a.bottom, footer: b.top };
   });
   assert(bounds.top > 135 && bounds.bottom <= bounds.footer);
-  await screenshot("phone-stop-16");
+  await screenshot(`phone-stop-${last}`);
   await page.evaluate(() => document.querySelector(".cinema-toggle").click());
   assert(
     await page.evaluate(() => {
       const label = document.querySelector(".equipment-caption");
       return (
-        label.textContent === "Ducted axial fan" &&
-        label.getBoundingClientRect().height > 0
+        label.textContent ===
+          (window.__gallery === "mechanical"
+            ? "Reverse osmosis skid"
+            : "Ducted axial fan") && label.getBoundingClientRect().height > 0
       );
     }),
     "Cinema view retains the component name",
@@ -230,18 +251,24 @@ try {
       .querySelector(".electrical-tour-actions button:first-child")
       .click(),
   );
-  await page.evaluate(() => (window.__expectedStop = 15));
+  await page.evaluate(() => (window.__expectedStop = window.__last - 1));
   await wait(() => {
     const d = document.querySelector("canvas").dataset;
-    return +d.electricalStation === 15 && d.guide === "presenting";
-  }, "reverse to station 15");
+    return (
+      +d[window.__gallery + "Station"] === window.__last - 1 &&
+      d.guide === "presenting"
+    );
+  }, "reverse one station");
   await page.evaluate(() =>
     document.querySelector(".electrical-tour nav button:last-child").click(),
   );
   await wait(() => {
     const d = document.querySelector("canvas").dataset;
-    return +d.electricalStation === 16 && d.guide === "presenting";
-  }, "return to station16");
+    return (
+      +d[window.__gallery + "Station"] === window.__last &&
+      d.guide === "presenting"
+    );
+  }, "return to final station");
   await page.evaluate(() =>
     document
       .querySelector(".electrical-tour-actions button:last-child")
@@ -250,12 +277,15 @@ try {
   await wait(
     () =>
       document.querySelector(".lift-dialog").open &&
-      Math.abs(+document.querySelector("canvas").dataset.journey - 2.8) < 0.001,
+      Math.abs(
+        +document.querySelector("canvas").dataset.journey -
+          (window.__gallery === "mechanical" ? 3.8 : 2.8),
+      ) < 0.001,
     "leave gallery",
   );
   assert.deepEqual(await page.evaluate(() => window.__errors), []);
   console.log(
-    `PASS: presentations ${initialStop}–16, Next/Previous/direct selection, long chapter, phone layout, WCAG A/AA and return to lift.`,
+    `PASS: presentations ${initialStop}–${last}, Next/Previous/direct selection, long chapter, phone layout, WCAG A/AA and return to lift.`,
   );
 } finally {
   if (browser) await browser.close({ silent: true });

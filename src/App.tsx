@@ -1,3 +1,4 @@
+import { mechanicalStations } from "./data/mechanical";
 import { Fragment } from "react";
 import { flushSync } from "react-dom";
 import {
@@ -247,7 +248,7 @@ export default function App() {
           const progress = floorProgress(floor, fraction);
           useTour.getState().setProgress(progress);
           const opacity =
-            floor.id === "electrical"
+            (floor.id === "electrical" || floor.id === "mechanical")
               ? 0
               : Math.min(
                   1,
@@ -441,12 +442,19 @@ export default function App() {
           />
 
           <ElectricalWelcome
+            mechanical={floor.id === "mechanical"}
             rtl={rtl}
-            onEnter={() => scrollToProgress(2.05)}
+            onEnter={() => scrollToProgress(
+              floor.id === "mechanical" ? mechanicalStations[0].at + 0.005 : 2.05,
+            )}
             onLift={openLift}
           />
 
-          <ElectricalTour rtl={rtl} onSelect={scrollToProgress} />
+          <ElectricalTour
+            mechanical={floor.id === "mechanical"}
+            rtl={rtl}
+            onSelect={scrollToProgress}
+          />
           <JourneyGuide
             key={floor.id}
             floor={floor}
@@ -658,8 +666,8 @@ export default function App() {
                       </a>
                     </details>
                   )}
-                  {chapter.id === "electrical" && list && (
-                    <ElectricalScope rtl={rtl} />
+                  {(chapter.id === "electrical" || chapter.id === "mechanical") && list && (
+                    <ElectricalScope mechanical={chapter.id === "mechanical"} rtl={rtl} />
                   )}
                   <a className="service-link" href={chapter.href}>
                     {t("Explore this service", "استكشف هذه الخدمة")}

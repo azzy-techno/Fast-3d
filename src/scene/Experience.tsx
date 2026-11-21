@@ -1,3 +1,4 @@
+import { isMechanicalVisit, mechanicalRoute } from "./mechanicalTour";
 import { floors } from "../lib/journeyScroll";
 import { electricalStationAt } from "./electricalTour";
 import { Suspense, memo, useEffect, useMemo, useRef, useState } from "react";
@@ -185,9 +186,16 @@ const World = memo(function World({
     }
     journeyState.progress = p;
     gl.domElement.dataset.jumpVersion = String(jumpVersion.current);
+    const mechanical = isMechanicalVisit(p);
+    const galleryPose = mechanical ? p - 1 : p;
+    let shotFov: number;
+    if (mechanical) {
+      mechanicalRoute.camera(p, vectors.p, vectors.target);
+      shotFov = 70;
+    } else shotFov = sampleJourney(p, vectors.p, vectors.target);
     const fov =
-      sampleJourney(p, vectors.p, vectors.target) +
-      (mobile && p >= 2 && p < 2.84 ? 12 : 0) +
+      shotFov +
+      (mobile && galleryPose >= 2 && galleryPose < 2.84 ? 12 : 0) +
       (mobile
         ? 18 *
           Math.min(1, Math.max(0, (p - 1.49) / 0.07)) *
@@ -198,10 +206,11 @@ const World = memo(function World({
       (1 - Math.min(1, Math.max(0, (p - 11.77) / 0.08)));
     const outside = 1 - inside;
     const cam = camera as PerspectiveCamera;
-    if (mobile && p >= 1.94 && p < 2.014) {
+    if (mobile && galleryPose >= 1.94 && galleryPose < 2.014) {
       // Read the whole entrance poster through the open lift doorway on phones.
       const intro =
-        Math.min(1, (p - 1.94) / 0.06) * Math.min(1, (2.014 - p) / 0.014);
+        Math.min(1, (galleryPose - 1.94) / 0.06) *
+        Math.min(1, (2.014 - galleryPose) / 0.014);
       vectors.p.z -= 3.8 * Math.max(0, intro);
     }
     if (mobile && outside > 0) {
@@ -233,7 +242,7 @@ const World = memo(function World({
     // Keep the suspended exhibit names below the toolbar on portrait screens.
     const electricalBays = Math.max(
       0,
-      Math.min(1, (p - 2.025) / 0.02, (2.76 - p) / 0.02),
+      Math.min(1, (galleryPose - 2.025) / 0.02, (2.76 - galleryPose) / 0.02),
     );
     const offsetY = mobile
       ? (0.19 - 0.18 * skyline) * outside +
@@ -262,8 +271,8 @@ const World = memo(function World({
       cam.updateProjectionMatrix();
     }
     const electricalLight =
-      Math.min(1, Math.max(0, (p - 1.96) / 0.04)) *
-      (1 - Math.min(1, Math.max(0, (p - 2.8) / 0.06)));
+      Math.min(1, Math.max(0, (galleryPose - 1.96) / 0.04)) *
+      (1 - Math.min(1, Math.max(0, (galleryPose - 2.8) / 0.06)));
     if (sun.current) {
       sun.current.castShadow = outside > 0.02;
       sun.current.intensity =
@@ -307,6 +316,9 @@ const World = memo(function World({
       gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
       gl.domElement.dataset.towerHeight = "83";
       gl.domElement.dataset.aboutStation = "0";
+      gl.domElement.dataset.mechanicalStation = String(
+        mechanicalRoute.stationAt(p)?.number ?? 0,
+      );
       gl.domElement.dataset.electricalStation = String(
         electricalStationAt(p)?.number ?? 0,
       );

@@ -2193,6 +2193,7 @@ footer p,
 }
 
 /* Electrical entrance and destination-controlled lift travel. */
+.tour-view #mechanical .chapter-copy,
 .tour-view #electrical .chapter-copy {
   visibility: hidden !important;
   pointer-events: none;
@@ -2603,7 +2604,8 @@ footer p,
 /* Each visit has its own scroll distance. Native touch and keyboard scrolling
    cover the same camera path as the eased wheel input. */
 .tour-view .reception-approach {height: 900svh; min-height: 5400px;}
-.tour-view .chapter:not(#electrical):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter:not(#electrical):not(#mechanical):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter#mechanical {height: 1900svh; min-height: 14000px;}
 .tour-view .chapter#electrical {height: 3000svh; min-height: 22000px;}
 .lift-dialog[data-phase="travelling"] .lift-journey {background: #152a36;}
 

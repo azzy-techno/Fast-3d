@@ -1,3 +1,5 @@
+import { isMechanicalVisit, mechanicalRoute } from "./mechanicalTour";
+import { mechanicalStations } from "../data/mechanical";
 import { useEffect, useMemo, useRef } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
@@ -96,10 +98,18 @@ function useFinishes() {
 }
 
 /** Detailed finishes and MEP fit-out; every solid stays above the route or on its perimeter. */
-export function ElectricalInterior() {
+export function ElectricalInterior({
+  mechanical = false,
+}: {
+  mechanical?: boolean;
+}) {
   const finish = useFinishes();
   return (
-    <group name="electrical-interior-fitout">
+    <group
+      name={
+        mechanical ? "mechanical-interior-fitout" : "electrical-interior-fitout"
+      }
+    >
       {/* Horizontal planes give the floor maps consistent, unstretched world scale. */}
       {floorPieces.map(({ p, size }, i) => (
         <mesh
@@ -114,7 +124,7 @@ export function ElectricalInterior() {
       ))}
       <StaticInstances>
         {/* Individually framed acoustic ceiling clouds, with recessed warm coves. */}
-        {electricalStations.map((s) => (
+        {(mechanical ? mechanicalStations : electricalStations).map((s) => (
           <group key={s.number} position={[s.x, 0, s.z]}>
             <mesh
               geometry={unitBox}
@@ -488,33 +498,50 @@ export function ElectricalInterior() {
       </StaticInstances>
       {/* Sparse room labels avoid repeating a wall behind every installation. */}
       <Wayfinding
-        text="POWER / CONTROL / CONNECTION"
-        sub="FAST ELECTRICAL / ENGINEERING GALLERY"
+        text={
+          mechanical
+            ? "HEAT TRANSFER / FLOW / MOTION"
+            : "POWER / CONTROL / CONNECTION"
+        }
+        sub={
+          mechanical
+            ? "FAST MECHANICAL / ENGINEERING GALLERY"
+            : "FAST ELECTRICAL / ENGINEERING GALLERY"
+        }
         p={[-17, 3.1, -10.02]}
         width={15}
         height={1.6}
       />
       <Wayfinding
         text="FROM INSTALLATION TO OPERATION"
-        sub="16 CAPABILITIES / ONE CONNECTED FLOOR"
+        sub={`${mechanical ? 10 : 16} CAPABILITIES / ONE CONNECTED FLOOR`}
         p={[17, 3.1, -10.02]}
         width={15}
         height={1.6}
       />
-      <ElectricalExhibitLight />
-      <PortfolioFrames />
+      <ElectricalExhibitLight mechanical={mechanical} />
+      <PortfolioFrames mechanical={mechanical} />
     </group>
   );
 }
 
-function PortfolioFrames() {
+function PortfolioFrames({ mechanical = false }: { mechanical?: boolean }) {
   const photos = useTexture(
-    ["contracting.webp", "automation.webp", "installation.webp"].map((name) =>
-      assetUrl(`electrical/${name}`),
+    (mechanical
+      ? ["cooling.webp", "machinery.webp", "pipework.webp"]
+      : ["contracting.webp", "automation.webp", "installation.webp"]
+    ).map((name) =>
+      assetUrl(`${mechanical ? "mechanical" : "electrical"}/${name}`),
     ),
   );
   return (
-    <group name="electrical-portfolio-gallery">
+    <group
+      name={
+        mechanical
+          ? "mechanical-portfolio-gallery"
+          : "electrical-portfolio-gallery"
+      }
+    >
       {[-1, 1].flatMap((side, i) =>
         [18, 42].map((z, j) => (
           <group
@@ -537,7 +564,9 @@ function PortfolioFrames() {
             </mesh>
             <Wayfinding
               text="FAST O&M / PROJECT PORTFOLIO"
-              sub="ELECTRICAL ENGINEERING"
+              sub={
+                mechanical ? "MECHANICAL ENGINEERING" : "ELECTRICAL ENGINEERING"
+              }
               p={[0, -1.14, 0.025]}
               width={3.8}
               height={0.28}
@@ -557,13 +586,20 @@ function PortfolioFrames() {
 }
 
 /** One shadowed key light follows the active bay; avoids sixteen shadow maps. */
-function ElectricalExhibitLight() {
+function ElectricalExhibitLight({
+  mechanical = false,
+}: {
+  mechanical?: boolean;
+}) {
   const key = useRef<SpotLight>(null),
     fill = useRef<SpotLight>(null);
   const target = useMemo(() => new Object3D(), []);
   useFrame((_, dt) => {
-    if (journeyState.progress < 1.73 || journeyState.progress >= 3) return;
-    const station = electricalStationAt(journeyState.progress);
+    const p = journeyState.progress;
+    if (mechanical ? !isMechanicalVisit(p) : p < 1.73 || p >= 3) return;
+    const station = mechanical
+      ? mechanicalRoute.stationAt(p)
+      : electricalStationAt(p);
     if (!key.current || !fill.current) return;
     const x = station?.x ?? 0,
       z = station?.z ?? 3;

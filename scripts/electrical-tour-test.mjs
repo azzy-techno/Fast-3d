@@ -8,7 +8,7 @@ const out = "/tmp/fast-electrical-tour-check.mjs";
 await build({
   stdin: {
     contents:
-      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export {Vector3,PerspectiveCamera} from "three";',
+      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export * from "./src/data/mechanical"; export * from "./src/scene/mechanicalTour"; export {Vector3,PerspectiveCamera} from "three";',
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -17,6 +17,9 @@ await build({
   outfile: out,
 });
 const {
+  mechanicalStations,
+  mechanicalRoute,
+  MECHANICAL_Y,
   electricalStations,
   electricalSign,
   ELECTRICAL_Y,
@@ -125,73 +128,122 @@ for (let n = 2718; n <= 2840; n++) {
 }
 // Test the shipped meshes against the sign plane, including its angled end.
 await MeshoptDecoder.ready;
-const modelFile = await new NodeIO()
-  .registerExtensions(ALL_EXTENSIONS)
-  .registerDependencies({ "meshopt.decoder": MeshoptDecoder })
-  .read("public/assets/electrical/exhibits.glb");
-const exhibitNodes = new Map(
-  modelFile
-    .getRoot()
-    .listNodes()
-    .map((node) => [node.getName(), node]),
-);
-assert(exhibitNodes.has("Impeller"));
-for (const s of electricalStations) {
-  sampleGuide(s.at + 0.001, guide, face);
-  const initial = guide.clone();
-  sampleGuide(s.end - 0.001, guide, face);
-  assert(guide.equals(initial), `Guide does not hold at ${s.number}`);
-  assert(guideIsPresenting(s.at + 0.005));
-  assert.equal(face.x, s.x + s.focus[0]);
-  assert.equal(face.z, s.z + s.focus[2]);
-  sampleJourney(s.at + 0.005, camera, target);
-  const node = exhibitNodes.get("Exhibit" + String(s.number).padStart(2, "0"));
-  assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
-  const bounds = getBounds(node);
-  assert(
-    bounds.max[2] <
-      electricalSign.z -
-        (Math.sin(electricalSign.yaw) * electricalSign.width) / 2,
-    `Equipment overlaps station ${s.number}'s sign`,
+for (const {
+  service,
+  stations,
+  level,
+  sampleCamera,
+  sampleHost,
+  presenting,
+} of [
+  {
+    service: "electrical",
+    stations: electricalStations,
+    level: ELECTRICAL_Y,
+    sampleCamera: sampleJourney,
+    sampleHost: sampleGuide,
+    presenting: guideIsPresenting,
+  },
+  {
+    service: "mechanical",
+    stations: mechanicalStations,
+    level: MECHANICAL_Y,
+    sampleCamera: mechanicalRoute.camera,
+    sampleHost: mechanicalRoute.guide,
+    presenting: mechanicalRoute.presenting,
+  },
+]) {
+  const modelFile = await new NodeIO()
+    .registerExtensions(ALL_EXTENSIONS)
+    .registerDependencies({ "meshopt.decoder": MeshoptDecoder })
+    .read(`public/assets/${service}/exhibits.glb`);
+  const exhibitNodes = new Map(
+    modelFile
+      .getRoot()
+      .listNodes()
+      .map((node) => [node.getName(), node]),
   );
-  for (const [w, h, fov] of [
-    [320, 740, 90],
-    [390, 844, 90],
-    [1440, 1000, 70],
-  ]) {
-    const portrait = w < 900;
-    const view = new PerspectiveCamera(fov, w / h, 0.08, 1000);
-    view.position.copy(camera);
-    view.lookAt(target);
-    view.setViewOffset(
-      w,
-      h,
-      portrait ? 0 : -0.03 * w,
-      portrait ? 0.06 * h : 0,
-      w,
-      h,
+  assert(exhibitNodes.has("Impeller"));
+  for (const s of stations) {
+    sampleHost(s.at + 0.001, guide, face);
+    const initial = guide.clone();
+    sampleHost(s.end - 0.001, guide, face);
+    assert(guide.equals(initial), `Guide does not hold at ${s.number}`);
+    assert(presenting(s.at + 0.005));
+    assert.equal(face.x, s.x + s.focus[0]);
+    assert.equal(face.z, s.z + s.focus[2]);
+    sampleCamera(s.at + 0.005, camera, target);
+    const node = exhibitNodes.get(
+      "Exhibit" + String(s.number).padStart(2, "0"),
     );
-    view.updateMatrixWorld();
-    for (const dx of [-1, 1])
-      for (const dy of [-1, 1]) {
-        const corner = new Vector3(
-          s.x +
-            electricalSign.x +
-            ((dx * electricalSign.width) / 2) * Math.cos(electricalSign.yaw),
-          ELECTRICAL_Y + electricalSign.y + (dy * electricalSign.height) / 2,
-          s.z +
-            electricalSign.z +
-            0.05 -
-            ((dx * electricalSign.width) / 2) * Math.sin(electricalSign.yaw),
-        ).project(view);
-        assert(
-          Math.abs(corner.x) < 1 && ((1 - corner.y) * h) / 2 > 125,
-          `Sign clipped by viewport or toolbar at station ${s.number} (${w} px)`,
-        );
-      }
+    assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
+    const bounds = getBounds(node);
+    assert(
+      bounds.max[2] <
+        electricalSign.z -
+          (Math.sin(electricalSign.yaw) * electricalSign.width) / 2,
+      `Equipment overlaps station ${s.number}'s sign`,
+    );
+    for (const [w, h, fov] of [
+      [320, 740, 90],
+      [390, 844, 90],
+      [1440, 1000, 70],
+    ]) {
+      const portrait = w < 900;
+      const view = new PerspectiveCamera(fov, w / h, 0.08, 1000);
+      view.position.copy(camera);
+      view.lookAt(target);
+      view.setViewOffset(
+        w,
+        h,
+        portrait ? 0 : -0.03 * w,
+        portrait ? 0.06 * h : 0,
+        w,
+        h,
+      );
+      view.updateMatrixWorld();
+      for (const dx of [-1, 1])
+        for (const dy of [-1, 1]) {
+          const corner = new Vector3(
+            s.x +
+              electricalSign.x +
+              ((dx * electricalSign.width) / 2) * Math.cos(electricalSign.yaw),
+            level + electricalSign.y + (dy * electricalSign.height) / 2,
+            s.z +
+              electricalSign.z +
+              0.05 -
+              ((dx * electricalSign.width) / 2) * Math.sin(electricalSign.yaw),
+          ).project(view);
+          assert(
+            Math.abs(corner.x) < 1 && ((1 - corner.y) * h) / 2 > 125,
+            `Sign clipped by viewport or toolbar at station ${s.number} (${w} px)`,
+          );
+        }
+    }
+    assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
   }
-  assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
 }
+assert.equal(mechanicalStations.length, 10);
+for (let i = 0; i <= 4000; i++) {
+  const p = 3 + i / 5000;
+  mechanicalRoute.camera(p, camera, target);
+  mechanicalRoute.guide(p, guide, face);
+  for (const v of [camera, guide]) {
+    assert(
+      Math.abs(v.x) < 31 && v.z < 54.1 && v.z > -10,
+      "Mechanical tour stays in the hall",
+    );
+    for (const station of mechanicalStations) {
+      const dx = Math.max(0, Math.abs(v.x - station.x) - 4.5);
+      const dz = Math.max(0, Math.abs(v.z - station.z) - 2.5);
+      assert(Math.hypot(dx, dz) > 0.35, `Mechanical plinth collision at ${p}`);
+    }
+  }
+}
+assert.equal(target.z, 58, "Mechanical ends facing the rear lift");
+console.log(
+  "PASS 10 mechanical exhibits, complete aisle route and sign clearance at three viewport sizes",
+);
 for (let i = 0; i <= 100; i++) {
   const p = electricalDepartureAt(2.6 + (0.16 * i) / 100);
   sampleJourney(p, camera, target);

@@ -1,3 +1,4 @@
+import { isMechanicalVisit, mechanicalRoute } from "./mechanicalTour";
 import { ContactShadow } from "./ContactShadow";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -53,7 +54,9 @@ export function Host() {
       state.initialized = false;
       return;
     }
-    sampleGuide(p, state.p, state.face);
+    const mechanical = isMechanicalVisit(p);
+    if (mechanical) mechanicalRoute.guide(p, state.p, state.face);
+    else sampleGuide(p, state.p, state.face);
     const cut =
       state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
     const arriving =
@@ -95,7 +98,9 @@ export function Host() {
       8,
       Math.min(dt, 0.1),
     );
-    const presentingHere = guideIsPresenting(p);
+    const presentingHere = mechanical
+      ? mechanicalRoute.presenting(p)
+      : guideIsPresenting(p);
 
     const settled = presentingHere && state.walking < 0.2;
     state.presentation = MathUtils.damp(
@@ -109,7 +114,9 @@ export function Host() {
     // upper body turns, nods and uses an open supporting hand.
     const rhythm =
       state.presentationTime * 1.6 +
-      (electricalStationAt(p)?.number ?? 0) * 0.7;
+      ((mechanical ? mechanicalRoute.stationAt(p) : electricalStationAt(p))
+        ?.number ?? 0) *
+        0.7;
     const emphasis = (Math.sin(rhythm) + 1) / 2;
     const gestureWeight = state.presentation;
     if (gestureWeight > 0.001) {

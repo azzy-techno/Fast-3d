@@ -1,3 +1,4 @@
+import { MECHANICAL_Y, isMechanicalVisit } from "./mechanicalTour";
 import { AboutHall } from "./AboutHall";
 import { ServiceFloors } from "./ServiceFloors";
 import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
@@ -244,13 +245,14 @@ export function Lift({
       cabin.current.visible = progress < 1.36;
     if (rear && cabin.current)
       cabin.current.visible =
-        progress > 1.73 &&
-        progress < ELECTRICAL_END &&
-        Math.abs(camera.position.y - 66) < 9;
+        (p[1] === MECHANICAL_Y
+          ? isMechanicalVisit(progress)
+          : progress > 1.73 && progress < ELECTRICAL_END) &&
+        Math.abs(camera.position.y - p[1]) < 6;
     const open = rear
       ? 1
       : stack
-        ? stackDoorOpen(progress)
+        ? stackDoorOpen(isMechanicalVisit(progress) ? 3 : progress)
         : liftDoorOpen(progress, exit ? "exit" : roof ? "roof" : "service");
     if (cabin.current && exit)
       cabin.current.position.y =
@@ -273,7 +275,9 @@ export function Lift({
       }
     }
     if (stack && cabin.current) {
-      cabin.current.position.y = stackLiftFloor(progress);
+      cabin.current.position.y = stackLiftFloor(
+        isMechanicalVisit(progress) ? 3 : progress,
+      );
       cabin.current.position.x = inElectricalRearLift(progress)
         ? ELECTRICAL_EXIT.x
         : p[0];
@@ -291,7 +295,15 @@ export function Lift({
       ref={cabin}
       position={p}
       rotation={[0, rear ? Math.PI : 0, 0]}
-      name={rear ? "electrical-exit-lift" : roof ? "roof-lift" : "service-lift"}
+      name={
+        rear
+          ? p[1] === MECHANICAL_Y
+            ? "mechanical-exit-lift"
+            : "electrical-exit-lift"
+          : roof
+            ? "roof-lift"
+            : "service-lift"
+      }
     >
       <Box p={[-1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
       <Box p={[1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
@@ -434,6 +446,7 @@ export function Interior() {
       <ServiceFloors />
       <Lift p={[0, 66, -7]} stack />
       <Lift p={[ELECTRICAL_EXIT.x, 66, ELECTRICAL_EXIT.z]} rear />
+      <Lift p={[ELECTRICAL_EXIT.x, MECHANICAL_Y, ELECTRICAL_EXIT.z]} rear />
     </group>
   );
 }

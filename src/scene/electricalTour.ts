@@ -1,4 +1,4 @@
-import type { Point } from "../data/chapters";
+import { createExhibitRoute } from "./exhibitRoute";
 import { electricalScope } from "../data/electrical";
 import { Vector3 } from "three";
 
@@ -98,15 +98,13 @@ export const electricalStations = electricalScope
       focus: equipment[i][2],
     };
   });
-export function electricalStationAt(p: number) {
-  if (p < 2.035 || p > 2.735) return null;
-  for (let i = electricalStations.length - 1; i >= 0; i--)
-    if (p >= electricalStations[i].at - 0.01) return electricalStations[i];
-  return electricalStations[0];
-}
-export function electricalPresenting(p: number) {
-  return electricalStations.some((s) => p >= s.at && p <= s.end);
-}
+export const {
+  keys: electricalCameraKeys,
+  camera: sampleElectricalCamera,
+  guide: sampleElectricalGuide,
+  stationAt: electricalStationAt,
+  presenting: electricalPresenting,
+} = createExhibitRoute(2, ELECTRICAL_Y, electricalStations);
 /** Preserve the existing lift choreography, after the full exhibition tour. */
 export function electricalDepartureAt(p: number) {
   return 2.84 + ((p - 2.46) * 0.16) / 0.54;
@@ -117,86 +115,4 @@ export function electricalLiftProgress(p: number) {
       ? 2
       : 2.46 + ((p - 2.84) * 0.54) / 0.16
     : p;
-}
-type Key = { at: number; camera: Point; guide: Point; target: Point };
-const keys: Key[] = [];
-function key(at: number, camera: Point, guide: Point, target?: Point) {
-  keys.push({
-    at,
-    camera: [camera[0], ELECTRICAL_Y + camera[1], camera[2]],
-    guide: [guide[0], ELECTRICAL_Y, guide[2]],
-    target: target
-      ? [target[0], ELECTRICAL_Y + target[1], target[2]]
-      : [guide[0], ELECTRICAL_Y + 1.4, guide[2]],
-  });
-}
-key(1.94, [0, 1.7, -1], [-2.1, 0, -1.95]);
-key(1.96, [0, 1.7, -1], [-2.8, 0, 1.3]);
-key(1.98, [0, 1.7, -1], [-2.8, 0, 1.3]);
-// Approach 01 along the entrance aisle and its outside edge. The former
-// central-aisle approach passed 02 before doubling back to the first display.
-key(2, [0, 2.05, -3], [-2.8, 0, 1.3], [0, 2.3, 3.8]);
-key(2.014, [-18, 2.2, 1], [-24, 0, 3]);
-key(2.024, [-27, 2.2, 3], [-29, 0, 3]);
-key(2.035, [-27, 2.2, 16], [-29, 0, 11.8]);
-for (const [i, s] of electricalStations.entries()) {
-  const camera: Point = [s.x + 3.8, 2.2, s.z + 8];
-  const guide: Point = [s.x + 3.2, 0, s.z + 3.8];
-  const target: Point = [s.x + 1.2, 1.45, s.z + 0.5];
-  key(s.at, camera, guide, target);
-  key(s.end, camera, guide, target);
-  if (i % 4 === 3 && i < 15) {
-    const side = i === 7 ? -1 : 1;
-    key(s.end + 0.007, [side * 27, 2.2, s.z + 8], [side * 29, 0, s.z + 3.8]);
-    key(s.end + 0.023, [side * 27, 2.2, s.z + 20], [side * 29, 0, s.z + 15.8]);
-  }
-}
-key(2.75, [-17.2, 2.2, 51], [-22.15, 0, 52], [-21, 2.2, 56.2]);
-key(2.8, [-21, 1.7, 51.9], [-22.15, 0, 54], [-21, 1.7, 58]);
-key(ELECTRICAL_END, [-21, 1.7, 51.9], [-22.15, 0, 54], [-21, 1.7, 58]);
-export const electricalCameraKeys = keys.filter((k) => k.at >= 2);
-export function sampleElectricalCamera(
-  p: number,
-  position: Vector3,
-  target: Vector3,
-) {
-  let i = 0;
-  while (i < keys.length - 2 && p > keys[i + 1].at) i++;
-  const a = keys[i],
-    b = keys[i + 1];
-  const t = Math.max(0, Math.min(1, (p - a.at) / (b.at - a.at)));
-  const u = t * t * (3 - 2 * t);
-  for (let axis = 0; axis < 3; axis++) {
-    position.setComponent(
-      axis,
-      a.camera[axis] + (b.camera[axis] - a.camera[axis]) * u,
-    );
-    target.setComponent(
-      axis,
-      a.target[axis] + (b.target[axis] - a.target[axis]) * u,
-    );
-  }
-}
-export function sampleElectricalGuide(
-  p: number,
-  position: Vector3,
-  facing: Vector3,
-) {
-  let i = 0;
-  while (i < keys.length - 2 && p > keys[i + 1].at) i++;
-  const a = keys[i],
-    b = keys[i + 1];
-  const t = Math.max(0, Math.min(1, (p - a.at) / (b.at - a.at))),
-    u = t * t * (3 - 2 * t);
-  position.set(
-    a.guide[0] + (b.guide[0] - a.guide[0]) * u,
-    ELECTRICAL_Y,
-    a.guide[2] + (b.guide[2] - a.guide[2]) * u,
-  );
-  const s = electricalStationAt(p);
-  facing.set(
-    s ? s.x + s.focus[0] : b.guide[0],
-    ELECTRICAL_Y + (s ? s.focus[1] : 1.55),
-    s ? s.z + s.focus[2] : b.guide[2],
-  );
 }
