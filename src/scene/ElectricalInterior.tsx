@@ -514,7 +514,7 @@ export function ElectricalInterior({
       />
       <Wayfinding
         text="FROM INSTALLATION TO OPERATION"
-        sub={`${mechanical ? 10 : 16} CAPABILITIES / ONE CONNECTED FLOOR`}
+        sub={`${mechanical ? `${mechanicalStations.length} STATIONS` : "16 CAPABILITIES"} / ONE CONNECTED FLOOR`}
         p={[17, 3.1, -10.02]}
         width={15}
         height={1.6}
@@ -528,7 +528,12 @@ export function ElectricalInterior({
 function PortfolioFrames({ mechanical = false }: { mechanical?: boolean }) {
   const photos = useTexture(
     (mechanical
-      ? ["cooling.webp", "machinery.webp", "pipework.webp"]
+      ? [
+          "cooling.webp",
+          "machinery.webp",
+          "pipework.webp",
+          "project-ductwork.webp",
+        ]
       : ["contracting.webp", "automation.webp", "installation.webp"]
     ).map((name) =>
       assetUrl(`${mechanical ? "mechanical" : "electrical"}/${name}`),

@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
 const mechanical = process.argv.includes("--mechanical");
 const gallery = mechanical ? "mechanical" : "electrical";
-const last = mechanical ? 10 : 16;
+const last = 16;
 const server = spawn(
   process.execPath,
   [
@@ -83,20 +83,29 @@ try {
   );
   assert(
     await page.evaluate(
-      () =>
-        document.getElementById(window.__gallery).offsetHeight >=
-        (window.__gallery === "mechanical" ? 14000 : 18000),
+      () => document.getElementById(window.__gallery).offsetHeight >= 18000,
     ),
     "Gallery provides a paced scroll",
   );
-  const initialStop = process.env.ELECTRICAL_MOBILE_ONLY ? last : 1;
-  if (initialStop === 1) {
+  const projectsOnly = mechanical && process.argv.includes("--projects");
+  const initialStop = projectsOnly
+    ? 11
+    : process.env.ELECTRICAL_MOBILE_ONLY
+      ? last
+      : 1;
+  if (projectsOnly) {
+    await page.evaluate(() =>
+      Array.from(document.querySelectorAll(".electrical-welcome button"))
+        .find((b) => b.textContent.includes("Go to FAST projects"))
+        .click(),
+    );
+  } else if (initialStop === 1) {
     await page.evaluate(() =>
       document.querySelector(".electrical-welcome button").click(),
     );
   } else {
     await page.evaluate(() => {
-      const finalHold = window.__gallery === "mechanical" ? 0.703 : 0.711;
+      const finalHold = 0.711;
       scrollTo(
         0,
         (document.getElementById("together").offsetTop * finalHold) / 0.8,
@@ -218,7 +227,7 @@ try {
       return (
         label.textContent ===
           (window.__gallery === "mechanical"
-            ? "Reverse osmosis skid"
+            ? "Electric superheater & element bank"
             : "Ducted axial fan") && label.getBoundingClientRect().height > 0
       );
     }),

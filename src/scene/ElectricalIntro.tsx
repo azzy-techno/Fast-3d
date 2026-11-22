@@ -1,3 +1,4 @@
+import { mechanicalStations } from "../data/mechanical";
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
 import { useEffect, useMemo } from "react";
@@ -76,7 +77,7 @@ export function ElectricalIntro({
     c.lineTo(1446, 560);
     c.stroke();
     (mechanical
-      ? ["01  THERMAL SYSTEMS", "02  PLANT & MACHINERY", "03  PIPING & WATER"]
+      ? ["01–04  THERMAL SYSTEMS", "05–10  PLANT & PIPING", "11–16  PROJECTS"]
       : ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"]
     ).forEach((label, i) => {
       c.font = "500 24px sans-serif";
@@ -86,7 +87,7 @@ export function ElectricalIntro({
     c.font = "400 23px sans-serif";
     c.fillStyle = "#bdd0d3";
     c.fillText(
-      `${mechanical ? 10 : 16} guided stations   /   Choose your pace   /   Exit lift at the end`,
+      `${mechanical ? mechanicalStations.length : 16} guided stations   /   Choose your pace   /   Exit lift at the end`,
       90,
       700,
     );

@@ -376,6 +376,285 @@ def treatment():
     dial(-1.83, 2.49, 0.16)
 
 
+def trapeze(x, y, half_depth):
+    """Rod-and-channel hanger below a ceiling sample rail."""
+    for z in (-half_depth, half_depth):
+        tube((x, y, z), (x, 3.16, z), 0.027, silver)
+        box(x, y + 0.08, z, 0.09, 0.05, 0.09, bronze, metal)
+    rail(x, y, 0, 0.10, 0.09, 2 * half_depth + 0.16)
+
+
+def supply_duct():
+    # Galvanised trunk with bolted transverse joints, branch takeoffs and diffusers.
+    for x in (-2.25, 2.25):
+        rail(x, 1.55, -0.88, 0.13, 3.10, 0.13)
+        anchor(x, -0.88)
+        rail(x, 3.12, -0.06, 0.14, 0.14, 1.81)
+        trapeze(x, 1.76, 0.73)
+    box(0, 2.19, 0, 5.4, 0.78, 1.16, silver, metal)
+    for x in (-2.69, -1.45, 0, 1.45, 2.69):
+        box(x, 2.19, 0, 0.075, 0.88, 1.25, "849496", metal)
+    for x in (-1.5, 1.58):
+        box(x, 1.66, 0.13, 0.63, 0.56, 0.67, silver, metal)
+        # A tapered diffuser neck flares out towards the occupied space.
+        loft(
+            [
+                [
+                    (x + dx * w, y, 0.14 + dz * d)
+                    for dx, dz in [(-1, 1), (1, 1), (1, -1), (-1, -1)]
+                ]
+                for y, w, d in [(1.11, 0.69, 0.50), (1.46, 0.31, 0.31)]
+            ],
+            cream,
+            metal,
+        )
+        for i in range(3):
+            box(
+                x,
+                1.10 - i * 0.065,
+                0.14,
+                1.48 - i * 0.31,
+                0.055,
+                1.1 - i * 0.22,
+                cream,
+                metal,
+            )
+    box(0.25, 2.20, 0.615, 0.66, 0.52, 0.065, navy)
+    for i in range(6):
+        box(0.25, 2.01 + i * 0.075, 0.66, 0.55, 0.031, 0.05, silver, metal)
+
+
+def fresh_air():
+    # A weather louvre and removable filter, then an open damper inspection bay.
+    base(5.5, 1.7)
+    for x in (-2.22, 0, 2.22):
+        rail(x, 0.67, 0, 0.14, 0.86, 1.28)
+    box(-1.63, 1.87, 0, 1.66, 1.8, 1.12, navy)
+    for i in range(9):
+        y = 1.14 + i * 0.18
+        loft(
+            [
+                [
+                    (x, y + 0.13, 0.52),
+                    (x, y, 0.86),
+                    (x, y + 0.034, 0.87),
+                    (x, y + 0.16, 0.53),
+                ]
+                for x in (-2.38, -0.89)
+            ],
+            silver,
+            metal,
+        )
+    for y in (1.03, 2.68):
+        box(0.81, y, 0, 3.25, 0.12, 1.3, silver, metal)
+    box(0.82, 1.85, -0.61, 3.23, 1.63, 0.085, silver, metal)
+    for x in (-0.70, 0.24, 2.39):
+        rail(x, 1.86, 0.61, 0.08, 1.62, 0.08)
+    for i in range(11):
+        x = -0.67 + i * 0.081
+        loft(
+            [
+                [(x, y, 0.54), (x + 0.038, y, -0.49), (x + 0.078, y, 0.54)]
+                for y in (1.12, 2.6)
+            ],
+            cream,
+            paint,
+        )
+    for y in (1.35, 1.78, 2.20):
+        tube((2.2, y, 0.05), (2.57, y, 0.05), 0.046, bronze)
+    box(2.53, 1.77, 0.09, 0.33, 0.52, 0.38, safety)
+    box(2.53, 1.81, 0.29, 0.22, 0.18, 0.025, navy)
+
+
+def shelter_ac():
+    # Show a slice of shelter wall so both halves of the refrigerant circuit are visible.
+    base(5.6, 1.82)
+    box(-1.04, 1.7, -0.39, 3.28, 2.85, 0.25, cream)
+    for i in range(14):
+        box(-2.59 + i * 0.237, 1.7, -0.245, 0.037, 2.77, 0.05, silver, metal)
+    box(-1.11, 2.37, 0.04, 2.34, 0.66, 0.62, "e8ebe1")
+    box(-1.11, 2.17, 0.362, 2.07, 0.14, 0.04, dark)
+    box(-1.11, 2.13, 0.395, 1.99, 0.046, 0.09, silver)
+    rail(1.6, 0.45, 0, 1.75, 0.42, 1.02)
+    box(1.58, 1.36, -0.05, 1.9, 1.55, 1.02, cream)
+    tube((1.39, 1.37, 0.46), (1.39, 1.37, 0.48), 0.615, navy, n=40)
+    for radius in (0.23, 0.41, 0.59):
+        for i in range(24):
+            a = i * math.tau / 24
+            b = (i + 1) * math.tau / 24
+            tube(
+                (1.39 + radius * math.cos(a), 1.37 + radius * math.sin(a), 0.67),
+                (1.39 + radius * math.cos(b), 1.37 + radius * math.sin(b), 0.67),
+                0.012,
+                silver,
+                n=6,
+            )
+    for i in range(6):
+        box(2.24, 1.11 + i * 0.095, 0.47, 0.33, 0.034, 0.04, navy)
+    for shift, radius, color in [(0, 0.052, bronze), (0.13, 0.074, dark)]:
+        wire(
+            [
+                (-0.02, 2.30 + shift, 0.10),
+                (0.30 + shift, 2.30 + shift, 0.10),
+                (0.30 + shift, 0.86 + shift, 0.10),
+                (0.62, 0.86 + shift, 0.10),
+                (0.68, 1 + shift, 0.10),
+            ],
+            radius,
+            color,
+        )
+
+
+def exchanger_installation():
+    # A plate-and-frame exchanger on grouted soleplates, separate from the tube bundle exhibit.
+    base(4.8, 1.85)
+    for x in (-1.3, 1.48):
+        box(x, 0.37, 0, 0.75, 0.27, 1.63, "a39d8c")
+        box(x, 0.54, 0, 0.68, 0.1, 1.53, silver, metal)
+    for z in (-0.56, 0.56):
+        box(0.11, 0.60, z, 3.46, 0.10, 0.12, silver, metal)
+    for x in (-1.3, 0.89):
+        box(x, 1.63, 0, 0.15, 2.10, 1.44, teal)
+    for i in range(28):
+        x = -1.14 + i * 0.067
+        box(x, 1.62, 0, 0.044, 1.89, 1.33, silver if i % 2 else "7b8d90", metal)
+    for y in (0.78, 2.43):
+        for z in (-0.76, 0.76):
+            cylinder_x(-0.10, y, z, 2.91, 0.042, silver)
+            cylinder_x(0.99, y, z, 0.10, 0.086, bronze)
+    rail(1.5, 1.62, 0, 0.14, 2.2, 0.2)
+    rail(0.12, 2.72, 0, 2.90, 0.13, 0.22)
+    for y in (0.99, 2.22):
+        for z in (-0.41, 0.41):
+            cylinder_x(-1.58, y, z, 0.47, 0.16, blue)
+            flange(-1.82, y, z, 0.23)
+    # Mounting studs and a spirit level on the forward soleplate.
+    for x in (-1.5, -1.1, 1.28, 1.68):
+        tube((x, 0.48, 0.64), (x, 0.66, 0.64), 0.045, bronze, n=6)
+    box(0.12, 0.72, 0.58, 0.71, 0.11, 0.12, safety)
+    box(0.12, 0.74, 0.647, 0.19, 0.05, 0.016, "649673")
+
+
+def refractory():
+    # View into an opened length of flue. Each brick is a tapered annular segment.
+    base(5.16, 1.88)
+    for x in (-1.77, 1.77):
+        rail(x, 0.55, 0, 0.32, 0.62, 1.44)
+    cy = 1.71
+
+    def segment(left, right, inner, outer, a, b, colour, material):
+        loft(
+            [
+                [
+                    (x, cy + r * math.cos(t), r * math.sin(t))
+                    for r, t in [(inner, a), (outer, a), (outer, b), (inner, b)]
+                ]
+                for x in (left, right)
+            ],
+            colour,
+            material,
+        )
+
+    # Omit the upper forward quadrant across the cutaway. The end rings stay intact.
+    for col in range(9):
+        x = -2.22 + col * 0.49
+        for n in range(20):
+            a = n * math.tau / 20
+            b = (n + 1) * math.tau / 20
+            if 1 <= col <= 7 and n < 7:
+                continue
+            segment(x, x + 0.49, 1.04, 1.095, a, b, navy, metal)
+            segment(
+                x + 0.005, x + 0.483, 0.91, 1.038, a + 0.004, b - 0.004, "e6d9b3", paint
+            )
+            segment(
+                x + 0.01,
+                x + 0.477,
+                0.70,
+                0.909,
+                a + 0.009,
+                b - 0.009,
+                ("bb7958", "cb8f68", "a96c50")[(n + col) % 3],
+                paint,
+            )
+    for x in (-2.23, 2.18):
+        for n in range(20):
+            a = n * math.tau / 20
+            b = (n + 1) * math.tau / 20
+            segment(x, x + 0.09, 1.05, 1.17, a, b, silver, metal)
+    # One sample brick forward of the cutaway makes the wedge profile readable.
+    box(0.46, 0.45, 1.0, 1.34, 0.14, 0.52, navy)
+    loft(
+        [
+            [
+                (x, y, z)
+                for x, y in [(-0.03, 0.53), (0.88, 0.53), (0.78, 0.84), (0.07, 0.84)]
+            ]
+            for z in (0.81, 1.20)
+        ],
+        "c88662",
+        paint,
+    )
+
+
+def superheater():
+    base(5.66, 1.86)
+    for x in (-1.28, 0.68):
+        rail(x, 0.72, 0, 0.30, 0.93, 1.12)
+    # Section the heater shell lengthwise to reveal the removable electrical elements.
+    for i in range(20):
+        a = (0.60 + i / 20 * 1.44) * math.pi
+        b = (0.60 + (i + 1) / 20 * 1.44) * math.pi
+        loft(
+            [
+                [
+                    (x, 1.58 + r * math.cos(t), r * math.sin(t))
+                    for r, t in [(0.64, a), (0.70, a), (0.70, b), (0.64, b)]
+                ]
+                for x in (-1.94, 1.34)
+            ],
+            silver,
+            metal,
+        )
+    for i in range(7):
+        y = 1.20 + (i % 4) * 0.218
+        z = 0.28 if i < 4 else -0.14
+        wire(
+            [
+                (-1.89, y, z),
+                (1.06, y, z),
+                (1.22, y + 0.067, z),
+                (1.06, y + 0.134, z),
+                (-1.89, y + 0.134, z),
+            ],
+            0.043,
+            bronze,
+            metal,
+        )
+    flange(-1.96, 1.58, 0, 0.81)
+    cylinder_x(-2.22, 1.58, 0, 0.41, 0.60, teal)
+    box(-2.32, 1.61, 0, 0.57, 0.85, 0.92, teal)
+    for x in (-1.34, 0.93):
+        tube((x, 2.11, -0.16), (x, 2.59, -0.16), 0.17, silver)
+        tube((x, 2.54, -0.16), (x, 2.62, -0.16), 0.25, teal)
+    box(2.02, 1.26, 0, 0.96, 1.98, 0.83, navy)
+    box(2.02, 1.31, 0.43, 0.85, 1.70, 0.055, "c3cfc9")
+    box(2.02, 1.74, 0.47, 0.47, 0.31, 0.035, dark)
+    box(2.02, 1.74, 0.491, 0.38, 0.22, 0.015, "509fa8")
+    for j, col in enumerate((teal, safety, "b75645")):
+        tube((1.77 + j * 0.23, 1.32, 0.45), (1.77 + j * 0.23, 1.32, 0.51), 0.064, col)
+    wire(
+        [
+            (1.76, 0.37, -0.15),
+            (1.63, 0.32, -0.65),
+            (-2.42, 0.32, -0.65),
+            (-2.42, 1.25, -0.4),
+        ],
+        0.064,
+        dark,
+    )
+
+
 for index, build in enumerate(
     [
         tower,
@@ -388,6 +667,12 @@ for index, build in enumerate(
         tap,
         trap,
         treatment,
+        supply_duct,
+        fresh_air,
+        shelter_ac,
+        exchanger_installation,
+        refractory,
+        superheater,
     ],
     1,
 ):
@@ -395,4 +680,6 @@ for index, build in enumerate(
     export_part(f"Exhibit{index:02}")
 fan(0, 0, 0, 0.91)
 export_part("Impeller")
+box(0, 0, 0, 1.81, 0.07, 0.48, teal)
+export_part("DamperBlade")
 write_glb(Path.cwd() / "public/assets/mechanical/exhibits.glb")

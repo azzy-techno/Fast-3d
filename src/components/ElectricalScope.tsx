@@ -1,4 +1,4 @@
-import { mechanicalScope } from "../data/mechanical";
+import { mechanicalScope, mechanicalStations } from "../data/mechanical";
 import { useState } from "react";
 import { electricalScope } from "../data/electrical";
 import { assetUrl } from "../lib/assets";
@@ -18,7 +18,13 @@ export function ElectricalScope({
     <details className="electrical-scope" data-lenis-prevent>
       <summary>
         <span>
-          {rtl ? "قدرات ننفذها بفرقنا" : "Capabilities we self-deliver"}
+          {mechanical
+            ? rtl
+              ? "الخدمات ومشاريع مختارة"
+              : "Capabilities and selected projects"
+            : rtl
+              ? "قدرات ننفذها بفرقنا"
+              : "Capabilities we self-deliver"}
           <small>
             {rtl
               ? "اختر مجالاً ومرّر داخله لعرض النطاق الكامل"
@@ -33,6 +39,7 @@ export function ElectricalScope({
       <div className="electrical-scope-body">
         <div
           className="scope-categories"
+          data-service={service}
           role="group"
           aria-label={
             mechanical
@@ -71,7 +78,16 @@ export function ElectricalScope({
                 <span aria-hidden="true">
                   {String(scope.start + i).padStart(2, "0")}
                 </span>
-                {rtl ? ar : en}
+                <div>
+                  {rtl ? ar : en}
+                  {scope.id === "projects" && (
+                    <p className="scope-source">
+                      {rtl
+                        ? mechanicalStations[scope.start + i - 1].noteAr
+                        : mechanicalStations[scope.start + i - 1].note}
+                    </p>
+                  )}
+                </div>
               </li>
             ))}
           </ol>
@@ -106,9 +122,13 @@ export function ElectricalScope({
           </figure>
         </section>
         <p className="scope-source">
-          {rtl
-            ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
-            : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
+          {mechanical
+            ? rtl
+              ? "المصدر: صفحة الخدمات الميكانيكية وملف فاست 2026، الصفحات 9–10 و49–50. النماذج توضيحية."
+              : "Project scope is drawn from FAST’s Mechanical page and 2026 company profile, pp. 9–10 and 49–50. The models illustrate the installations."
+            : rtl
+              ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
+              : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
         </p>
         <a href={`https://fast-arabia.com/services/${service}`}>
           {rtl

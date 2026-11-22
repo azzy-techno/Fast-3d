@@ -58,12 +58,12 @@ export const chapters: Chapter[] = [
     id: "mechanical",
     title: "Mechanical",
     ar: "المقاولات الميكانيكية",
-    place: "Level 02 / 10 guided stations",
-    placeAr: "الطابق 02 / 10 محطات إرشادية",
+    place: "Level 02 / 16 guided stations",
+    placeAr: "الطابق 02 / 16 محطة إرشادية",
     description:
-      "Explore ten mechanical services with a FAST engineer. Look inside a cooling tower, trace a pump alignment and follow the pipework to a water treatment skid.",
+      "Explore ten core mechanical services and six installations from FAST’s project portfolio. Follow the engineer from cooling towers and pipework to shelter air conditioning and furnace linings.",
     descriptionAr:
-      "استكشف عشر خدمات ميكانيكية مع مهندس فاست. شاهد مقطع برج التبريد ومحاذاة المضخة، وتتبّع الأنابيب وصولاً إلى وحدة معالجة المياه.",
+      "استكشف عشر خدمات ميكانيكية وستة تطبيقات من مشاريع فاست. رافق المهندس من أبراج التبريد والأنابيب إلى تكييف المآوي الصناعية وبطانات الأفران.",
     capabilities: [
       "Piping & HVAC",
       "Pumps & equipment",

@@ -1,3 +1,4 @@
+import { exhibitBay } from "../data/exhibitLayout";
 import { createExhibitRoute } from "./exhibitRoute";
 import { electricalScope } from "../data/electrical";
 import { Vector3 } from "three";
@@ -85,14 +86,9 @@ export const electricalStations = electricalScope
     })),
   )
   .map((item, i) => {
-    const row = Math.floor(i / 4),
-      col = row % 2 ? 3 - (i % 4) : i % 4;
     return {
       ...item,
-      x: [-21, -7, 7, 21][col],
-      z: 8 + row * 12,
-      at: 2.045 + i * 0.044,
-      end: 2.057 + i * 0.044,
+      ...exhibitBay(2, i),
       component: equipment[i][0],
       componentAr: equipment[i][1],
       focus: equipment[i][2],

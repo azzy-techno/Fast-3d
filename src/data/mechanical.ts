@@ -1,4 +1,9 @@
-// Capabilities and portfolio photographs from FAST O&M 2026 Saudi Arabia, pp. 9–10.
+import { exhibitBay } from "./exhibitLayout";
+
+// Core scope: FAST O&M 2026 Saudi Arabia, pp. 9–10. Project exhibits: the
+// profile’s Selected Completed Projects (pp. 49–50) and fast-arabia.com/services/mechanical.
+// Ductwork photograph: fast-arabia.com/assets/gallery/mech-04.webp.
+// Equipment arrangements are illustrative. Client, scope and rating follow the sources.
 const groups = [
   ["thermal", "Thermal systems", "الأنظمة الحرارية", "cooling.webp"],
   ["machinery", "Plant & machinery", "معدات المصانع", "machinery.webp"],
@@ -7,6 +12,12 @@ const groups = [
     "Piping & water treatment",
     "الأنابيب ومعالجة المياه",
     "pipework.webp",
+  ],
+  [
+    "projects",
+    "Selected mechanical projects",
+    "مشاريع ميكانيكية مختارة",
+    "project-ductwork.webp",
   ],
 ] as const;
 
@@ -101,23 +112,65 @@ const exhibits = [
     "تجاور المرشّحات الأولية الرأسية ثلاثة أوعية ضغط للأغشية ومجمّع الأنابيب المشترك.",
     [0.84, 2.45, 0.26],
   ],
+  [
+    "HVAC ductwork installation",
+    "تركيب مجاري هواء التكييف",
+    "Suspended supply duct & diffusers",
+    "مجرى تغذية معلّق وناشرات هواء",
+    "WESCOSA · Abu Ali plant. Follow the sheet-metal trunk past its flanged joints to the two diffuser branches. Threaded rods carry the duct on cross rails.",
+    "ويسكوسا · معمل أبو علي. تتبّع المجرى المعدني من وصلاته إلى فرعَي ناشرات الهواء. تحمل قضبان التثبيت المجرى على عوارض عرضية.",
+    [1.58, 1.25, 0.65],
+  ],
+  [
+    "Fresh-air duct installation",
+    "تركيب مجاري الهواء النقي",
+    "Intake louvre, filter & damper",
+    "فتحات سحب ومرشّح وبوابة تحكّم",
+    "Rawabi Electric · Fresh-air intake. The angled louvre sheds rain. The cutaway reveals a pleated filter and the damper blades that regulate incoming air.",
+    "الروابي الكهربائية · مدخل الهواء النقي. تصرّف الشفرات المائلة مياه المطر، ويكشف المقطع المرشّح المطوي وريش بوابة التحكّم بتدفق الهواء.",
+    [-1.65, 2.03, 0.84],
+  ],
+  [
+    "Shelter air-conditioning installation",
+    "تركيب تكييف المآوي الصناعية",
+    "Shelter split AC & refrigerant lines",
+    "مكيّف منفصل وخطوط وسيط التبريد",
+    "Petronash Arabia · WCH shelter AC. Trace the refrigerant lines between the wall-mounted indoor unit and the outdoor condenser behind the circular fan guard.",
+    "بتروناش العربية · تكييف مأوى WCH. تتبّع خطوط وسيط التبريد بين الوحدة الجدارية الداخلية والمكثّف الخارجي خلف الشبكة الدائرية للمروحة.",
+    [1.8, 1.53, 0.67],
+  ],
+  [
+    "Heat-exchanger installation",
+    "تركيب المبادلات الحرارية",
+    "Plate exchanger on grouted supports",
+    "مبادل صفائحي على قواعد محقونة بالملاط",
+    "Smart Products Pipes · Bahra Electric. This installation example exposes the baseplates and anchor studs beneath the clamped plate pack. A spirit level rests on the front rail.",
+    "سمارت برودكتس بايبس · بحرة للكهرباء. يُظهر نموذج التركيب صفائح القاعدة ومسامير التثبيت أسفل حزمة الصفائح المضغوطة، وميزان استواء على العارضة الأمامية.",
+    [0.12, 0.9, 0.645],
+  ],
+  [
+    "Furnace exhaust refurbishment",
+    "تجديد بطانة عادم الأفران",
+    "Refractory-lined flue cutaway",
+    "مقطع في قناة عادم مبطّنة بمواد حرارية",
+    "Tenaris Saudi Arabia · Furnace exhaust refractory works. The open section shows wedge-shaped lining bricks, a pale insulating layer and the steel casing around them.",
+    "تيناريس السعودية · تجديد البطانة الحرارية لعادم الفرن. يُظهر المقطع الطوب الإسفيني وطبقة العزل الفاتحة والغلاف الفولاذي المحيط بهما.",
+    [0.36, 1.4, 0.64],
+  ],
+  [
+    "250 kW superheater supply",
+    "توريد مسخّنات فائقة بقدرة 250 كيلوواط",
+    "Electric superheater & element bank",
+    "مسخّن فائق كهربائي وحزمة عناصر التسخين",
+    "Byrne Investment Saudi Arabia · 250 kW superheaters, 380 V, three-phase, 60 Hz. The cutaway reveals the return bends of the electric elements and their flanged terminal head.",
+    "بايرن للاستثمار بالسعودية · مسخّنات فائقة بقدرة 250 كيلوواط، 380 فولت، ثلاثية الطور، 60 هرتز. يكشف المقطع انحناءات عناصر التسخين ورأس التوصيل المثبّت بشفّة.",
+    [0.95, 1.95, 0.28],
+  ],
 ] as const;
 
-const positions = [
-  [-21, 8],
-  [0, 8],
-  [21, 8],
-  [21, 20],
-  [-21, 20],
-  [-21, 32],
-  [21, 32],
-  [21, 44],
-  [0, 44],
-  [-21, 44],
-] as const;
 export const mechanicalStations = exhibits.map(
   ([title, ar, component, componentAr, note, noteAr, focus], i) => {
-    const group = groups[i < 4 ? 0 : i < 6 ? 1 : 2];
+    const group = groups[i < 4 ? 0 : i < 6 ? 1 : i < 10 ? 2 : 3];
     return {
       title,
       ar,
@@ -129,10 +182,7 @@ export const mechanicalStations = exhibits.map(
       category: group[1],
       categoryAr: group[2],
       number: i + 1,
-      x: positions[i][0],
-      z: positions[i][1],
-      at: 3.05 + i * 0.072,
-      end: 3.071 + i * 0.072,
+      ...exhibitBay(3, i),
     };
   },
 );

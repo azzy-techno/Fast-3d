@@ -444,6 +444,7 @@ export default function App() {
           <ElectricalWelcome
             mechanical={floor.id === "mechanical"}
             rtl={rtl}
+            onProjects={() => scrollToProgress(mechanicalStations[10].at + 0.005, true)}
             onEnter={() => scrollToProgress(
               floor.id === "mechanical" ? mechanicalStations[0].at + 0.005 : 2.05,
             )}

@@ -3,6 +3,7 @@ import { getBounds, NodeIO } from "@gltf-transform/core";
 import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
 import { MeshoptDecoder } from "meshoptimizer";
 import { build } from "esbuild";
+import { Matrix4, Triangle } from "three";
 import { pathToFileURL } from "node:url";
 const out = "/tmp/fast-electrical-tour-check.mjs";
 await build({
@@ -128,6 +129,33 @@ for (let n = 2718; n <= 2840; n++) {
 }
 // Test the shipped meshes against the sign plane, including its angled end.
 await MeshoptDecoder.ready;
+// Confirm the hand aims at the shipped mesh, including glTF quantization
+// transforms and the gallery plinth beneath each installation.
+function distanceToEquipment(node, focus) {
+  const point = new Vector3(...focus);
+  point.y -= 0.16;
+  const matrix = new Matrix4().fromArray(node.getWorldMatrix());
+  const triangle = new Triangle(),
+    closest = new Vector3();
+  let minimum = Infinity;
+  for (const primitive of node.getMesh().listPrimitives()) {
+    const positions = primitive.getAttribute("POSITION");
+    const indices = primitive.getIndices().getArray();
+    const vertices = Array.from({ length: positions.getCount() }, (_, i) =>
+      new Vector3(...positions.getElement(i, [])).applyMatrix4(matrix),
+    );
+    for (let i = 0; i < indices.length; i += 3) {
+      triangle.set(
+        vertices[indices[i]],
+        vertices[indices[i + 1]],
+        vertices[indices[i + 2]],
+      );
+      triangle.closestPointToPoint(point, closest);
+      minimum = Math.min(minimum, point.distanceTo(closest));
+    }
+  }
+  return minimum;
+}
 for (const {
   service,
   stations,
@@ -164,6 +192,7 @@ for (const {
       .map((node) => [node.getName(), node]),
   );
   assert(exhibitNodes.has("Impeller"));
+  if (service === "mechanical") assert(exhibitNodes.has("DamperBlade"));
   for (const s of stations) {
     sampleHost(s.at + 0.001, guide, face);
     const initial = guide.clone();
@@ -177,6 +206,11 @@ for (const {
       "Exhibit" + String(s.number).padStart(2, "0"),
     );
     assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
+    if (service === "mechanical" && s.number >= 11)
+      assert(
+        distanceToEquipment(node, s.focus) < 0.04,
+        `Guide misses project exhibit ${s.number}`,
+      );
     const bounds = getBounds(node);
     assert(
       bounds.max[2] <
@@ -223,7 +257,7 @@ for (const {
     assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
   }
 }
-assert.equal(mechanicalStations.length, 10);
+assert.equal(mechanicalStations.length, 16);
 for (let i = 0; i <= 4000; i++) {
   const p = 3 + i / 5000;
   mechanicalRoute.camera(p, camera, target);
@@ -242,7 +276,7 @@ for (let i = 0; i <= 4000; i++) {
 }
 assert.equal(target.z, 58, "Mechanical ends facing the rear lift");
 console.log(
-  "PASS 10 mechanical exhibits, complete aisle route and sign clearance at three viewport sizes",
+  "PASS 16 mechanical exhibits, complete aisle route and sign clearance at three viewport sizes",
 );
 for (let i = 0; i <= 100; i++) {
   const p = electricalDepartureAt(2.6 + (0.16 * i) / 100);

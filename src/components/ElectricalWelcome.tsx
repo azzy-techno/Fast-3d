@@ -5,11 +5,13 @@ export function ElectricalWelcome({
   onEnter,
   mechanical = false,
   onLift,
+  onProjects,
 }: {
   rtl: boolean;
   mechanical?: boolean;
   onEnter: () => void;
   onLift: () => void;
+  onProjects?: () => void;
 }) {
   const visible = useTour((s) =>
     mechanical
@@ -46,8 +48,8 @@ export function ElectricalWelcome({
       <p>
         {mechanical
           ? rtl
-            ? "رافق مهندس فاست في عشر محطات، من أبراج التبريد إلى معالجة المياه."
-            : "Follow your FAST engineer through ten stations, from cooling towers and rotating machinery to process piping and water treatment."
+            ? "رافق مهندس فاست في 16 محطة تشمل عشر خدمات ميكانيكية وستة تطبيقات من مشاريع الشركة."
+            : "Explore ten core services and six project installations with your FAST engineer, from cooling towers to furnace exhausts and electric superheaters."
           : rtl
             ? "16 محطة في المقاولات الكهربائية والأتمتة والبنية التحتية. اختر جولتك مع مهندس فاست."
             : "16 stations across electrical contracting, automation and LV / ELV infrastructure. Explore with your FAST engineer."}
@@ -56,6 +58,13 @@ export function ElectricalWelcome({
         <button onClick={onEnter}>
           {rtl ? "ابدأ من المحطة 01" : "Start at station 01"} →
         </button>
+        {mechanical && onProjects && (
+          <button onClick={onProjects}>
+            {rtl
+              ? "انتقل إلى مشاريع فاست · 11–16"
+              : "Go to FAST projects · 11–16"}
+          </button>
+        )}
         <button onClick={onLift}>
           {rtl ? "اختر خدمة أخرى" : "Choose another service"}
         </button>

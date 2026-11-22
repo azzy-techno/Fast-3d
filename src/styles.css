@@ -2227,6 +2227,9 @@ footer p,
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.electrical-welcome .scope-categories[data-service="mechanical"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .electrical-welcome .scope-categories button {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -2605,7 +2608,7 @@ footer p,
    cover the same camera path as the eased wheel input. */
 .tour-view .reception-approach {height: 900svh; min-height: 5400px;}
 .tour-view .chapter:not(#electrical):not(#mechanical):not(#cooling) {height: 520svh; min-height: 3100px;}
-.tour-view .chapter#mechanical {height: 1900svh; min-height: 14000px;}
+.tour-view .chapter#mechanical,
 .tour-view .chapter#electrical {height: 3000svh; min-height: 22000px;}
 .lift-dialog[data-phase="travelling"] .lift-journey {background: #152a36;}
 
