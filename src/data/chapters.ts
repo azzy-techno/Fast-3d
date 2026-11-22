@@ -79,12 +79,12 @@ export const chapters: Chapter[] = [
     id: "fabrication",
     title: "Fabrication",
     ar: "خدمات التصنيع",
-    place: "Made in our own yard",
-    placeAr: "من ساحة التصنيع لدينا",
+    place: "Level 03 / 16 guided stations",
+    placeAr: "الطابق 03 / 16 محطة إرشادية",
     description:
-      "The detail is in the making. Custom structures, skids and tanks fabricated in our own yard, with in-house welding, finishing and erection capability.",
+      "Walk through eight capabilities from FAST’s Dammam-area fabrication yard, then see how the work is used in eight selected client projects.",
     descriptionAr:
-      "تصنيع الهياكل والمنصات والخزانات حسب الطلب في ساحة التصنيع الداخلية، بقدرات لحام وتشطيب وتركيب.",
+      "استكشف ثماني خدمات من ورشة فاست للتصنيع في منطقة الدمام، ثم شاهد تطبيقاتها في ثمانية مشاريع مختارة للعملاء.",
     capabilities: ["Structural steel", "Skids & tanks", "Welding & finishing"],
     image: "fabrication.webp",
     imageAlt: "Steel fabrication work from the FAST fabrication yard",

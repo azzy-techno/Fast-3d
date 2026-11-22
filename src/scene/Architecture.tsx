@@ -1,4 +1,9 @@
-import { MECHANICAL_Y, isMechanicalVisit } from "./mechanicalTour";
+import {
+  FABRICATION_Y,
+  galleries,
+  independentGalleryAt,
+} from "./serviceGalleries";
+import { MECHANICAL_Y } from "./mechanicalTour";
 import { AboutHall } from "./AboutHall";
 import { ServiceFloors } from "./ServiceFloors";
 import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
@@ -243,16 +248,18 @@ export function Lift({
     const progress = journeyState.progress;
     if (roof && p[1] === 83 && cabin.current)
       cabin.current.visible = progress < 1.36;
+    const galleryId = independentGalleryAt(progress);
+    const stackProgress = galleryId ? galleries[galleryId].start : progress;
     if (rear && cabin.current)
       cabin.current.visible =
-        (p[1] === MECHANICAL_Y
-          ? isMechanicalVisit(progress)
+        (p[1] !== 66
+          ? galleryId !== null && p[1] === galleries[galleryId].level
           : progress > 1.73 && progress < ELECTRICAL_END) &&
         Math.abs(camera.position.y - p[1]) < 6;
     const open = rear
       ? 1
       : stack
-        ? stackDoorOpen(isMechanicalVisit(progress) ? 3 : progress)
+        ? stackDoorOpen(stackProgress)
         : liftDoorOpen(progress, exit ? "exit" : roof ? "roof" : "service");
     if (cabin.current && exit)
       cabin.current.position.y =
@@ -275,9 +282,7 @@ export function Lift({
       }
     }
     if (stack && cabin.current) {
-      cabin.current.position.y = stackLiftFloor(
-        isMechanicalVisit(progress) ? 3 : progress,
-      );
+      cabin.current.position.y = stackLiftFloor(stackProgress);
       cabin.current.position.x = inElectricalRearLift(progress)
         ? ELECTRICAL_EXIT.x
         : p[0];
@@ -297,9 +302,11 @@ export function Lift({
       rotation={[0, rear ? Math.PI : 0, 0]}
       name={
         rear
-          ? p[1] === MECHANICAL_Y
-            ? "mechanical-exit-lift"
-            : "electrical-exit-lift"
+          ? p[1] === FABRICATION_Y
+            ? "fabrication-exit-lift"
+            : p[1] === MECHANICAL_Y
+              ? "mechanical-exit-lift"
+              : "electrical-exit-lift"
           : roof
             ? "roof-lift"
             : "service-lift"
@@ -447,6 +454,7 @@ export function Interior() {
       <Lift p={[0, 66, -7]} stack />
       <Lift p={[ELECTRICAL_EXIT.x, 66, ELECTRICAL_EXIT.z]} rear />
       <Lift p={[ELECTRICAL_EXIT.x, MECHANICAL_Y, ELECTRICAL_EXIT.z]} rear />
+      <Lift p={[ELECTRICAL_EXIT.x, FABRICATION_Y, ELECTRICAL_EXIT.z]} rear />
     </group>
   );
 }

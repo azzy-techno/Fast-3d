@@ -1,24 +1,26 @@
-import { mechanicalScope, mechanicalStations } from "../data/mechanical";
+import { galleries, type GalleryId } from "../scene/serviceGalleries";
+
 import { useState } from "react";
-import { electricalScope } from "../data/electrical";
+
 import { assetUrl } from "../lib/assets";
 
 export function ElectricalScope({
   rtl,
-  mechanical = false,
+  service,
 }: {
   rtl: boolean;
-  mechanical?: boolean;
+  service: GalleryId;
 }) {
   const [selected, setSelected] = useState(0);
-  const groups = mechanical ? mechanicalScope : electricalScope;
+  const gallery = galleries[service];
+  const groups = gallery.scope;
   const scope = groups[selected];
-  const service = mechanical ? "mechanical" : "electrical";
+
   return (
     <details className="electrical-scope" data-lenis-prevent>
       <summary>
         <span>
-          {mechanical
+          {service !== "electrical"
             ? rtl
               ? "الخدمات ومشاريع مختارة"
               : "Capabilities and selected projects"
@@ -42,13 +44,7 @@ export function ElectricalScope({
           data-service={service}
           role="group"
           aria-label={
-            mechanical
-              ? rtl
-                ? "مجالات الأعمال الميكانيكية"
-                : "Mechanical scope categories"
-              : rtl
-                ? "مجالات الأعمال الكهربائية"
-                : "Electrical scope categories"
+            rtl ? `مجالات ${gallery.ar}` : `${gallery.name} scope categories`
           }
         >
           {groups.map((category, i) => (
@@ -73,23 +69,24 @@ export function ElectricalScope({
             {rtl ? scope.ar : scope.title}
           </h3>
           <ol start={scope.start}>
-            {scope.items.map(([en, ar], i) => (
-              <li key={en}>
-                <span aria-hidden="true">
-                  {String(scope.start + i).padStart(2, "0")}
-                </span>
-                <div>
-                  {rtl ? ar : en}
-                  {scope.id === "projects" && (
-                    <p className="scope-source">
-                      {rtl
-                        ? mechanicalStations[scope.start + i - 1].noteAr
-                        : mechanicalStations[scope.start + i - 1].note}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
+            {scope.items.map(([en, ar], i) => {
+              const station = gallery.stations[scope.start + i - 1];
+              return (
+                <li key={en}>
+                  <span aria-hidden="true">
+                    {String(scope.start + i).padStart(2, "0")}
+                  </span>
+                  <div>
+                    {rtl ? ar : en}
+                    {scope.id === "projects" && "note" in station && (
+                      <p className="scope-source">
+                        {rtl ? station.noteAr : station.note}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
           {scope.id === "contracting" && (
             <p className="scope-source">
@@ -102,13 +99,9 @@ export function ElectricalScope({
             <img
               src={assetUrl(`${service}/${scope.image}`)}
               alt={
-                mechanical
-                  ? rtl
-                    ? "أعمال ميكانيكية من محفظة مشاريع فاست"
-                    : "Mechanical work from the FAST project portfolio"
-                  : rtl
-                    ? "أعمال كهربائية من محفظة مشاريع فاست"
-                    : "Electrical work from the FAST project portfolio"
+                rtl
+                  ? `أعمال ${gallery.ar} من مشاريع فاست`
+                  : `${gallery.name} work from the FAST project portfolio`
               }
               loading="lazy"
               width="640"
@@ -122,13 +115,17 @@ export function ElectricalScope({
           </figure>
         </section>
         <p className="scope-source">
-          {mechanical
+          {service === "fabrication"
             ? rtl
-              ? "المصدر: صفحة الخدمات الميكانيكية وملف فاست 2026، الصفحات 9–10 و49–50. النماذج توضيحية."
-              : "Project scope is drawn from FAST’s Mechanical page and 2026 company profile, pp. 9–10 and 49–50. The models illustrate the installations."
-            : rtl
-              ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
-              : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
+              ? "من صفحة خدمات التصنيع وسجل مشاريع فاست. النماذج توضيحية."
+              : "Scope and project references come from FAST’s Fabrication page. Equipment models illustrate the work."
+            : service === "mechanical"
+              ? rtl
+                ? "المصدر: صفحة الخدمات الميكانيكية وملف فاست 2026، الصفحات 9–10 و49–50. النماذج توضيحية."
+                : "Project scope is drawn from FAST’s Mechanical page and 2026 company profile, pp. 9–10 and 49–50. The models illustrate the installations."
+              : rtl
+                ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
+                : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
         </p>
         <a href={`https://fast-arabia.com/services/${service}`}>
           {rtl

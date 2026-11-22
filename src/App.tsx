@@ -1,4 +1,4 @@
-import { mechanicalStations } from "./data/mechanical";
+import { galleries,isGallery } from "./scene/serviceGalleries";
 import { Fragment } from "react";
 import { flushSync } from "react-dom";
 import {
@@ -103,6 +103,7 @@ export default function App() {
   const audio = useRef<Howl | null>(null);
   const soundscapes = useRef<ServiceSound | null>(null);
   const [floor, setFloor] = useState(floors[0]);
+  const galleryId=isGallery(floor.id) ? floor.id : null;
   const [listFloor, setListFloor] = useState(floors[0]);
   const currentFloor = list ? listFloor : floor;
   const orderedChapters = [...chapters.slice(1), chapters[0]];
@@ -248,7 +249,7 @@ export default function App() {
           const progress = floorProgress(floor, fraction);
           useTour.getState().setProgress(progress);
           const opacity =
-            (floor.id === "electrical" || floor.id === "mechanical")
+            isGallery(floor.id)
               ? 0
               : Math.min(
                   1,
@@ -441,21 +442,12 @@ export default function App() {
             onLift={openLift}
           />
 
-          <ElectricalWelcome
-            mechanical={floor.id === "mechanical"}
-            rtl={rtl}
-            onProjects={() => scrollToProgress(mechanicalStations[10].at + 0.005, true)}
-            onEnter={() => scrollToProgress(
-              floor.id === "mechanical" ? mechanicalStations[0].at + 0.005 : 2.05,
-            )}
-            onLift={openLift}
-          />
-
-          <ElectricalTour
-            mechanical={floor.id === "mechanical"}
-            rtl={rtl}
-            onSelect={scrollToProgress}
-          />
+          {galleryId && <>
+            <ElectricalWelcome key={galleryId} service={galleryId} rtl={rtl}
+              onProjects={galleries[galleryId].projectStart ? () => scrollToProgress(galleries[galleryId].stations[galleries[galleryId].projectStart-1].at+.005,true) : undefined}
+              onEnter={() => scrollToProgress(galleries[galleryId].stations[0].at+.005)} onLift={openLift}/>
+            <ElectricalTour service={galleryId} rtl={rtl} onSelect={scrollToProgress}/>
+          </>}
           <JourneyGuide
             key={floor.id}
             floor={floor}
@@ -667,8 +659,8 @@ export default function App() {
                       </a>
                     </details>
                   )}
-                  {(chapter.id === "electrical" || chapter.id === "mechanical") && list && (
-                    <ElectricalScope mechanical={chapter.id === "mechanical"} rtl={rtl} />
+                  {isGallery(chapter.id) && list && (
+                    <ElectricalScope service={chapter.id} rtl={rtl} />
                   )}
                   <a className="service-link" href={chapter.href}>
                     {t("Explore this service", "استكشف هذه الخدمة")}

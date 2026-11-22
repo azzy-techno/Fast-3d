@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
 const mechanical = process.argv.includes("--mechanical");
-const gallery = mechanical ? "mechanical" : "electrical";
+const gallery = process.argv.includes("--fabrication") ? "fabrication" : mechanical ? "mechanical" : "electrical";
 const last = 16;
 const server = spawn(
   process.execPath,
@@ -87,9 +87,9 @@ try {
     ),
     "Gallery provides a paced scroll",
   );
-  const projectsOnly = mechanical && process.argv.includes("--projects");
+  const projectsOnly = gallery !== "electrical" && process.argv.includes("--projects");
   const initialStop = projectsOnly
-    ? 11
+    ? (gallery === "fabrication" ? 9 : 11)
     : process.env.ELECTRICAL_MOBILE_ONLY
       ? last
       : 1;
@@ -226,7 +226,7 @@ try {
       const label = document.querySelector(".equipment-caption");
       return (
         label.textContent ===
-          (window.__gallery === "mechanical"
+          (window.__gallery === "fabrication" ? "Fitted stainless cabinet run" : window.__gallery === "mechanical"
             ? "Electric superheater & element bank"
             : "Ducted axial fan") && label.getBoundingClientRect().height > 0
       );
@@ -288,7 +288,7 @@ try {
       document.querySelector(".lift-dialog").open &&
       Math.abs(
         +document.querySelector("canvas").dataset.journey -
-          (window.__gallery === "mechanical" ? 3.8 : 2.8),
+          (window.__gallery === "fabrication" ? 4.8 : window.__gallery === "mechanical" ? 3.8 : 2.8),
       ) < 0.001,
     "leave gallery",
   );

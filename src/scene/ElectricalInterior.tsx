@@ -1,5 +1,8 @@
-import { isMechanicalVisit, mechanicalRoute } from "./mechanicalTour";
-import { mechanicalStations } from "../data/mechanical";
+import {
+  galleries,
+  independentGalleryAt,
+  type GalleryId,
+} from "./serviceGalleries";
 import { useEffect, useMemo, useRef } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
@@ -16,7 +19,7 @@ import {
 import { Box, Cylinder, Pipe } from "./Primitives";
 import { StaticInstances } from "./StaticInstances";
 import { Wayfinding } from "./Architecture";
-import { electricalStations, electricalStationAt } from "./electricalTour";
+
 import { journeyState } from "./journey";
 import { assetUrl } from "../lib/assets";
 import type { Point } from "../data/chapters";
@@ -98,18 +101,10 @@ function useFinishes() {
 }
 
 /** Detailed finishes and MEP fit-out; every solid stays above the route or on its perimeter. */
-export function ElectricalInterior({
-  mechanical = false,
-}: {
-  mechanical?: boolean;
-}) {
+export function ElectricalInterior({ service }: { service: GalleryId }) {
   const finish = useFinishes();
   return (
-    <group
-      name={
-        mechanical ? "mechanical-interior-fitout" : "electrical-interior-fitout"
-      }
-    >
+    <group name={`${service}-interior-fitout`}>
       {/* Horizontal planes give the floor maps consistent, unstretched world scale. */}
       {floorPieces.map(({ p, size }, i) => (
         <mesh
@@ -124,7 +119,7 @@ export function ElectricalInterior({
       ))}
       <StaticInstances>
         {/* Individually framed acoustic ceiling clouds, with recessed warm coves. */}
-        {(mechanical ? mechanicalStations : electricalStations).map((s) => (
+        {galleries[service].stations.map((s) => (
           <group key={s.number} position={[s.x, 0, s.z]}>
             <mesh
               geometry={unitBox}
@@ -498,55 +493,31 @@ export function ElectricalInterior({
       </StaticInstances>
       {/* Sparse room labels avoid repeating a wall behind every installation. */}
       <Wayfinding
-        text={
-          mechanical
-            ? "HEAT TRANSFER / FLOW / MOTION"
-            : "POWER / CONTROL / CONNECTION"
-        }
-        sub={
-          mechanical
-            ? "FAST MECHANICAL / ENGINEERING GALLERY"
-            : "FAST ELECTRICAL / ENGINEERING GALLERY"
-        }
+        text={galleries[service].wall}
+        sub={`FAST ${service.toUpperCase()} / ENGINEERING GALLERY`}
         p={[-17, 3.1, -10.02]}
         width={15}
         height={1.6}
       />
       <Wayfinding
         text="FROM INSTALLATION TO OPERATION"
-        sub={`${mechanical ? `${mechanicalStations.length} STATIONS` : "16 CAPABILITIES"} / ONE CONNECTED FLOOR`}
+        sub={`${service === "electrical" ? "16 CAPABILITIES" : `${galleries[service].stations.length} STATIONS`} / ONE CONNECTED FLOOR`}
         p={[17, 3.1, -10.02]}
         width={15}
         height={1.6}
       />
-      <ElectricalExhibitLight mechanical={mechanical} />
-      <PortfolioFrames mechanical={mechanical} />
+      <ElectricalExhibitLight service={service} />
+      <PortfolioFrames service={service} />
     </group>
   );
 }
 
-function PortfolioFrames({ mechanical = false }: { mechanical?: boolean }) {
+function PortfolioFrames({ service }: { service: GalleryId }) {
   const photos = useTexture(
-    (mechanical
-      ? [
-          "cooling.webp",
-          "machinery.webp",
-          "pipework.webp",
-          "project-ductwork.webp",
-        ]
-      : ["contracting.webp", "automation.webp", "installation.webp"]
-    ).map((name) =>
-      assetUrl(`${mechanical ? "mechanical" : "electrical"}/${name}`),
-    ),
+    galleries[service].photos.map((name) => assetUrl(`${service}/${name}`)),
   );
   return (
-    <group
-      name={
-        mechanical
-          ? "mechanical-portfolio-gallery"
-          : "electrical-portfolio-gallery"
-      }
-    >
+    <group name={`${service}-portfolio-gallery`}>
       {[-1, 1].flatMap((side, i) =>
         [18, 42].map((z, j) => (
           <group
@@ -569,9 +540,7 @@ function PortfolioFrames({ mechanical = false }: { mechanical?: boolean }) {
             </mesh>
             <Wayfinding
               text="FAST O&M / PROJECT PORTFOLIO"
-              sub={
-                mechanical ? "MECHANICAL ENGINEERING" : "ELECTRICAL ENGINEERING"
-              }
+              sub={`${service.toUpperCase()} ENGINEERING`}
               p={[0, -1.14, 0.025]}
               width={3.8}
               height={0.28}
@@ -591,20 +560,19 @@ function PortfolioFrames({ mechanical = false }: { mechanical?: boolean }) {
 }
 
 /** One shadowed key light follows the active bay; avoids sixteen shadow maps. */
-function ElectricalExhibitLight({
-  mechanical = false,
-}: {
-  mechanical?: boolean;
-}) {
+function ElectricalExhibitLight({ service }: { service: GalleryId }) {
   const key = useRef<SpotLight>(null),
     fill = useRef<SpotLight>(null);
   const target = useMemo(() => new Object3D(), []);
   useFrame((_, dt) => {
     const p = journeyState.progress;
-    if (mechanical ? !isMechanicalVisit(p) : p < 1.73 || p >= 3) return;
-    const station = mechanical
-      ? mechanicalRoute.stationAt(p)
-      : electricalStationAt(p);
+    if (
+      service === "electrical"
+        ? p < 1.73 || p >= 3
+        : independentGalleryAt(p) !== service
+    )
+      return;
+    const station = galleries[service].stationAt(p);
     if (!key.current || !fill.current) return;
     const x = station?.x ?? 0,
       z = station?.z ?? 3;

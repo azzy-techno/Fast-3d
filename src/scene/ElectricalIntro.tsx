@@ -1,12 +1,12 @@
-import { mechanicalStations } from "../data/mechanical";
+import { galleries, type GalleryId } from "./serviceGalleries";
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
 import { useEffect, useMemo } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { Box } from "./Primitives";
 
-function RetrofitPhotograph() {
-  const photo = useTexture(assetUrl("mechanical/retrofit.webp"));
+function YardPhotograph({ path }: { path: string }) {
+  const photo = useTexture(assetUrl(path));
   return (
     <mesh position={[0, 0, -0.19]} rotation={[0, Math.PI, 0]}>
       <planeGeometry args={[9, 4.5]} />
@@ -16,11 +16,10 @@ function RetrofitPhotograph() {
 }
 
 /** An entrance poster, facing visitors as the lift doors open. */
-export function ElectricalIntro({
-  mechanical = false,
-}: {
-  mechanical?: boolean;
-}) {
+export function ElectricalIntro({ service }: { service: GalleryId }) {
+  const mechanical = service === "mechanical";
+  const fabrication = service === "fabrication";
+  const gallery = galleries[service];
   const map = useMemo(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 1536;
@@ -42,32 +41,30 @@ export function ElectricalIntro({
     }
     c.fillStyle = "#dfbe7c";
     c.font = "500 26px sans-serif";
-    c.fillText(
-      mechanical
-        ? "FAST O&M     /     LEVEL 02"
-        : "FAST O&M     /     LEVEL 01",
-      90,
-      100,
-    );
+    c.fillText(`FAST O&M     /     LEVEL 0${gallery.start - 1}`, 90, 100);
     c.fillStyle = "#f2f1e8";
     c.font = "600 116px sans-serif";
-    c.fillText(mechanical ? "MECHANICAL" : "ELECTRICAL", 80, 280);
+    c.fillText(gallery.name.toUpperCase(), 80, 280);
     c.font = "400 76px sans-serif";
     c.fillText("SERVICES", 86, 365);
     c.font = "400 30px sans-serif";
     c.fillStyle = "#c2d8da";
     c.fillText(
-      mechanical
-        ? "A guided walk through industrial plant and pipework."
-        : "Powering the building. Connecting every system.",
+      fabrication
+        ? "From welded steelwork to site installation."
+        : mechanical
+          ? "A guided walk through industrial plant and pipework."
+          : "Powering the building. Connecting every system.",
       90,
       440,
     );
     c.font = "400 32px Cairo, sans-serif";
     c.fillText(
-      mechanical
-        ? "الخدمات الميكانيكية — المعدات والأنابيب والمعالجة"
-        : "الخدمات الكهربائية — الطاقة والتحكم والربط",
+      fabrication
+        ? "ورشة التصنيع — من تشكيل الفولاذ إلى التركيب في الموقع"
+        : mechanical
+          ? "الخدمات الميكانيكية — المعدات والأنابيب والمعالجة"
+          : "الخدمات الكهربائية — الطاقة والتحكم والربط",
       90,
       505,
     );
@@ -76,9 +73,11 @@ export function ElectricalIntro({
     c.moveTo(90, 560);
     c.lineTo(1446, 560);
     c.stroke();
-    (mechanical
-      ? ["01–04  THERMAL SYSTEMS", "05–10  PLANT & PIPING", "11–16  PROJECTS"]
-      : ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"]
+    (fabrication
+      ? ["01–06  FABRICATION", "07–08  FINISH & ERECT", "09–16  PROJECTS"]
+      : mechanical
+        ? ["01–04  THERMAL SYSTEMS", "05–10  PLANT & PIPING", "11–16  PROJECTS"]
+        : ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"]
     ).forEach((label, i) => {
       c.font = "500 24px sans-serif";
       c.fillStyle = "#e4ca92";
@@ -87,26 +86,28 @@ export function ElectricalIntro({
     c.font = "400 23px sans-serif";
     c.fillStyle = "#bdd0d3";
     c.fillText(
-      `${mechanical ? mechanicalStations.length : 16} guided stations   /   Choose your pace   /   Exit lift at the end`,
+      `${gallery.stations.length} guided stations   /   Choose your pace   /   Exit lift at the end`,
       90,
       700,
     );
     const texture = new CanvasTexture(canvas);
     texture.colorSpace = SRGBColorSpace;
     return texture;
-  }, [mechanical]);
+  }, [service, gallery, mechanical, fabrication]);
   useEffect(() => () => map.dispose(), [map]);
   return (
     <group
       position={[0, 2.7, 3.8]}
       rotation={[0, Math.PI, 0]}
-      name={
-        mechanical
-          ? "mechanical-introduction-poster"
-          : "electrical-introduction-poster"
-      }
+      name={`${service}-introduction-poster`}
     >
-      {mechanical && <RetrofitPhotograph />}
+      {service !== "electrical" && (
+        <YardPhotograph
+          path={
+            fabrication ? "fabrication/yard.webp" : "mechanical/retrofit.webp"
+          }
+        />
+      )}
       <Box p={[0, 0, -0.1]} s={[9.4, 4.8, 0.16]} c="#30464e" metal={0.6} />
       <mesh position={[0, 0, 0.01]}>
         <planeGeometry args={[9, 4.5]} />

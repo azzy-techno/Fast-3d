@@ -1,3 +1,4 @@
+import type { GalleryId } from "./serviceGalleries";
 import { mechanicalStations } from "../data/mechanical";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -8,16 +9,12 @@ import { journeyState } from "./journey";
 
 function ExhibitMesh({
   name,
-  mechanical = false,
+  service = "electrical",
 }: {
   name: string;
-  mechanical?: boolean;
+  service?: GalleryId;
 }) {
-  const { nodes } = useGLTF(
-    assetUrl(
-      mechanical ? "mechanical/exhibits.glb" : "electrical/exhibits.glb",
-    ),
-  );
+  const { nodes } = useGLTF(assetUrl(`${service}/exhibits.glb`));
   const model = useMemo(() => {
     const instance = nodes[name].clone();
     instance.traverse((part) => {
@@ -54,7 +51,7 @@ function IntakeDamper() {
     <group ref={blades} userData={{ dynamic: true }}>
       {[1.35, 1.78, 2.2].map((y) => (
         <group key={y} rotation={[0.7, 0, 0]} position={[1.35, y, 0.05]}>
-          <ExhibitMesh mechanical name="DamperBlade" />
+          <ExhibitMesh service="mechanical" name="DamperBlade" />
         </group>
       ))}
     </group>
@@ -96,25 +93,31 @@ function Impeller({
       ref={shaft}
       userData={{ dynamic: true }}
     >
-      <ExhibitMesh mechanical={mechanical} name="Impeller" />
+      <ExhibitMesh
+        service={mechanical ? "mechanical" : "electrical"}
+        name="Impeller"
+      />
     </group>
   );
 }
 
 export function ElectricalStationModel({
   number,
-  mechanical = false,
+  service = "electrical",
 }: {
   number: number;
-  mechanical?: boolean;
+  service?: GalleryId;
 }) {
+  const mechanical = service === "mechanical";
   return (
     <>
       <ExhibitMesh
-        mechanical={mechanical}
+        service={service}
         name={`Exhibit${String(number).padStart(2, "0")}`}
       />
-      {(mechanical ? number === 3 || number === 13 : number === 16) && (
+      {(mechanical
+        ? number === 3 || number === 13
+        : service === "electrical" && number === 16) && (
         <Impeller mechanical={mechanical} number={number} />
       )}
       {mechanical && number === 12 && <IntakeDamper />}

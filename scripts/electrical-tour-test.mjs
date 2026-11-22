@@ -9,7 +9,7 @@ const out = "/tmp/fast-electrical-tour-check.mjs";
 await build({
   stdin: {
     contents:
-      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export * from "./src/data/mechanical"; export * from "./src/scene/mechanicalTour"; export {Vector3,PerspectiveCamera} from "three";',
+      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export * from "./src/data/mechanical"; export * from "./src/data/fabrication"; export * from "./src/scene/serviceGalleries"; export * from "./src/scene/mechanicalTour"; export {Vector3,PerspectiveCamera} from "three";',
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -18,6 +18,7 @@ await build({
   outfile: out,
 });
 const {
+  fabricationStations, fabricationRoute, FABRICATION_Y,
   mechanicalStations,
   mechanicalRoute,
   MECHANICAL_Y,
@@ -172,6 +173,7 @@ for (const {
     sampleHost: sampleGuide,
     presenting: guideIsPresenting,
   },
+  {service:"fabrication",stations:fabricationStations,level:FABRICATION_Y,sampleCamera:fabricationRoute.camera,sampleHost:fabricationRoute.guide,presenting:fabricationRoute.presenting},
   {
     service: "mechanical",
     stations: mechanicalStations,
@@ -191,7 +193,7 @@ for (const {
       .listNodes()
       .map((node) => [node.getName(), node]),
   );
-  assert(exhibitNodes.has("Impeller"));
+  if(service !== "fabrication") assert(exhibitNodes.has("Impeller"));
   if (service === "mechanical") assert(exhibitNodes.has("DamperBlade"));
   for (const s of stations) {
     sampleHost(s.at + 0.001, guide, face);
@@ -206,7 +208,7 @@ for (const {
       "Exhibit" + String(s.number).padStart(2, "0"),
     );
     assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
-    if (service === "mechanical" && s.number >= 11)
+    if (service==="fabrication" || service === "mechanical" && s.number >= 11)
       assert(
         distanceToEquipment(node, s.focus) < 0.04,
         `Guide misses project exhibit ${s.number}`,
@@ -257,26 +259,28 @@ for (const {
     assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
   }
 }
-assert.equal(mechanicalStations.length, 16);
+for (const [start,route,stations] of [[3,mechanicalRoute,mechanicalStations],[4,fabricationRoute,fabricationStations]]) {
+assert.equal(stations.length, 16);
 for (let i = 0; i <= 4000; i++) {
-  const p = 3 + i / 5000;
-  mechanicalRoute.camera(p, camera, target);
-  mechanicalRoute.guide(p, guide, face);
+  const p = start + i / 5000;
+  route.camera(p, camera, target);
+  route.guide(p, guide, face);
   for (const v of [camera, guide]) {
     assert(
       Math.abs(v.x) < 31 && v.z < 54.1 && v.z > -10,
       "Mechanical tour stays in the hall",
     );
-    for (const station of mechanicalStations) {
+    for (const station of stations) {
       const dx = Math.max(0, Math.abs(v.x - station.x) - 4.5);
       const dz = Math.max(0, Math.abs(v.z - station.z) - 2.5);
       assert(Math.hypot(dx, dz) > 0.35, `Mechanical plinth collision at ${p}`);
     }
   }
 }
-assert.equal(target.z, 58, "Mechanical ends facing the rear lift");
+assert.equal(target.z, 58, "Gallery ends facing the rear lift");
+}
 console.log(
-  "PASS 16 mechanical exhibits, complete aisle route and sign clearance at three viewport sizes",
+  "PASS mechanical and fabrication exhibits, complete aisle route and sign clearance at three viewport sizes",
 );
 for (let i = 0; i <= 100; i++) {
   const p = electricalDepartureAt(2.6 + (0.16 * i) / 100);

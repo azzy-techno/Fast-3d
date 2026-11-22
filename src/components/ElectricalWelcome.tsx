@@ -1,22 +1,24 @@
+import { galleries, type GalleryId } from "../scene/serviceGalleries";
 import { useTour } from "../store";
 import { ElectricalScope } from "./ElectricalScope";
 export function ElectricalWelcome({
   rtl,
   onEnter,
-  mechanical = false,
+  service,
   onLift,
   onProjects,
 }: {
   rtl: boolean;
-  mechanical?: boolean;
+  service: GalleryId;
   onEnter: () => void;
   onLift: () => void;
   onProjects?: () => void;
 }) {
-  const visible = useTour((s) =>
-    mechanical
-      ? s.progress >= 3 && s.progress < 3.012
-      : s.progress >= 1.96 && s.progress < 2.012,
+  const gallery = galleries[service];
+  const visible = useTour(
+    (s) =>
+      s.progress >= (service === "electrical" ? 1.96 : gallery.start) &&
+      s.progress < gallery.start + 0.012,
   );
   if (!visible) return null;
   return (
@@ -24,52 +26,32 @@ export function ElectricalWelcome({
       className="electrical-welcome"
       data-lenis-prevent
       aria-label={
-        mechanical
-          ? rtl
-            ? "مقدمة الخدمات الميكانيكية"
-            : "Mechanical service introduction"
-          : rtl
-            ? "مقدمة الخدمات الكهربائية"
-            : "Electrical service introduction"
+        rtl
+          ? `مقدمة خدمات ${gallery.ar}`
+          : `${gallery.name} service introduction`
       }
     >
       <span>
-        {mechanical ? "02 / FAST MECHANICAL" : "01 / FAST ELECTRICAL"}
+        0{gallery.start - 1} / FAST {service.toUpperCase()}
       </span>
-      <h2>
-        {mechanical
-          ? rtl
-            ? "هندسة الأنظمة الميكانيكية"
-            : "Inside the mechanical plant"
-          : rtl
-            ? "الطاقة. التحكم. الربط."
-            : "Power. Control. Connection."}
-      </h2>
-      <p>
-        {mechanical
-          ? rtl
-            ? "رافق مهندس فاست في 16 محطة تشمل عشر خدمات ميكانيكية وستة تطبيقات من مشاريع الشركة."
-            : "Explore ten core services and six project installations with your FAST engineer, from cooling towers to furnace exhausts and electric superheaters."
-          : rtl
-            ? "16 محطة في المقاولات الكهربائية والأتمتة والبنية التحتية. اختر جولتك مع مهندس فاست."
-            : "16 stations across electrical contracting, automation and LV / ELV infrastructure. Explore with your FAST engineer."}
-      </p>
+      <h2>{gallery.headline[rtl ? 1 : 0]}</h2>
+      <p>{gallery.intro[rtl ? 1 : 0]}</p>
       <div>
         <button onClick={onEnter}>
           {rtl ? "ابدأ من المحطة 01" : "Start at station 01"} →
         </button>
-        {mechanical && onProjects && (
+        {gallery.projectStart > 0 && onProjects && (
           <button onClick={onProjects}>
             {rtl
-              ? "انتقل إلى مشاريع فاست · 11–16"
-              : "Go to FAST projects · 11–16"}
+              ? `انتقل إلى مشاريع فاست · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`
+              : `Go to FAST projects · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`}
           </button>
         )}
         <button onClick={onLift}>
           {rtl ? "اختر خدمة أخرى" : "Choose another service"}
         </button>
       </div>
-      <ElectricalScope mechanical={mechanical} rtl={rtl} />
+      <ElectricalScope service={service} rtl={rtl} />
     </aside>
   );
 }

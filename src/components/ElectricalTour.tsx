@@ -1,10 +1,5 @@
-import { mechanicalStations } from "../data/mechanical";
-import { mechanicalRoute } from "../scene/mechanicalTour";
+import { galleries, type GalleryId } from "../scene/serviceGalleries";
 import { useTour } from "../store";
-import {
-  electricalStationAt,
-  electricalStations,
-} from "../scene/electricalTour";
 const notes = [
   [
     "The two incoming breaker sections sit beside the stacked outgoing feeder drawers.",
@@ -74,32 +69,21 @@ const notes = [
 export function ElectricalTour({
   rtl,
   onSelect,
-  mechanical = false,
+  service,
 }: {
   rtl: boolean;
-  mechanical?: boolean;
+  service: GalleryId;
   onSelect: (at: number) => void;
 }) {
-  const stations = mechanical ? mechanicalStations : electricalStations;
-  const station = useTour((s) =>
-    mechanical
-      ? mechanicalRoute.stationAt(s.progress)
-      : electricalStationAt(s.progress),
-  );
+  const gallery = galleries[service];
+  const { stations } = gallery;
+  const station = useTour((s) => gallery.stationAt(s.progress));
   if (!station) return null;
   const i = station.number - 1;
   return (
     <aside
       className="electrical-tour"
-      aria-label={
-        mechanical
-          ? rtl
-            ? "جولة الخدمات الميكانيكية"
-            : "Guided mechanical floor tour"
-          : rtl
-            ? "جولة الأعمال الكهربائية"
-            : "Guided electrical floor tour"
-      }
+      aria-label={rtl ? `جولة ${gallery.ar}` : `Guided ${service} floor tour`}
     >
       <p className="electrical-tour-kicker">
         {rtl ? station.categoryAr : station.category}
@@ -112,10 +96,10 @@ export function ElectricalTour({
         {rtl ? station.componentAr : station.component}
       </p>
       <p>
-        {mechanical
+        {"note" in station
           ? rtl
-            ? mechanicalStations[i].noteAr
-            : mechanicalStations[i].note
+            ? station.noteAr
+            : station.note
           : notes[i][rtl ? 1 : 0]}
       </p>
       <div className="electrical-tour-actions">
@@ -130,9 +114,7 @@ export function ElectricalTour({
           onClick={() =>
             onSelect(
               i === stations.length - 1
-                ? mechanical
-                  ? 3.8
-                  : 2.8
+                ? gallery.start + 0.8
                 : stations[i + 1].at + 0.005,
             )
           }
@@ -148,13 +130,7 @@ export function ElectricalTour({
       </div>
       <nav
         aria-label={
-          mechanical
-            ? rtl
-              ? "محطات الجولة الميكانيكية"
-              : "Mechanical tour stops"
-            : rtl
-              ? "محطات الجولة الكهربائية"
-              : "Electrical tour stops"
+          rtl ? `محطات جولة ${gallery.ar}` : `${gallery.name} tour stops`
         }
       >
         {stations.map((s) => (

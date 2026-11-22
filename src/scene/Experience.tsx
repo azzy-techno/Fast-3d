@@ -1,4 +1,10 @@
-import { isMechanicalVisit, mechanicalRoute } from "./mechanicalTour";
+import {
+  independentGalleryAt,
+  independentRoutes,
+  galleries,
+  fabricationRoute,
+} from "./serviceGalleries";
+import { mechanicalRoute } from "./mechanicalTour";
 import { floors } from "../lib/journeyScroll";
 import { electricalStationAt } from "./electricalTour";
 import { Suspense, memo, useEffect, useMemo, useRef, useState } from "react";
@@ -186,11 +192,11 @@ const World = memo(function World({
     }
     journeyState.progress = p;
     gl.domElement.dataset.jumpVersion = String(jumpVersion.current);
-    const mechanical = isMechanicalVisit(p);
-    const galleryPose = mechanical ? p - 1 : p;
+    const galleryId = independentGalleryAt(p);
+    const galleryPose = galleryId ? p - galleries[galleryId].start + 2 : p;
     let shotFov: number;
-    if (mechanical) {
-      mechanicalRoute.camera(p, vectors.p, vectors.target);
+    if (galleryId) {
+      independentRoutes[galleryId].camera(p, vectors.p, vectors.target);
       shotFov = 70;
     } else shotFov = sampleJourney(p, vectors.p, vectors.target);
     const fov =
@@ -316,6 +322,9 @@ const World = memo(function World({
       gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
       gl.domElement.dataset.towerHeight = "83";
       gl.domElement.dataset.aboutStation = "0";
+      gl.domElement.dataset.fabricationStation = String(
+        fabricationRoute.stationAt(p)?.number ?? 0,
+      );
       gl.domElement.dataset.mechanicalStation = String(
         mechanicalRoute.stationAt(p)?.number ?? 0,
       );
