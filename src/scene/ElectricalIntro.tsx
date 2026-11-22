@@ -17,8 +17,6 @@ function YardPhotograph({ path }: { path: string }) {
 
 /** An entrance poster, facing visitors as the lift doors open. */
 export function ElectricalIntro({ service }: { service: GalleryId }) {
-  const mechanical = service === "mechanical";
-  const fabrication = service === "fabrication";
   const gallery = galleries[service];
   const map = useMemo(() => {
     const canvas = document.createElement("canvas");
@@ -49,39 +47,19 @@ export function ElectricalIntro({ service }: { service: GalleryId }) {
     c.fillText("SERVICES", 86, 365);
     c.font = "400 30px sans-serif";
     c.fillStyle = "#c2d8da";
-    c.fillText(
-      fabrication
-        ? "From welded steelwork to site installation."
-        : mechanical
-          ? "A guided walk through industrial plant and pipework."
-          : "Powering the building. Connecting every system.",
-      90,
-      440,
-    );
+    c.fillText(gallery.posterLines[0], 90, 440);
     c.font = "400 32px Cairo, sans-serif";
-    c.fillText(
-      fabrication
-        ? "ورشة التصنيع — من تشكيل الفولاذ إلى التركيب في الموقع"
-        : mechanical
-          ? "الخدمات الميكانيكية — المعدات والأنابيب والمعالجة"
-          : "الخدمات الكهربائية — الطاقة والتحكم والربط",
-      90,
-      505,
-    );
+    c.fillText(gallery.posterLines[1], 90, 505);
     c.strokeStyle = "#a58e60";
     c.beginPath();
     c.moveTo(90, 560);
     c.lineTo(1446, 560);
     c.stroke();
-    (fabrication
-      ? ["01–06  FABRICATION", "07–08  FINISH & ERECT", "09–16  PROJECTS"]
-      : mechanical
-        ? ["01–04  THERMAL SYSTEMS", "05–10  PLANT & PIPING", "11–16  PROJECTS"]
-        : ["01  CONTRACTING", "02  AUTOMATION", "03  LV + ELV"]
-    ).forEach((label, i) => {
+    const columnWidth = 1395 / gallery.posterGroups.length;
+    gallery.posterGroups.forEach((label, i) => {
       c.font = "500 24px sans-serif";
       c.fillStyle = "#e4ca92";
-      c.fillText(label, 90 + i * 465, 625);
+      c.fillText(label, 90 + i * columnWidth, 625, columnWidth - 20);
     });
     c.font = "400 23px sans-serif";
     c.fillStyle = "#bdd0d3";
@@ -93,7 +71,7 @@ export function ElectricalIntro({ service }: { service: GalleryId }) {
     const texture = new CanvasTexture(canvas);
     texture.colorSpace = SRGBColorSpace;
     return texture;
-  }, [service, gallery, mechanical, fabrication]);
+  }, [gallery]);
   useEffect(() => () => map.dispose(), [map]);
   return (
     <group
@@ -101,13 +79,7 @@ export function ElectricalIntro({ service }: { service: GalleryId }) {
       rotation={[0, Math.PI, 0]}
       name={`${service}-introduction-poster`}
     >
-      {service !== "electrical" && (
-        <YardPhotograph
-          path={
-            fabrication ? "fabrication/yard.webp" : "mechanical/retrofit.webp"
-          }
-        />
-      )}
+      {gallery.posterPhoto && <YardPhotograph path={gallery.posterPhoto} />}
       <Box p={[0, 0, -0.1]} s={[9.4, 4.8, 0.16]} c="#30464e" metal={0.6} />
       <mesh position={[0, 0, 0.01]}>
         <planeGeometry args={[9, 4.5]} />

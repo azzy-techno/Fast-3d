@@ -115,7 +115,11 @@ export function ElectricalScope({
           </figure>
         </section>
         <p className="scope-source">
-          {service === "fabrication"
+          {service === "civil"
+            ? rtl
+              ? "المصدر: صفحة الخدمات المدنية وملف فاست 2026، ص 11–12 و49–50. النماذج توضيحية."
+              : "Sources: FAST Civil services and the 2026 company profile, pp. 11–12 and 49–50. Sections and project models illustrate the work."
+            : service === "fabrication"
             ? rtl
               ? "من صفحة خدمات التصنيع وسجل مشاريع فاست. النماذج توضيحية."
               : "Scope and project references come from FAST’s Fabrication page. Equipment models illustrate the work."

@@ -2,8 +2,28 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
-const mechanical = process.argv.includes("--mechanical");
-const gallery = process.argv.includes("--fabrication") ? "fabrication" : mechanical ? "mechanical" : "electrical";
+const gallery =
+  ["civil", "fabrication", "mechanical"].find((id) =>
+    process.argv.includes(`--${id}`),
+  ) ?? "electrical";
+const expectations = {
+  electrical: { exit: 2.8, caption: "Ducted axial fan" },
+  mechanical: {
+    exit: 3.8,
+    caption: "Electric superheater & element bank",
+    projects: 11,
+  },
+  fabrication: {
+    exit: 4.8,
+    caption: "Fitted stainless cabinet run",
+    projects: 9,
+  },
+  civil: {
+    exit: 5.8,
+    caption: "Precast seat & recessed supports",
+    projects: 14,
+  },
+};
 const last = 16;
 const server = spawn(
   process.execPath,
@@ -67,12 +87,13 @@ try {
   await page.evaluate(() => document.querySelector(".lift-toggle").click());
   await wait(() => document.querySelector(".lift-dialog").open, "floor picker");
   await page.evaluate(
-    ({ gallery, last }) => {
+    ({ gallery, last, expected }) => {
+      window.__galleryExpected = expected;
       window.__gallery = gallery;
       window.__last = last;
       document.querySelector(`[data-destination="${gallery}"]`).click();
     },
-    { gallery, last },
+    { gallery, last, expected: expectations[gallery] },
   );
   await wait(
     () =>
@@ -87,9 +108,10 @@ try {
     ),
     "Gallery provides a paced scroll",
   );
-  const projectsOnly = gallery !== "electrical" && process.argv.includes("--projects");
+  const projectsOnly =
+    gallery !== "electrical" && process.argv.includes("--projects");
   const initialStop = projectsOnly
-    ? (gallery === "fabrication" ? 9 : 11)
+    ? expectations[gallery].projects
     : process.env.ELECTRICAL_MOBILE_ONLY
       ? last
       : 1;
@@ -225,10 +247,8 @@ try {
     await page.evaluate(() => {
       const label = document.querySelector(".equipment-caption");
       return (
-        label.textContent ===
-          (window.__gallery === "fabrication" ? "Fitted stainless cabinet run" : window.__gallery === "mechanical"
-            ? "Electric superheater & element bank"
-            : "Ducted axial fan") && label.getBoundingClientRect().height > 0
+        label.textContent === window.__galleryExpected.caption &&
+        label.getBoundingClientRect().height > 0
       );
     }),
     "Cinema view retains the component name",
@@ -288,7 +308,7 @@ try {
       document.querySelector(".lift-dialog").open &&
       Math.abs(
         +document.querySelector("canvas").dataset.journey -
-          (window.__gallery === "fabrication" ? 4.8 : window.__gallery === "mechanical" ? 3.8 : 2.8),
+          window.__galleryExpected.exit,
       ) < 0.001,
     "leave gallery",
   );

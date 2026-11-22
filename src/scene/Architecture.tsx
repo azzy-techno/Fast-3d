@@ -1,9 +1,9 @@
 import {
-  FABRICATION_Y,
+  type GalleryId,
+  galleryOrder,
   galleries,
   independentGalleryAt,
 } from "./serviceGalleries";
-import { MECHANICAL_Y } from "./mechanicalTour";
 import { AboutHall } from "./AboutHall";
 import { ServiceFloors } from "./ServiceFloors";
 import { stackLiftFloor, stackDoorOpen } from "./travelMotion";
@@ -232,14 +232,14 @@ export function Lift({
   exit = false,
   elevation = 0,
   stack = false,
-  rear = false,
+  rear,
 }: {
   p: Point;
   roof?: boolean;
   exit?: boolean;
   elevation?: number;
   stack?: boolean;
-  rear?: boolean;
+  rear?: GalleryId;
 }) {
   const panels = useRef<Group>(null),
     cabin = useRef<Group>(null);
@@ -252,8 +252,8 @@ export function Lift({
     const stackProgress = galleryId ? galleries[galleryId].start : progress;
     if (rear && cabin.current)
       cabin.current.visible =
-        (p[1] !== 66
-          ? galleryId !== null && p[1] === galleries[galleryId].level
+        (rear !== "electrical"
+          ? galleryId === rear
           : progress > 1.73 && progress < ELECTRICAL_END) &&
         Math.abs(camera.position.y - p[1]) < 6;
     const open = rear
@@ -300,17 +300,7 @@ export function Lift({
       ref={cabin}
       position={p}
       rotation={[0, rear ? Math.PI : 0, 0]}
-      name={
-        rear
-          ? p[1] === FABRICATION_Y
-            ? "fabrication-exit-lift"
-            : p[1] === MECHANICAL_Y
-              ? "mechanical-exit-lift"
-              : "electrical-exit-lift"
-          : roof
-            ? "roof-lift"
-            : "service-lift"
-      }
+      name={rear ? `${rear}-exit-lift` : roof ? "roof-lift" : "service-lift"}
     >
       <Box p={[-1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
       <Box p={[1.58, 1.65, 1.75]} s={[0.7, 3.3, 0.16]} c="#717b79" />
@@ -452,9 +442,13 @@ export function Interior() {
       </group>
       <ServiceFloors />
       <Lift p={[0, 66, -7]} stack />
-      <Lift p={[ELECTRICAL_EXIT.x, 66, ELECTRICAL_EXIT.z]} rear />
-      <Lift p={[ELECTRICAL_EXIT.x, MECHANICAL_Y, ELECTRICAL_EXIT.z]} rear />
-      <Lift p={[ELECTRICAL_EXIT.x, FABRICATION_Y, ELECTRICAL_EXIT.z]} rear />
+      {galleryOrder.map((service) => (
+        <Lift
+          key={service}
+          p={[ELECTRICAL_EXIT.x, galleries[service].level, ELECTRICAL_EXIT.z]}
+          rear={service}
+        />
+      ))}
     </group>
   );
 }

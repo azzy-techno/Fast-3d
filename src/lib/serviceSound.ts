@@ -14,6 +14,7 @@ export const soundNames = [
   "vision",
 ] as const;
 export function soundForProgress(p: number): string | null {
+  if (p >= 5 && p < 5.78) return soundNames[4];
   if (p >= 4 && p < 4.78) return soundNames[3];
   if (p >= 3 && p < 3.78) return soundNames[2];
   if (p >= 1.94 && p < 2.78) return soundNames[1];

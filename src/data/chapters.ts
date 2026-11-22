@@ -99,9 +99,9 @@ export const chapters: Chapter[] = [
     place: "Where everything begins",
     placeAr: "حيث يبدأ كل شيء",
     description:
-      "Strong operations start with strong foundations. Civil and structural works supporting industrial and infrastructure projects across the Kingdom.",
+      "Explore thirteen civil capabilities in section, then see project studies of a DACO generator foundation, a TESA-1 roof repair and an Amaala precast bench.",
     descriptionAr:
-      "الأعمال المدنية والإنشائية الداعمة للمشاريع الصناعية والبنية التحتية في المملكة.",
+      "استكشف ثلاث عشرة خدمة مدنية عبر مقاطع تفصيلية، ثم شاهد نماذج لأساس مولد في داكو وإصلاح سطح في تيسا 1 ومقعد مسبق الصب في أمالا.",
     capabilities: ["Foundations", "Concrete structures", "Infrastructure"],
     image: "civil.webp",
     imageAlt: "FAST civil and structural construction work",

@@ -1,4 +1,4 @@
-const galleryOrder = ["electrical", "mechanical", "fabrication"] as const;
+import { galleryOrder } from "./serviceGalleries";
 import { ContactShadow } from "./ContactShadow";
 import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { ExhibitionFloor } from "./ElectricalFloor";
@@ -277,7 +277,7 @@ export function ServiceFloors() {
   return (
     <group name="stacked-service-floors">
       {serviceRooms.map((_, i) =>
-        i < 3 ? (
+        i < galleryOrder.length ? (
           <ExhibitionFloor key={i} service={galleryOrder[i]} />
         ) : (
           <ServiceFloor key={i} index={i} />
