@@ -42,9 +42,11 @@ export function ElectricalWelcome({
         </button>
         {gallery.projectStart > 0 && onProjects && (
           <button onClick={onProjects}>
-            {rtl
-              ? `انتقل إلى مشاريع فاست · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`
-              : `Go to FAST projects · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`}
+            {"projectLabel" in gallery
+              ? gallery.projectLabel[rtl ? 1 : 0]
+              : rtl
+                ? `انتقل إلى مشاريع فاست · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`
+                : `Go to FAST projects · ${String(gallery.projectStart).padStart(2, "0")}–${gallery.stations.length}`}
           </button>
         )}
         <button onClick={onLift}>

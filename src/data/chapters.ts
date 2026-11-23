@@ -116,9 +116,9 @@ export const chapters: Chapter[] = [
     place: "Protection built in",
     placeAr: "الحماية جزء من البناء",
     description:
-      "Ready when it matters most. Integrated detection, suppression and fire-pump systems that protect people, facilities and the work inside them.",
+      "Explore alarm, suppression and water-supply equipment with the FAST engineer, then visit the Amiral fire detection exhibit.",
     descriptionAr:
-      "أنظمة كشف وإطفاء الحريق ومضخات الحريق لحماية الأفراد والمنشآت الصناعية والتجارية.",
+      "استكشف معدات الإنذار والإطفاء وإمداد المياه مع مهندس فاست، ثم زُر مجسّم كشف الحريق في مشروع أميرال.",
     capabilities: ["Fire detection", "Suppression systems", "Fire pumps"],
     image: "fire.webp",
     imageAlt: "Fire protection systems installed by FAST",

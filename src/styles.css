@@ -2193,6 +2193,7 @@ footer p,
 }
 
 /* Electrical entrance and destination-controlled lift travel. */
+.tour-view #fire .chapter-copy,
 .tour-view #civil .chapter-copy,
 .tour-view #fabrication .chapter-copy,
 .tour-view #mechanical .chapter-copy,
@@ -2229,11 +2230,11 @@ footer p,
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.scope-categories[data-service="civil"] {
+.scope-categories:is([data-service="civil"], [data-service="fire"]) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.electrical-welcome .scope-categories[data-service="civil"],
+.electrical-welcome .scope-categories:is([data-service="civil"], [data-service="fire"]),
 .electrical-welcome .scope-categories[data-service="mechanical"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2614,7 +2615,8 @@ footer p,
 /* Each visit has its own scroll distance. Native touch and keyboard scrolling
    cover the same camera path as the eased wheel input. */
 .tour-view .reception-approach {height: 900svh; min-height: 5400px;}
-.tour-view .chapter:not(#electrical):not(#mechanical):not(#fabrication):not(#civil):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter:not(#electrical):not(#mechanical):not(#fabrication):not(#civil):not(#fire):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter#fire,
 .tour-view .chapter#civil,
 .tour-view .chapter#fabrication,
 .tour-view .chapter#mechanical,

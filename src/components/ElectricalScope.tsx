@@ -1,5 +1,6 @@
 import { galleries, type GalleryId } from "../scene/serviceGalleries";
 
+import { chapters } from "../data/chapters";
 import { useState } from "react";
 
 import { assetUrl } from "../lib/assets";
@@ -114,24 +115,8 @@ export function ElectricalScope({
             </figcaption>
           </figure>
         </section>
-        <p className="scope-source">
-          {service === "civil"
-            ? rtl
-              ? "المصدر: صفحة الخدمات المدنية وملف فاست 2026، ص 11–12 و49–50. النماذج توضيحية."
-              : "Sources: FAST Civil services and the 2026 company profile, pp. 11–12 and 49–50. Sections and project models illustrate the work."
-            : service === "fabrication"
-            ? rtl
-              ? "من صفحة خدمات التصنيع وسجل مشاريع فاست. النماذج توضيحية."
-              : "Scope and project references come from FAST’s Fabrication page. Equipment models illustrate the work."
-            : service === "mechanical"
-              ? rtl
-                ? "المصدر: صفحة الخدمات الميكانيكية وملف فاست 2026، الصفحات 9–10 و49–50. النماذج توضيحية."
-                : "Project scope is drawn from FAST’s Mechanical page and 2026 company profile, pp. 9–10 and 49–50. The models illustrate the installations."
-              : rtl
-                ? "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية."
-                : "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative."}
-        </p>
-        <a href={`https://fast-arabia.com/services/${service}`}>
+        <p className="scope-source">{gallery.scopeSource[rtl ? 1 : 0]}</p>
+        <a href={chapters.find((chapter) => chapter.id === service)?.href}>
           {rtl
             ? "عرض الخدمة الكاملة ↗"
             : `Explore the full ${service} service ↗`}

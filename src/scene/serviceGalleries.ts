@@ -5,6 +5,7 @@ import {
 } from "./electricalTour";
 import { mechanicalStations, mechanicalScope } from "../data/mechanical";
 import { fabricationStations, fabricationScope } from "../data/fabrication";
+import { fireStations, fireScope } from "../data/fire";
 import { civilStations, civilScope } from "../data/civil";
 import { electricalScope } from "../data/electrical";
 import { createExhibitRoute } from "./exhibitRoute";
@@ -23,8 +24,14 @@ export const fabricationRoute = createExhibitRoute(
 );
 export const CIVIL_Y = serviceLevel(3);
 export const civilRoute = createExhibitRoute(5, CIVIL_Y, civilStations);
+export const FIRE_Y = serviceLevel(4);
+export const fireRoute = createExhibitRoute(6, FIRE_Y, fireStations);
 export const galleries = {
   electrical: {
+    scopeSource: [
+      "Scope informed by FAST’s 2026 company profiles. 3D equipment is illustrative.",
+      "نطاق العمل وفق ملفات تعريف فاست لعام 2026. النماذج ثلاثية الأبعاد توضيحية.",
+    ],
     name: "Electrical",
     posterPhoto: null,
     posterLines: [
@@ -49,6 +56,10 @@ export const galleries = {
     departments: "CONTRACTING / AUTOMATION / LV + ELV",
   },
   mechanical: {
+    scopeSource: [
+      "Project scope is drawn from FAST’s Mechanical page and 2026 company profile, pp. 9–10 and 49–50. The models illustrate the installations.",
+      "المصدر: صفحة الخدمات الميكانيكية وملف فاست 2026، الصفحات 9–10 و49–50. النماذج توضيحية.",
+    ],
     name: "Mechanical",
     posterPhoto: "mechanical/retrofit.webp",
     posterLines: [
@@ -82,6 +93,10 @@ export const galleries = {
     departments: "THERMAL SYSTEMS / MACHINERY / PIPEWORK",
   },
   fabrication: {
+    scopeSource: [
+      "Scope and project references come from FAST’s Fabrication page. Equipment models illustrate the work.",
+      "من صفحة خدمات التصنيع وسجل مشاريع فاست. النماذج توضيحية.",
+    ],
     name: "Fabrication",
     posterPhoto: "fabrication/yard.webp",
     posterLines: [
@@ -110,6 +125,10 @@ export const galleries = {
     departments: "SHOP FABRICATION / FINISHING / SITE ERECTION",
   },
   civil: {
+    scopeSource: [
+      "Sources: FAST Civil services and the 2026 company profile, pp. 11–12 and 49–50. Sections and project models illustrate the work.",
+      "المصدر: صفحة الخدمات المدنية وملف فاست 2026، ص 11–12 و49–50. النماذج توضيحية.",
+    ],
     name: "Civil",
     posterPhoto: "civil/site.webp",
     posterLines: [
@@ -143,6 +162,51 @@ export const galleries = {
     wall: "STRUCTURES / GROUNDWORKS / PROTECTION",
     departments: "CIVIL WORKS / SELECTED PROJECTS",
   },
+  fire: {
+    scopeSource: [
+      "Source: FAST Fire Protection and the 2026 company profile, pp. 15 and 50. The models illustrate the equipment and project scope.",
+      "المصدر: صفحة الحماية من الحريق وملف شركة فاست 2026، ص 15 و50. النماذج توضيحية.",
+    ],
+    name: "Fire & protection",
+    projectLabel: [
+      "Visit the Amiral project · 16",
+      "انتقل إلى مشروع أميرال · 16",
+    ],
+    ar: "الحريق والسلامة",
+    start: 6,
+    level: FIRE_Y,
+    stations: fireStations,
+    scope: fireScope,
+    stationAt: fireRoute.stationAt,
+    photos: [
+      "systems.webp",
+      "maintenance.webp",
+      "supply.webp",
+      "installation.webp",
+    ],
+    posterPhoto: "fire/overview.webp",
+    posterLines: [
+      "From the first alarm to the fire pump.",
+      "من أول إنذار إلى مضخة الحريق",
+    ],
+    posterGroups: [
+      "01–08  SYSTEMS",
+      "09–13  MAINTENANCE",
+      "14–15  SUPPLY",
+      "16  AMIRAL",
+    ],
+    projectStart: 16,
+    headline: [
+      "Inside the fire protection system",
+      "داخل منظومة الحماية من الحريق",
+    ],
+    intro: [
+      "Follow the engineer from the alarm panel to the pump set and hose reel. Explore inspection and maintenance, then visit the Amiral fire detection exhibit.",
+      "رافق المهندس من لوحة الإنذار إلى مجموعة المضخة وبكرة الخرطوم، ثم استكشف الفحص والصيانة وأعمال كشف الحريق في مشروع أميرال.",
+    ],
+    wall: "DETECTION / SUPPRESSION / WATER SUPPLY",
+    departments: "FIRE & LIFE SAFETY / PROJECT GALLERY",
+  },
 } as const;
 export type GalleryId = keyof typeof galleries;
 export const galleryOrder = [
@@ -150,6 +214,7 @@ export const galleryOrder = [
   "mechanical",
   "fabrication",
   "civil",
+  "fire",
 ] as const satisfies readonly GalleryId[];
 export function isGallery(id: string): id is GalleryId {
   return Object.prototype.hasOwnProperty.call(galleries, id);
@@ -158,10 +223,12 @@ export function independentGalleryAt(p: number) {
   if (isMechanicalVisit(p)) return "mechanical";
   if (p >= 4 && p <= 4.80001) return "fabrication";
   if (p >= 5 && p <= 5.80001) return "civil";
+  if (p >= 6 && p <= 6.80001) return "fire";
   return null;
 }
 export const independentRoutes = {
   mechanical: mechanicalRoute,
   fabrication: fabricationRoute,
   civil: civilRoute,
+  fire: fireRoute,
 };

@@ -75,6 +75,8 @@ try {
   assert.equal(soundForProgress(1), "cooling");
   assert.equal(soundForProgress(2.6), "electrical");
   assert.equal(soundForProgress(2.9), null);
+  assert.equal(soundForProgress(6.71), "fire");
+  assert.equal(soundForProgress(6.8), null);
   assert.equal(soundForProgress(11.7), null);
   engine.setEnabled(true);
   document.hidden = true;

@@ -9,7 +9,7 @@ const out = "/tmp/fast-electrical-tour-check.mjs";
 await build({
   stdin: {
     contents:
-      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export * from "./src/data/mechanical"; export * from "./src/data/fabrication"; export * from "./src/data/civil"; export * from "./src/scene/serviceGalleries"; export * from "./src/scene/mechanicalTour"; export {Vector3,PerspectiveCamera} from "three";',
+      'export * from "./src/scene/electricalTour"; export * from "./src/scene/journey"; export * from "./src/scene/travelMotion"; export * from "./src/data/mechanical"; export * from "./src/data/fabrication"; export * from "./src/data/civil"; export * from "./src/data/fire"; export * from "./src/scene/serviceGalleries"; export * from "./src/scene/mechanicalTour"; export {Vector3,PerspectiveCamera} from "three";',
     resolveDir: process.cwd(),
   },
   bundle: true,
@@ -20,6 +20,7 @@ await build({
 const {
   fabricationStations, fabricationRoute, FABRICATION_Y,
   civilStations, civilRoute, CIVIL_Y,
+  fireStations, fireRoute, FIRE_Y,
   mechanicalStations,
   mechanicalRoute,
   MECHANICAL_Y,
@@ -174,6 +175,7 @@ for (const {
     sampleHost: sampleGuide,
     presenting: guideIsPresenting,
   },
+  {service:"fire",stations:fireStations,level:FIRE_Y,sampleCamera:fireRoute.camera,sampleHost:fireRoute.guide,presenting:fireRoute.presenting},
   {service:"civil",stations:civilStations,level:CIVIL_Y,sampleCamera:civilRoute.camera,sampleHost:civilRoute.guide,presenting:civilRoute.presenting},
   {service:"fabrication",stations:fabricationStations,level:FABRICATION_Y,sampleCamera:fabricationRoute.camera,sampleHost:fabricationRoute.guide,presenting:fabricationRoute.presenting},
   {
@@ -210,7 +212,7 @@ for (const {
       "Exhibit" + String(s.number).padStart(2, "0"),
     );
     assert(node?.getMesh(), `Missing exhibit at ${s.number}`);
-    if (service==="civil" || service==="fabrication" || service === "mechanical" && s.number >= 11)
+    if (service==="fire" || service==="civil" || service==="fabrication" || service === "mechanical" && s.number >= 11)
       assert(
         distanceToEquipment(node, s.focus) < 0.04,
         `Guide misses project exhibit ${s.number}`,
@@ -261,7 +263,7 @@ for (const {
     assert(Math.hypot(camera.x - guide.x, camera.z - guide.z) > 3.5);
   }
 }
-for (const [start,route,stations] of [[3,mechanicalRoute,mechanicalStations],[4,fabricationRoute,fabricationStations],[5,civilRoute,civilStations]]) {
+for (const [start,route,stations] of [[3,mechanicalRoute,mechanicalStations],[4,fabricationRoute,fabricationStations],[5,civilRoute,civilStations],[6,fireRoute,fireStations]]) {
 assert.equal(stations.length, 16);
 for (let i = 0; i <= 4000; i++) {
   const p = start + i / 5000;
@@ -282,7 +284,7 @@ for (let i = 0; i <= 4000; i++) {
 assert.equal(target.z, 58, "Gallery ends facing the rear lift");
 }
 console.log(
-  "PASS mechanical, fabrication and civil exhibits, complete aisle route and sign clearance at three viewport sizes",
+  "PASS mechanical, fabrication, civil and fire exhibits, complete aisle route and sign clearance at three viewport sizes",
 );
 for (let i = 0; i <= 100; i++) {
   const p = electricalDepartureAt(2.6 + (0.16 * i) / 100);

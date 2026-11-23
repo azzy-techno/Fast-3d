@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
 const gallery =
-  ["civil", "fabrication", "mechanical"].find((id) =>
+  ["fire", "civil", "fabrication", "mechanical"].find((id) =>
     process.argv.includes(`--${id}`),
   ) ?? "electrical";
 const expectations = {
@@ -17,6 +17,11 @@ const expectations = {
     exit: 4.8,
     caption: "Fitted stainless cabinet run",
     projects: 9,
+  },
+  fire: {
+    exit: 6.8,
+    caption: "Detector, sounder & manual call point",
+    projects: 16,
   },
   civil: {
     exit: 5.8,
@@ -118,7 +123,13 @@ try {
   if (projectsOnly) {
     await page.evaluate(() =>
       Array.from(document.querySelectorAll(".electrical-welcome button"))
-        .find((b) => b.textContent.includes("Go to FAST projects"))
+        .find((b) =>
+          b.textContent.includes(
+            window.__gallery === "fire"
+              ? "Visit the Amiral project"
+              : "Go to FAST projects",
+          ),
+        )
         .click(),
     );
   } else if (initialStop === 1) {
