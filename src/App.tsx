@@ -445,6 +445,7 @@ export default function App() {
           {galleryId && <>
             <ElectricalWelcome key={galleryId} service={galleryId} rtl={rtl}
               onProjects={galleries[galleryId].projectStart ? () => scrollToProgress(galleries[galleryId].stations[galleries[galleryId].projectStart-1].at+.005,true) : undefined}
+              onVisit={(at) => scrollToProgress(at,true)}
               onEnter={() => scrollToProgress(galleries[galleryId].stations[0].at+.005)} onLift={openLift}/>
             <ElectricalTour service={galleryId} rtl={rtl} onSelect={scrollToProgress}/>
           </>}
@@ -608,7 +609,7 @@ export default function App() {
                         2,
                         "0",
                       )}{" "}
-                      / 11
+                      / {orderedChapters.length}
                     </span>
                   </p>
                   <h2 id={`${chapter.id}-title`}>
@@ -680,7 +681,7 @@ export default function App() {
                   </figure>
                 </div>
                 <div className="chapter-location" aria-hidden="true">
-                  <span>{orderedChapters.indexOf(chapter) + 1} / 11</span>
+                  <span>{orderedChapters.indexOf(chapter) + 1} / {orderedChapters.length}</span>
                   <span>{t("Explore the building", "استكشف المبنى")}</span>
                 </div>
               </section>
@@ -699,7 +700,7 @@ export default function App() {
             className="closing"
             id="together"
             aria-labelledby="closing-title"
-            data-chapter="12"
+            data-chapter={orderedChapters.length + 1}
           >
             <div className="closing-content">
               <h2 id="closing-title">

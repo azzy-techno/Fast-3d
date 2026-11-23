@@ -9,11 +9,9 @@ export const soundNames = [
   "fire",
   "it",
   "manufacturing",
-  "industry",
-  "iiot",
-  "vision",
 ] as const;
 export function soundForProgress(p: number): string | null {
+  if (p >= 8 && p < 8.78) return "manufacturing";
   if (p >= 7 && p < 7.78) return soundNames[6];
   if (p >= 6 && p < 6.78) return soundNames[5];
   if (p >= 5 && p < 5.78) return soundNames[4];
@@ -25,7 +23,7 @@ export function soundForProgress(p: number): string | null {
   const chapter = Math.round(p);
   if (
     chapter >= 2 &&
-    chapter <= 11 &&
+    chapter <= soundNames.length &&
     p >= chapter - 0.08 &&
     p < chapter + 0.35
   )

@@ -12,18 +12,20 @@ npm run dev -- --port 5174 --strictPort
 Build and test:
 
 ```bash
-npm run build
+BASE_PATH=/Fast-3d/ npm run build
 npm run test:journey
-npm run test:browser
+npm run test:electrical
+npm run test:floor-visits
 ```
 
-The browser suite checks rendered equipment in all 11 service scenes, verifies single-chime audio playback and scroll cleanup, and starts and closes its own production preview on port 4174. It uses system Chromium at `/usr/bin/chromium`, or `CHROMIUM_PATH`, with software WebGL in this cloud. Screenshots and results are saved to the ignored `artifacts/` directory. Hardware GPU frame-rate benchmarking remains separate from these software-WebGL functional checks.
+The floor visit test uses system Chromium at `/usr/bin/chromium` with software WebGL. It starts its own production preview on port 4189 and writes screenshots to the ignored `artifacts/` directory.
 
 ## The journey
 
 The tour opens at reception. The floor directory starts with Electrical and Mechanical, continues through the remaining services and About FAST, and ends at the cooling-tower roof.
 
 - Scroll at your own pace within a floor. When the guide reaches the lift landing, choose any destination. The doors mask the change until its first frame is ready.
+- Floor 07 brings the six technology partners and FAST’s computer vision work into one digital manufacturing gallery. Use the entrance directory to jump directly to a partner. Run `npm run test:electrical:browser -- --manufacturing` for the guided route or append `--projects` for the section shortcuts.
 - Use **Choose floor** or the floor plan at any time. The roof tour finishes with a farewell and a project enquiry.
 - Run `npm run test:floor-visits` against the production build to check the greeting, lift selection, direct rides, roof finale and mobile replay.
 - Offices, a lounge and meeting room lead into a corridor with real room openings. Signals, flow particles, sparks, articulated robotics and inspection sweeps animate the systems.

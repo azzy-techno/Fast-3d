@@ -159,11 +159,9 @@ try {
       Array.from(
         document.querySelectorAll("[data-destination]"),
         (el) => el.dataset.destination,
-      )
-        .slice(0, 3)
-        .join(","),
+      ).join(","),
     ),
-    "reception,electrical,mechanical",
+    "reception,electrical,mechanical,fabrication,civil,fire,it,manufacturing,about,cooling",
   );
   await click(".lift-console-top button");
   await delay(600);

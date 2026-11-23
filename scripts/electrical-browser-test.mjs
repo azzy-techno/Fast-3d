@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
 const gallery =
-  ["it", "fire", "civil", "fabrication", "mechanical"].find((id) =>
-    process.argv.includes(`--${id}`),
+  ["manufacturing", "it", "fire", "civil", "fabrication", "mechanical"].find(
+    (id) => process.argv.includes(`--${id}`),
   ) ?? "electrical";
 const expectations = {
   electrical: { exit: 2.8, caption: "Ducted axial fan" },
@@ -18,7 +18,16 @@ const expectations = {
     caption: "Fitted stainless cabinet run",
     projects: 9,
   },
-  it: { exit: 7.8, caption: "UPS battery drawers & SNMP console", projects: 15 },
+  manufacturing: {
+    exit: 8.8,
+    caption: "Forklift presence & marked crossing",
+    projects: 15,
+  },
+  it: {
+    exit: 7.8,
+    caption: "UPS battery drawers & SNMP console",
+    projects: 15,
+  },
   fire: {
     exit: 6.8,
     caption: "Detector, sounder & manual call point",
@@ -121,14 +130,62 @@ try {
     : process.env.ELECTRICAL_MOBILE_ONLY
       ? last
       : 1;
+  if (gallery === "manufacturing" && projectsOnly) {
+    const sections = [1, 3, 6, 8, 10, 12, 15];
+    for (const [index, first] of sections.entries()) {
+      await wait(
+        () => !!document.querySelector(".electrical-welcome summary"),
+        "digital floor directory",
+      );
+      await page.evaluate((index) => {
+        const scope = document.querySelector(".electrical-welcome details");
+        if (!scope.open) scope.querySelector("summary").click();
+        scope.querySelectorAll(".scope-categories button")[index].click();
+      }, index);
+      const section = await page.evaluate(async () => {
+        const card = document.querySelector("#manufacturing-scope-content");
+        const logo = card.querySelector(".scope-partner-logo");
+        if (logo) await logo.decode();
+        return {
+          number: card.querySelector("ol").start,
+          source: card.querySelector("a").href,
+          logoLoaded: !!logo?.naturalWidth,
+          heading: card.querySelector("h3").textContent,
+        };
+      });
+      assert.equal(section.number, first);
+      assert(section.source.startsWith("https://"));
+      assert.equal(section.logoLoaded, index < 6);
+      await page.evaluate((n) => {
+        window.__expectedStop = n;
+        document.querySelector(".scope-visit").click();
+      }, first);
+      await wait(
+        () =>
+          +document.querySelector("canvas").dataset.manufacturingStation ===
+          window.__expectedStop,
+        section.heading,
+      );
+      console.log(`PASS ${section.heading}: section opens at exhibit ${first}`);
+      await page.evaluate(() =>
+        window.scrollTo({ top: 0, behavior: "instant" }),
+      );
+    }
+    await wait(
+      () => !!document.querySelector(".electrical-welcome"),
+      "return to directory",
+    );
+  }
   if (projectsOnly) {
     await page.evaluate(() =>
       Array.from(document.querySelectorAll(".electrical-welcome button"))
         .find((b) =>
           b.textContent.includes(
-            window.__gallery === "fire"
-              ? "Visit the Amiral project"
-              : "Go to FAST projects",
+            window.__gallery === "manufacturing"
+              ? "Visit computer vision"
+              : window.__gallery === "fire"
+                ? "Visit the Amiral project"
+                : "Go to FAST projects",
           ),
         )
         .click(),

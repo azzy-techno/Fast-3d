@@ -149,83 +149,17 @@ export const chapters: Chapter[] = [
   },
   {
     id: "manufacturing",
-    title: "Smart manufacturing",
-    ar: "التصنيع الذكي",
-    place: "The factory in motion",
-    placeAr: "المصنع في حركة",
-    description:
-      "Precision, connected. Robotic automation, production systems and local engineering expertise come together to make manufacturing work smarter.",
-    descriptionAr:
-      "الأتمتة الروبوتية وأنظمة الإنتاج والخبرات الهندسية المحلية تعمل معاً لتصنيع أكثر ذكاءً.",
-    capabilities: [
-      "Robotic automation",
-      "MES integration",
-      "Production systems",
-    ],
+    title: "Digitalization & smart manufacturing",
+    ar: "الرقمنة والتصنيع الذكي",
+    place: "Industry 4.0 / Floor 07",
+    placeAr: "الصناعة 4.0 / الطابق 07",
+    description: "One floor connects manufacturing execution, industrial IoT, plant operations, maintenance, enterprise software, energy and computer vision. Explore six partner sections and FAST’s Tenaris safety-line example.",
+    descriptionAr: "يجمع طابق واحد تنفيذ التصنيع وإنترنت الأشياء الصناعي والتشغيل والصيانة وبرمجيات المؤسسات والطاقة والرؤية الحاسوبية. استكشف أقسام الشركاء الستة ومثال فاست لرصد خطوط السلامة لدى تيناريس.",
+    capabilities: ["Smart manufacturing & Industry 4.0", "Industrial IoT", "Computer vision"],
     image: "manufacturing.webp",
     imageAlt: "Industrial automation and production capabilities from FAST",
-    href: `${site}/services/industrial-automation`,
+    href: `${site}/partners`,
     color: "#5ec5dc",
     origin: [-6.6, 30, -4],
-  },
-  {
-    id: "industry",
-    title: "Industry 4.0",
-    ar: "الصناعة 4.0",
-    place: "A clearer view of operations",
-    placeAr: "رؤية أوضح للعمليات",
-    description:
-      "See the bigger picture. MES, EMS, SCADA and digital-twin capabilities turn disconnected systems into a more informed industrial operation.",
-    descriptionAr:
-      "أنظمة إدارة التصنيع والطاقة والتحكم والتوائم الرقمية تمنحك رؤية متكاملة للعمليات الصناعية.",
-    capabilities: ["SCADA & MES", "Energy management", "Digital twins"],
-    image: "digital.webp",
-    imageAlt: "Digital engineering and industrial systems from FAST",
-    href: `${site}/services/industrial-automation#scope`,
-    color: "#79d2d5",
-    origin: [6.6, 24, -4],
-  },
-  {
-    id: "iiot",
-    title: "Industrial IoT",
-    ar: "إنترنت الأشياء الصناعي",
-    place: "Every asset has a voice",
-    placeAr: "لكل أصل صوت",
-    description:
-      "Connect the equipment to the insight. IIoT integration and predictive maintenance help industrial teams understand their assets and act with confidence.",
-    descriptionAr:
-      "تكامل إنترنت الأشياء الصناعي والصيانة التنبؤية يساعد فرق التشغيل على فهم حالة الأصول واتخاذ قرارات مدروسة.",
-    capabilities: [
-      "IIoT integration",
-      "Asset monitoring",
-      "Predictive maintenance",
-    ],
-    image: "digital.webp",
-    imageAlt: "FAST digital engineering and asset information capabilities",
-    href: `${site}/services/industrial-automation#scope`,
-    color: "#6ed6bf",
-    origin: [-6.6, 18, -4],
-  },
-  {
-    id: "vision",
-    title: "Computer vision",
-    ar: "الرؤية الحاسوبية",
-    place: "Intelligence that sees",
-    placeAr: "ذكاء يرى",
-    description:
-      "Make the invisible visible. AI computer vision supports safety-line detection, identifying human and forklift presence in industrial environments.",
-    descriptionAr:
-      "تدعم الرؤية الحاسوبية بالذكاء الاصطناعي رصد خطوط السلامة واكتشاف تواجد الأفراد والرافعات الشوكية في البيئات الصناعية.",
-    capabilities: [
-      "AI vision",
-      "Safety-line detection",
-      "Human & forklift detection",
-    ],
-    image: "manufacturing.webp",
-    imageAlt:
-      "Industrial automation environment representing FAST computer vision services",
-    href: `${site}/services/industrial-automation#projects`,
-    color: "#95d9a9",
-    origin: [6.6, 12, -4],
   },
 ];

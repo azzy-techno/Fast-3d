@@ -23,13 +23,6 @@ from exhibits import (
     paint,
 )
 
-subprocess.run(
-    ["python3", str(Path(__file__).with_name("screens.py")), str(atlas)], check=True
-)
-next(
-    n for n in materials[print_face].node_tree.nodes if n.type == "TEX_IMAGE"
-).image.reload()
-
 dark, black, slate, steel = "26323b", "18252e", "536776", "aab8be"
 cream, teal, gold, blue, green = "e6e3d4", "338e91", "d7a459", "4c91ac", "80bf9c"
 
@@ -261,14 +254,14 @@ def server_sled():
     angle = math.radians(28)
     for i in range(chassis_start, len(verts)):
         x, negative_z, y = verts[i]
-        dy, dz = y - .9, -negative_z - .7
-        y = .9 + dy * math.cos(angle) - dz * math.sin(angle)
-        z = .7 + dy * math.sin(angle) + dz * math.cos(angle)
+        dy, dz = y - 0.9, -negative_z - 0.7
+        y = 0.9 + dy * math.cos(angle) - dz * math.sin(angle)
+        z = 0.7 + dy * math.sin(angle) + dz * math.cos(angle)
         verts[i] = (x, -z, y)
     for x in (-1.28, 1.28):
-        box(x, .92, -.04, .18, .08, 1.40, slate)
-        tube((x, .94, -.47), (x, 1.52, -.47), .068, steel)
-        tube((x, .94, .61), (x, 1.52, -.47), .046, steel)
+        box(x, 0.92, -0.04, 0.18, 0.08, 1.40, slate)
+        tube((x, 0.94, -0.47), (x, 1.52, -0.47), 0.068, steel)
+        tube((x, 0.94, 0.61), (x, 1.52, -0.47), 0.046, steel)
 
 
 def integration():
@@ -423,9 +416,17 @@ builders = (
     video_wall,
     power_monitor,
 )
-for i, build in enumerate(builders, 1):
-    build()
-    export_part(f"Exhibit{i:02}")
-inspection_carrier()
-export_part("InspectionCarrier")
-write_glb(Path.cwd() / "public/assets/it/exhibits.glb")
+if __name__ == "__main__":
+    subprocess.run(
+        ["python3", str(Path(__file__).with_name("screens.py")), str(atlas)], check=True
+    )
+    next(
+        n for n in materials[print_face].node_tree.nodes if n.type == "TEX_IMAGE"
+    ).image.reload()
+
+    for i, build in enumerate(builders, 1):
+        build()
+        export_part(f"Exhibit{i:02}")
+    inspection_carrier()
+    export_part("InspectionCarrier")
+    write_glb(Path.cwd() / "public/assets/it/exhibits.glb")

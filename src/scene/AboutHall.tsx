@@ -142,7 +142,7 @@ export function AboutHall() {
         )}
         <Wayfinding
           text="THE FAST GALLERY"
-          sub="11 / ASSURANCE / INDUSTRY / GLOBAL TECHNOLOGY"
+          sub="08 / ASSURANCE / INDUSTRY / GLOBAL TECHNOLOGY"
           p={[0, 4.9, 10]}
           rotation={[0, Math.PI, 0]}
           width={12}

@@ -7,12 +7,14 @@ export function ElectricalWelcome({
   service,
   onLift,
   onProjects,
+  onVisit,
 }: {
   rtl: boolean;
   service: GalleryId;
   onEnter: () => void;
   onLift: () => void;
   onProjects?: () => void;
+  onVisit: (at: number) => void;
 }) {
   const gallery = galleries[service];
   const visible = useTour(
@@ -53,7 +55,7 @@ export function ElectricalWelcome({
           {rtl ? "اختر خدمة أخرى" : "Choose another service"}
         </button>
       </div>
-      <ElectricalScope service={service} rtl={rtl} />
+      <ElectricalScope service={service} rtl={rtl} onVisit={onVisit} />
     </aside>
   );
 }

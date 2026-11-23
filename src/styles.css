@@ -1866,12 +1866,6 @@ footer p,
   }
 }
 
-/* Give the lift, reception and farewell the same breathing room as the arrival. */
-.tour-view #vision {
-  height: 740svh;
-  min-height: 5200px;
-}
-
 .host-cue {
   position: absolute;
   inset-inline-end: var(--page);
@@ -2193,6 +2187,7 @@ footer p,
 }
 
 /* Electrical entrance and destination-controlled lift travel. */
+.tour-view #manufacturing .chapter-copy,
 .tour-view #it .chapter-copy,
 .tour-view #fire .chapter-copy,
 .tour-view #civil .chapter-copy,
@@ -2231,11 +2226,11 @@ footer p,
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.scope-categories:is([data-service="civil"], [data-service="fire"], [data-service="it"]) {
+.scope-categories:is([data-service="civil"], [data-service="fire"], [data-service="it"], [data-service="manufacturing"]) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.electrical-welcome .scope-categories:is([data-service="civil"], [data-service="fire"], [data-service="it"]),
+.electrical-welcome .scope-categories:is([data-service="civil"], [data-service="fire"], [data-service="it"], [data-service="manufacturing"]),
 .electrical-welcome .scope-categories[data-service="mechanical"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2616,7 +2611,8 @@ footer p,
 /* Each visit has its own scroll distance. Native touch and keyboard scrolling
    cover the same camera path as the eased wheel input. */
 .tour-view .reception-approach {height: 900svh; min-height: 5400px;}
-.tour-view .chapter:not(#electrical):not(#mechanical):not(#fabrication):not(#civil):not(#fire):not(#it):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter:not(#electrical):not(#mechanical):not(#fabrication):not(#civil):not(#fire):not(#it):not(#manufacturing):not(#cooling) {height: 520svh; min-height: 3100px;}
+.tour-view .chapter#manufacturing,
 .tour-view .chapter#it,
 .tour-view .chapter#fire,
 .tour-view .chapter#civil,
@@ -2643,3 +2639,6 @@ footer p,
 }
 
 .floor-plan {max-height:calc(100dvh - 215px);overflow-y:auto;overscroll-behavior:contain;}
+
+.scope-partner-logo { display: block; width: 148px; height: 58px; object-fit: contain; padding: 8px 14px; background: #f5f6ef; border-radius: 4px; margin-block: 8px; }
+.scope-visit { display: block; margin-block: 10px; padding: 8px 12px; background: #c5dcd4; color: #132c34; border: 0; border-radius: 4px; cursor: pointer; }

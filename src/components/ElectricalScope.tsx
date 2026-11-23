@@ -8,9 +8,11 @@ import { assetUrl } from "../lib/assets";
 export function ElectricalScope({
   rtl,
   service,
+  onVisit,
 }: {
   rtl: boolean;
   service: GalleryId;
+  onVisit?: (at: number) => void;
 }) {
   const [selected, setSelected] = useState(0);
   const gallery = galleries[service];
@@ -25,13 +27,17 @@ export function ElectricalScope({
     <details className="electrical-scope" data-lenis-prevent>
       <summary>
         <span>
-          {service !== "electrical"
+          {service === "manufacturing"
             ? rtl
-              ? "الخدمات ومشاريع مختارة"
-              : "Capabilities and selected projects"
-            : rtl
-              ? "قدرات ننفذها بفرقنا"
-              : "Capabilities we self-deliver"}
+              ? "الشركاء والرؤية الحاسوبية"
+              : "Partner services & computer vision"
+            : service !== "electrical"
+              ? rtl
+                ? "الخدمات ومشاريع مختارة"
+                : "Capabilities and selected projects"
+              : rtl
+                ? "قدرات ننفذها بفرقنا"
+                : "Capabilities we self-deliver"}
           <small>
             {rtl
               ? "اختر مجالاً ومرّر داخله لعرض النطاق الكامل"
@@ -73,6 +79,31 @@ export function ElectricalScope({
           <h3 id={`${service}-scope-heading`}>
             {rtl ? scope.ar : scope.title}
           </h3>
+          {"url" in scope && (
+            <>
+              {scope.logo && (
+                <img
+                  className="scope-partner-logo"
+                  src={assetUrl(scope.logo)}
+                  alt=""
+                />
+              )}
+              <p>{rtl ? scope.descriptionAr : scope.description}</p>
+              <a href={scope.url}>{rtl ? scope.ar : scope.title} ↗</a>
+              {onVisit && (
+                <button
+                  className="scope-visit"
+                  type="button"
+                  onClick={() =>
+                    onVisit(gallery.stations[scope.start - 1].at + 0.005)
+                  }
+                >
+                  {rtl ? "زُر القسم" : "Visit section"} ·{" "}
+                  {String(scope.start).padStart(2, "0")} →
+                </button>
+              )}
+            </>
+          )}
           <ol start={scope.start}>
             {scope.items.map(([en, ar], i) => {
               const station = gallery.stations[scope.start + i - 1];
@@ -83,11 +114,12 @@ export function ElectricalScope({
                   </span>
                   <div>
                     {rtl ? ar : en}
-                    {scope.id === "projects" && "note" in station && (
-                      <p className="scope-source">
-                        {rtl ? station.noteAr : station.note}
-                      </p>
-                    )}
+                    {(scope.id === "projects" || "url" in scope) &&
+                      "note" in station && (
+                        <p className="scope-source">
+                          {rtl ? station.noteAr : station.note}
+                        </p>
+                      )}
                   </div>
                 </li>
               );
@@ -100,34 +132,40 @@ export function ElectricalScope({
                 : "The pre-qualification profile also details breaker and control-panel installation, plus heat- and cold-shrink cable terminations."}
             </p>
           )}
-          <figure>
-            <img
-              src={assetUrl(`${service}/${scope.image}`)}
-              alt={
-                fieldwork
+          {!("url" in scope) && (
+            <figure>
+              <img
+                src={assetUrl(`${service}/${scope.image}`)}
+                alt={
+                  fieldwork
+                    ? fieldworkCaption
+                    : rtl
+                      ? `أعمال ${gallery.ar} من مشاريع فاست`
+                      : `${gallery.name} work from the FAST project portfolio`
+                }
+                loading="lazy"
+                width="640"
+                height="380"
+              />
+              <figcaption>
+                {fieldwork
                   ? fieldworkCaption
                   : rtl
-                    ? `أعمال ${gallery.ar} من مشاريع فاست`
-                    : `${gallery.name} work from the FAST project portfolio`
-              }
-              loading="lazy"
-              width="640"
-              height="380"
-            />
-            <figcaption>
-              {fieldwork
-                ? fieldworkCaption
-                : rtl
-                  ? "من محفظة مشاريع FAST O&M"
-                  : "From the FAST O&M project portfolio"}
-            </figcaption>
-          </figure>
+                    ? "من محفظة مشاريع FAST O&M"
+                    : "From the FAST O&M project portfolio"}
+              </figcaption>
+            </figure>
+          )}
         </section>
         <p className="scope-source">{gallery.scopeSource[rtl ? 1 : 0]}</p>
         <a href={chapters.find((chapter) => chapter.id === service)?.href}>
-          {rtl
-            ? "عرض الخدمة الكاملة ↗"
-            : `Explore the full ${service} service ↗`}
+          {service === "manufacturing"
+            ? rtl
+              ? "دليل شركاء فاست ↗"
+              : "FAST technology partner directory ↗"
+            : rtl
+              ? "عرض الخدمة الكاملة ↗"
+              : `Explore the full ${service} service ↗`}
         </a>
       </div>
     </details>

@@ -5,6 +5,10 @@ import {
 } from "./electricalTour";
 import { mechanicalStations, mechanicalScope } from "../data/mechanical";
 import { fabricationStations, fabricationScope } from "../data/fabrication";
+import {
+  manufacturingStations,
+  manufacturingScope,
+} from "../data/manufacturing";
 import { itStations, itScope } from "../data/it";
 import { fireStations, fireScope } from "../data/fire";
 import { civilStations, civilScope } from "../data/civil";
@@ -29,6 +33,12 @@ export const FIRE_Y = serviceLevel(4);
 export const fireRoute = createExhibitRoute(6, FIRE_Y, fireStations);
 export const IT_Y = serviceLevel(5);
 export const itRoute = createExhibitRoute(7, IT_Y, itStations);
+export const DIGITAL_Y = serviceLevel(6);
+export const manufacturingRoute = createExhibitRoute(
+  8,
+  DIGITAL_Y,
+  manufacturingStations,
+);
 export const galleries = {
   electrical: {
     scopeSource: [
@@ -251,6 +261,42 @@ export const galleries = {
     wall: "FIELD SYSTEMS / NETWORKS / SOFTWARE",
     departments: "INDUSTRIAL ICT / PROJECT GALLERY",
   },
+  manufacturing: {
+    name: "Digitalization",
+    ar: "الرقمنة والتصنيع الذكي",
+    start: 8,
+    level: DIGITAL_Y,
+    scopeSource: [
+      "Services follow FAST’s technology partner directory and industrial automation portfolio. Models, displays and operating data are illustrative.",
+      "تعتمد الخدمات على دليل شركاء فاست ومحفظة الأتمتة الصناعية. النماذج والشاشات وبيانات التشغيل توضيحية.",
+    ],
+    stations: manufacturingStations,
+    scope: manufacturingScope,
+    stationAt: manufacturingRoute.stationAt,
+    photos: ["overview.webp", "scope-1.webp", "stats.webp"],
+    posterPhoto: "manufacturing/overview.webp",
+    posterLines: [
+      "Industry 4.0, industrial IoT and computer vision",
+      "الصناعة 4.0 وإنترنت الأشياء الصناعي والرؤية الحاسوبية",
+    ],
+    posterGroups: [
+      "01–05  PRODUCTION",
+      "06–11  OPERATIONS",
+      "12–16  ENERGY & VISION",
+    ],
+    projectStart: 15,
+    projectLabel: [
+      "Visit computer vision · 15–16",
+      "انتقل إلى الرؤية الحاسوبية · 15–16",
+    ],
+    headline: ["Inside the connected factory", "داخل المصنع المتصل"],
+    intro: [
+      "Follow a production order from the shop floor to the enterprise. Choose a partner below to start with its equipment and services.",
+      "تتبّع أمر إنتاج من الورشة إلى نظام المؤسسة. اختر شريكاً أدناه للبدء بمعدّاته وخدماته.",
+    ],
+    wall: "SMART MANUFACTURING / INDUSTRY 4.0",
+    departments: "INDUSTRIAL IOT / ENERGY / COMPUTER VISION",
+  },
 } as const;
 export type GalleryId = keyof typeof galleries;
 export const galleryOrder = [
@@ -260,6 +306,7 @@ export const galleryOrder = [
   "civil",
   "fire",
   "it",
+  "manufacturing",
 ] as const satisfies readonly GalleryId[];
 export function isGallery(id: string): id is GalleryId {
   return Object.prototype.hasOwnProperty.call(galleries, id);
@@ -270,6 +317,7 @@ export function independentGalleryAt(p: number) {
   if (p >= 5 && p <= 5.80001) return "civil";
   if (p >= 6 && p <= 6.80001) return "fire";
   if (p >= 7 && p <= 7.80001) return "it";
+  if (p >= 8 && p <= 8.80001) return "manufacturing";
   return null;
 }
 export const independentRoutes = {
@@ -278,4 +326,5 @@ export const independentRoutes = {
   civil: civilRoute,
   fire: fireRoute,
   it: itRoute,
+  manufacturing: manufacturingRoute,
 };

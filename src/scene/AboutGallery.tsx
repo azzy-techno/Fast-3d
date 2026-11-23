@@ -16,7 +16,7 @@ import { useTour } from "../store";
 import { aboutTabs, partners } from "../data/about";
 import { journeyState } from "./journey";
 
-/** Executive gallery at level 11. All fittings stay outside the existing lift/guide lanes. */
+/** Executive gallery at level 08. All fittings stay outside the existing lift/guide lanes. */
 export function AboutGallery() {
   return (
     <group position={[0, 16, 0]} name="about-fast-gallery">
@@ -199,7 +199,7 @@ function Projector() {
     ctx.strokeRect(4, 4, 1528, 632);
     ctx.fillStyle = "#a2eff5";
     ctx.font = "20px sans-serif";
-    ctx.fillText("FAST / LEVEL 11 / KNOWLEDGE GALLERY", 50, 54);
+    ctx.fillText("FAST / LEVEL 08 / KNOWLEDGE GALLERY", 50, 54);
     ctx.font = "48px sans-serif";
     ctx.fillStyle = "#e3feff";
     ctx.fillText(

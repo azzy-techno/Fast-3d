@@ -70,7 +70,7 @@ try {
     0,
     "Mute stops every voice immediately",
   );
-  for (let n = 2; n <= 11; n++)
+  for (let n = 2; n <= soundNames.length; n++)
     assert.equal(soundForProgress(n), soundNames[n - 1]);
   assert.equal(soundForProgress(1), "cooling");
   assert.equal(soundForProgress(2.6), "electrical");
@@ -79,6 +79,8 @@ try {
   assert.equal(soundForProgress(6.8), null);
   assert.equal(soundForProgress(7.71), "it");
   assert.equal(soundForProgress(7.8), null);
+  assert.equal(soundForProgress(8.71), "manufacturing");
+  assert.equal(soundForProgress(9), null);
   assert.equal(soundForProgress(11.7), null);
   engine.setEnabled(true);
   document.hidden = true;
@@ -91,7 +93,7 @@ try {
   engine.dispose();
   assert.equal(document.documentElement.dataset.soundscape, "silent");
   console.log(
-    "PASS: opt-in, late loads, rapid crossfades, mute, hidden tab, all 11 sound mappings, silent travel.",
+    "PASS: opt-in, late loads, rapid crossfades, mute, hidden tab, all service sound mappings, silent travel.",
   );
 } finally {
   await rm(dir, { recursive: true, force: true });

@@ -18,7 +18,8 @@ export function JourneyGuide({
   locationLabel: string;
 }) {
   const [mapOpen, setMapOpen] = useState(false);
-  const row = floors.indexOf(floor);
+  const row = floors.length - 1 - floors.indexOf(floor);
+  const pitch = 165 / (floors.length - 1);
   return (
     <div className="journey-guide">
       <div className="journey-toolbar">
@@ -88,29 +89,29 @@ export function JourneyGuide({
             {Array.from({ length: floors.length }, (_, row) => (
               <g key={row}>
                 <path
-                  d={`M16 ${29 + row * 13.6}H118`}
+                  d={`M16 ${29 + row * pitch}H118`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth=".7"
                 />
                 <rect
                   x="21"
-                  y={17 + row * 13.6}
+                  y={17 + row * pitch}
                   width="92"
                   height="10"
                   rx="1"
-                  fill={floor === floors[row] ? "#91d8da" : "#789ca41c"}
+                  fill={floors.length - 1 - row === floors.indexOf(floor) ? "#91d8da" : "#789ca41c"}
                 />
               </g>
             ))}
             <path
-              d="M130 26V184"
+              d="M130 22V187"
               fill="none"
               stroke="#96d8d8"
               strokeWidth="1"
               strokeDasharray="2 4"
             />
-            <circle cx="130" cy={22 + row * 13.6} r="3.5" fill="#e1c69b" />
+            <circle cx="130" cy={22 + row * pitch} r="3.5" fill="#e1c69b" />
           </svg>
           <ol>
             {floors.map((d) => (
