@@ -5,6 +5,7 @@ import {
   fabricationRoute,
   civilRoute,
   fireRoute,
+  itRoute,
 } from "./serviceGalleries";
 import { mechanicalRoute } from "./mechanicalTour";
 import { floors } from "../lib/journeyScroll";
@@ -324,6 +325,7 @@ const World = memo(function World({
       gl.domElement.dataset.cameraHeight = camera.position.y.toFixed(3);
       gl.domElement.dataset.towerHeight = "83";
       gl.domElement.dataset.aboutStation = "0";
+      gl.domElement.dataset.itStation = String(itRoute.stationAt(p)?.number ?? 0);
       gl.domElement.dataset.fireStation = String(fireRoute.stationAt(p)?.number ?? 0);
       gl.domElement.dataset.civilStation = String(civilRoute.stationAt(p)?.number ?? 0);
       gl.domElement.dataset.fabricationStation = String(

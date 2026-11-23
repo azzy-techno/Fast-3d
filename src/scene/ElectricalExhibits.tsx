@@ -1,4 +1,5 @@
 import type { GalleryId } from "./serviceGalleries";
+import { itStations } from "../data/it";
 import { mechanicalStations } from "../data/mechanical";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -101,6 +102,34 @@ function Impeller({
   );
 }
 
+function InspectionTurntable() {
+  const carrier = useRef<Group>(null);
+  const reduced = useMemo(
+    () => matchMedia("(prefers-reduced-motion: reduce)"),
+    [],
+  );
+  useFrame((_, dt) => {
+    const p = journeyState.progress;
+    const station = itStations[3];
+    if (
+      carrier.current &&
+      !reduced.matches &&
+      p >= station.at &&
+      p <= station.end
+    )
+      carrier.current.rotation.y += Math.min(dt, 0.1) * 0.65;
+  });
+  return (
+    <group
+      ref={carrier}
+      position={[-0.72, 1.15, 0]}
+      userData={{ dynamic: true }}
+    >
+      <ExhibitMesh service="it" name="InspectionCarrier" />
+    </group>
+  );
+}
+
 export function ElectricalStationModel({
   number,
   service = "electrical",
@@ -120,6 +149,7 @@ export function ElectricalStationModel({
         : service === "electrical" && number === 16) && (
         <Impeller mechanical={mechanical} number={number} />
       )}
+      {service === "it" && number === 4 && <InspectionTurntable />}
       {mechanical && number === 12 && <IntakeDamper />}
     </>
   );

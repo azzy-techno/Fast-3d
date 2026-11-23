@@ -5,6 +5,7 @@ import {
 } from "./electricalTour";
 import { mechanicalStations, mechanicalScope } from "../data/mechanical";
 import { fabricationStations, fabricationScope } from "../data/fabrication";
+import { itStations, itScope } from "../data/it";
 import { fireStations, fireScope } from "../data/fire";
 import { civilStations, civilScope } from "../data/civil";
 import { electricalScope } from "../data/electrical";
@@ -26,6 +27,8 @@ export const CIVIL_Y = serviceLevel(3);
 export const civilRoute = createExhibitRoute(5, CIVIL_Y, civilStations);
 export const FIRE_Y = serviceLevel(4);
 export const fireRoute = createExhibitRoute(6, FIRE_Y, fireStations);
+export const IT_Y = serviceLevel(5);
+export const itRoute = createExhibitRoute(7, IT_Y, itStations);
 export const galleries = {
   electrical: {
     scopeSource: [
@@ -207,6 +210,47 @@ export const galleries = {
     wall: "DETECTION / SUPPRESSION / WATER SUPPLY",
     departments: "FIRE & LIFE SAFETY / PROJECT GALLERY",
   },
+  it: {
+    name: "IT",
+    ar: "تقنية المعلومات",
+    start: 7,
+    level: IT_Y,
+    scopeSource: [
+      "Scope and field photographs are drawn from FAST’s Industrial ICT profile, pp. 4–16 and 18. Project names come from FAST’s IT Services page. Models and screen data are illustrative.",
+      "استُمد النطاق والصور الميدانية من ملف فاست للتقنية الصناعية، ص 4–16 و18، وأسماء المشاريع من صفحة خدمات التقنية. النماذج وبيانات الشاشات توضيحية.",
+    ],
+    stations: itStations,
+    scope: itScope,
+    stationAt: itRoute.stationAt,
+    photos: [
+      "security.webp",
+      "networks.webp",
+      "software.webp",
+      "fieldwork.webp",
+    ],
+    posterPhoto: "it/overview.webp",
+    posterLines: [
+      "Field devices, networks and software in one guided visit.",
+      "من أجهزة الموقع إلى الشبكات والتطبيقات",
+    ],
+    posterGroups: [
+      "01–04  ELV & SECURITY",
+      "05–09  NETWORKS",
+      "10–14  SOFTWARE",
+      "15–16  PROJECTS",
+    ],
+    projectStart: 15,
+    headline: [
+      "From the field to the control room",
+      "من الميدان إلى غرفة التحكم",
+    ],
+    intro: [
+      "Follow a camera feed, trace a fibre link and see an Andon station beside its operator dashboard. Finish at the video wall and UPS monitoring exhibits.",
+      "تتبّع صورة الكاميرا ومسار الألياف وشاهد محطة أندون إلى جوار لوحة التشغيل. تختتم الجولة بجدار العرض ومراقبة الطاقة الاحتياطية.",
+    ],
+    wall: "FIELD SYSTEMS / NETWORKS / SOFTWARE",
+    departments: "INDUSTRIAL ICT / PROJECT GALLERY",
+  },
 } as const;
 export type GalleryId = keyof typeof galleries;
 export const galleryOrder = [
@@ -215,6 +259,7 @@ export const galleryOrder = [
   "fabrication",
   "civil",
   "fire",
+  "it",
 ] as const satisfies readonly GalleryId[];
 export function isGallery(id: string): id is GalleryId {
   return Object.prototype.hasOwnProperty.call(galleries, id);
@@ -224,6 +269,7 @@ export function independentGalleryAt(p: number) {
   if (p >= 4 && p <= 4.80001) return "fabrication";
   if (p >= 5 && p <= 5.80001) return "civil";
   if (p >= 6 && p <= 6.80001) return "fire";
+  if (p >= 7 && p <= 7.80001) return "it";
   return null;
 }
 export const independentRoutes = {
@@ -231,4 +277,5 @@ export const independentRoutes = {
   fabrication: fabricationRoute,
   civil: civilRoute,
   fire: fireRoute,
+  it: itRoute,
 };

@@ -19,7 +19,7 @@ export const floors = [
     ar: c.ar,
     floor: String(i + 1).padStart(2, "0"),
     start: i + 2,
-    end: i < 5 ? i + 2.8 : i === 9 ? 11.48 : i + 2 + 0.46,
+    end: i < 6 ? i + 2.8 : i === 9 ? 11.48 : i + 2 + 0.46,
   })),
   {
     id: "about",

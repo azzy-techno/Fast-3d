@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { openBrowser } from "@remotion/renderer";
 const gallery =
-  ["fire", "civil", "fabrication", "mechanical"].find((id) =>
+  ["it", "fire", "civil", "fabrication", "mechanical"].find((id) =>
     process.argv.includes(`--${id}`),
   ) ?? "electrical";
 const expectations = {
@@ -18,6 +18,7 @@ const expectations = {
     caption: "Fitted stainless cabinet run",
     projects: 9,
   },
+  it: { exit: 7.8, caption: "UPS battery drawers & SNMP console", projects: 15 },
   fire: {
     exit: 6.8,
     caption: "Detector, sounder & manual call point",

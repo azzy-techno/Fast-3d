@@ -133,9 +133,9 @@ export const chapters: Chapter[] = [
     place: "The connected core",
     placeAr: "في قلب الاتصال",
     description:
-      "A dependable digital foundation. Networks, server rooms, security systems and software solutions connecting your people, processes and facilities.",
+      "Explore field devices, server rooms and software with a FAST engineer, then visit the LED video-wall and UPS monitoring project exhibits.",
     descriptionAr:
-      "شبكات وغرف خوادم وأنظمة أمن وحلول برمجية تربط الأفراد والعمليات والمنشآت.",
+      "استكشف أجهزة الموقع وغرف الخوادم والبرمجيات مع مهندس فاست ثم زُر مجسّمَي جدار العرض ومراقبة الطاقة الاحتياطية.",
     capabilities: [
       "Networks & servers",
       "CCTV & access control",

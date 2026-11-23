@@ -16,6 +16,10 @@ export function ElectricalScope({
   const gallery = galleries[service];
   const groups = gallery.scope;
   const scope = groups[selected];
+  const fieldwork = service === "it" && scope.id === "projects";
+  const fieldworkCaption = rtl
+    ? "تجهيز الخزائن وإشارات أندون في الموقع، من ملف فاست للتقنية الصناعية، ص 18"
+    : "Rack commissioning and Andon line signalling, from FAST’s Industrial ICT profile, p. 18";
 
   return (
     <details className="electrical-scope" data-lenis-prevent>
@@ -100,18 +104,22 @@ export function ElectricalScope({
             <img
               src={assetUrl(`${service}/${scope.image}`)}
               alt={
-                rtl
-                  ? `أعمال ${gallery.ar} من مشاريع فاست`
-                  : `${gallery.name} work from the FAST project portfolio`
+                fieldwork
+                  ? fieldworkCaption
+                  : rtl
+                    ? `أعمال ${gallery.ar} من مشاريع فاست`
+                    : `${gallery.name} work from the FAST project portfolio`
               }
               loading="lazy"
               width="640"
               height="380"
             />
             <figcaption>
-              {rtl
-                ? "من محفظة مشاريع FAST O&M"
-                : "From the FAST O&M project portfolio"}
+              {fieldwork
+                ? fieldworkCaption
+                : rtl
+                  ? "من محفظة مشاريع FAST O&M"
+                  : "From the FAST O&M project portfolio"}
             </figcaption>
           </figure>
         </section>
