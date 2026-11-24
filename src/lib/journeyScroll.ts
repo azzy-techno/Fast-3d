@@ -13,22 +13,22 @@ export const floors = [
     start: 11.69,
     end: 11.61,
   },
-  ...chapters.slice(1).map((c, i) => ({
-    id: c.id,
-    title: c.title,
-    ar: c.ar,
-    floor: String(i + 1).padStart(2, "0"),
-    start: i + 2,
-    end: i + 2.8,
-  })),
   {
     id: "about",
     title: "About FAST",
     ar: "عن فاست",
-    floor: String(chapters.length).padStart(2, "0"),
+    floor: "01",
     start: 1.535,
     end: 1.74,
   },
+  ...chapters.slice(1).map((c, i) => ({
+    id: c.id,
+    title: c.title,
+    ar: c.ar,
+    floor: String(i + 2).padStart(2, "0"),
+    start: i + 2,
+    end: i + 2.8,
+  })),
   {
     id: "cooling",
     title: chapters[0].title,
@@ -38,6 +38,9 @@ export const floors = [
     end: 0,
   },
 ];
+export function floorNumber(id: string) {
+  return floors.find((floor) => floor.id === id)!.floor;
+}
 export type Floor = (typeof floors)[number];
 export function floorStops(floor: Floor): [number, number][] {
   if (floor.id === "cooling")

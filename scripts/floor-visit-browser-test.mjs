@@ -161,7 +161,16 @@ try {
         (el) => el.dataset.destination,
       ).join(","),
     ),
-    "reception,electrical,mechanical,fabrication,civil,fire,it,manufacturing,about,cooling",
+    "reception,about,electrical,mechanical,fabrication,civil,fire,it,manufacturing,cooling",
+  );
+  assert.deepEqual(
+    await page.evaluate(() =>
+      Array.from(
+        document.querySelectorAll(".lift-floor-number"),
+        (el) => el.textContent,
+      ),
+    ),
+    ["G", "01", "02", "03", "04", "05", "06", "07", "08", "R"],
   );
   await click(".lift-console-top button");
   await delay(600);
@@ -169,6 +178,8 @@ try {
     await page.evaluate(() => document.querySelector(".lift-dialog").open),
     false,
   );
+  await click(".lift-toggle");
+  await ride("about", 1.535);
   await click(".lift-toggle");
   await ride("electrical", 2);
   await click(".electrical-welcome button");
@@ -244,6 +255,26 @@ try {
         .at(-1),
     ),
     "cooling",
+  );
+  assert.deepEqual(
+    await page.evaluate(() =>
+      Array.from(
+        document.querySelectorAll("main #arrival, main #about, main .chapter"),
+        (el) => el.id,
+      ),
+    ),
+    [
+      "arrival",
+      "about",
+      "electrical",
+      "mechanical",
+      "fabrication",
+      "civil",
+      "fire",
+      "it",
+      "manufacturing",
+      "cooling",
+    ],
   );
   assert.deepEqual(errors, []);
   console.log(

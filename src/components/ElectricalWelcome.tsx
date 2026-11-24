@@ -1,3 +1,4 @@
+import { floorNumber } from "../lib/journeyScroll";
 import { galleries, type GalleryId } from "../scene/serviceGalleries";
 import { useTour } from "../store";
 import { ElectricalScope } from "./ElectricalScope";
@@ -34,7 +35,7 @@ export function ElectricalWelcome({
       }
     >
       <span>
-        0{gallery.start - 1} / FAST {service.toUpperCase()}
+        {floorNumber(service)} / FAST {service.toUpperCase()}
       </span>
       <h2>{gallery.headline[rtl ? 1 : 0]}</h2>
       <p>{gallery.intro[rtl ? 1 : 0]}</p>

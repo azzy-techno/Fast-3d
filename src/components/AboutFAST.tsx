@@ -1,3 +1,4 @@
+import { floorNumber } from "../lib/journeyScroll";
 import { useEffect, useRef, useState } from "react";
 import {
   aboutTabs,
@@ -43,7 +44,7 @@ export function AboutWelcome({
       aria-label={rtl ? "مرصد فاست" : "FAST Observatory"}
     >
       <span className="about-eyebrow">
-        08 / {rtl ? "مرصد فاست" : "THE FAST OBSERVATORY"}
+        {floorNumber("about")} / {rtl ? "مرصد فاست" : "THE FAST OBSERVATORY"}
       </span>
       <h2>{rtl ? "اقترب. واكتشف المزيد." : "Look closer. Discover more."}</h2>
       <p>

@@ -1,3 +1,4 @@
+import { floorNumber } from "../lib/journeyScroll";
 import {
   type GalleryId,
   galleryOrder,
@@ -316,7 +317,7 @@ export function Lift({
           exit
             ? "WELCOME / RECEPTION"
             : roof
-              ? "ABOUT FAST / LEVEL 08"
+              ? `ABOUT FAST / LEVEL ${floorNumber("about")}`
               : "ENGINEERING FLOORS"
         }
         sub={
@@ -411,7 +412,7 @@ export function Lift({
               ? "ROOF ACCESS / 83 M"
               : stack || rear
                 ? "CHOOSE YOUR NEXT FLOOR"
-                : "ELECTRICAL / 01"
+                : `ELECTRICAL / ${floorNumber("electrical")}`
         }
         p={[0, 3, 1.86]}
         width={3}

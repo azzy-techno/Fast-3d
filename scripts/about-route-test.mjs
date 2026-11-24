@@ -76,8 +76,19 @@ try {
   assert(camera.equals(previous), "Presentation viewing hold");
   assert(guideIsPresenting(1.588));
   sampleJourney(1.605, camera, target);
-  sampleJourney(1.65, previous, prevGuide);
+  sampleJourney(1.606, previous, prevGuide);
   assert(camera.equals(previous), "Steady first-person binocular hold");
+  const eye = camera.clone();
+  let distance = 0;
+  for (let i = 0; i <= 100; i++) {
+    sampleJourney(1.606 + (1.67 - 1.606) * (i / 100), camera, target);
+    assert(
+      camera.distanceTo(eye) >= distance,
+      "Stepping away never approaches the eyepiece again",
+    );
+    distance = camera.distanceTo(eye);
+  }
+  assert(distance > 4, "The camera clears the instrument");
   for (const floor of floors) {
     for (let i = 0; i <= 1000; i++) {
       const fraction = i / 1000;

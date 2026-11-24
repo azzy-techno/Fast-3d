@@ -37,8 +37,8 @@ export const chapters: Chapter[] = [
     id: "electrical",
     title: "Electrical",
     ar: "المقاولات الكهربائية",
-    place: "Level 01 / 16 guided stations",
-    placeAr: "الطابق 01 / 16 محطة إرشادية",
+    place: "Level 02 / 16 guided stations",
+    placeAr: "الطابق 02 / 16 محطة إرشادية",
     description:
       "Step into a 62 × 64 m electrical exhibition. Follow your FAST engineer through all 16 capabilities, from power installations to automation, lighting and industrial fans.",
     descriptionAr:
@@ -58,8 +58,8 @@ export const chapters: Chapter[] = [
     id: "mechanical",
     title: "Mechanical",
     ar: "المقاولات الميكانيكية",
-    place: "Level 02 / 16 guided stations",
-    placeAr: "الطابق 02 / 16 محطة إرشادية",
+    place: "Level 03 / 16 guided stations",
+    placeAr: "الطابق 03 / 16 محطة إرشادية",
     description:
       "Explore ten core mechanical services and six installations from FAST’s project portfolio. Follow the engineer from cooling towers and pipework to shelter air conditioning and furnace linings.",
     descriptionAr:
@@ -79,8 +79,8 @@ export const chapters: Chapter[] = [
     id: "fabrication",
     title: "Fabrication",
     ar: "خدمات التصنيع",
-    place: "Level 03 / 16 guided stations",
-    placeAr: "الطابق 03 / 16 محطة إرشادية",
+    place: "Level 04 / 16 guided stations",
+    placeAr: "الطابق 04 / 16 محطة إرشادية",
     description:
       "Walk through eight capabilities from FAST’s Dammam-area fabrication yard, then see how the work is used in eight selected client projects.",
     descriptionAr:
@@ -151,8 +151,8 @@ export const chapters: Chapter[] = [
     id: "manufacturing",
     title: "Digitalization & smart manufacturing",
     ar: "الرقمنة والتصنيع الذكي",
-    place: "Industry 4.0 / Floor 07",
-    placeAr: "الصناعة 4.0 / الطابق 07",
+    place: "Industry 4.0 / Floor 08",
+    placeAr: "الصناعة 4.0 / الطابق 08",
     description: "One floor connects manufacturing execution, industrial IoT, plant operations, maintenance, enterprise software, energy and computer vision. Explore six partner sections and FAST’s Tenaris safety-line example.",
     descriptionAr: "يجمع طابق واحد تنفيذ التصنيع وإنترنت الأشياء الصناعي والتشغيل والصيانة وبرمجيات المؤسسات والطاقة والرؤية الحاسوبية. استكشف أقسام الشركاء الستة ومثال فاست لرصد خطوط السلامة لدى تيناريس.",
     capabilities: ["Smart manufacturing & Industry 4.0", "Industrial IoT", "Computer vision"],

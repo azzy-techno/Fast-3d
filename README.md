@@ -22,10 +22,10 @@ The floor visit test uses system Chromium at `/usr/bin/chromium` with software W
 
 ## The journey
 
-The tour opens at reception. The floor directory starts with Electrical and Mechanical, continues through the remaining services and About FAST, and ends at the cooling-tower roof.
+The tour starts outside the tower and leads into Reception. About FAST is Floor 01, followed by Electrical, Mechanical and the other service floors. The cooling-tower roof is the final stop.
 
 - Scroll at your own pace within a floor. When the guide reaches the lift landing, choose any destination. The doors mask the change until its first frame is ready.
-- Floor 07 brings the six technology partners and FAST’s computer vision work into one digital manufacturing gallery. Use the entrance directory to jump directly to a partner. Run `npm run test:electrical:browser -- --manufacturing` for the guided route or append `--projects` for the section shortcuts.
+- Floor 08 brings the six technology partners and FAST’s computer vision work into one digital manufacturing gallery. Use the entrance directory to jump directly to a partner. Run `npm run test:electrical:browser -- --manufacturing` for the guided route or append `--projects` for the section shortcuts.
 - Use **Choose floor** or the floor plan at any time. The roof tour finishes with a farewell and a project enquiry.
 - Run `npm run test:floor-visits` against the production build to check the greeting, lift selection, direct rides, roof finale and mobile replay.
 - Offices, a lounge and meeting room lead into a corridor with real room openings. Signals, flow particles, sparks, articulated robotics and inspection sweeps animate the systems.

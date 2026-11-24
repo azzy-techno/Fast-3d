@@ -38,7 +38,7 @@ import { Building } from "./Building";
 import { Interior, RoofAccess } from "./Architecture";
 import { Atmosphere } from "./Atmosphere";
 import { journeyState, sampleJourney } from "./journey";
-import { observatoryView } from "../lib/observatoryView";
+import { OBSERVATORY_AT, observatoryView } from "../lib/observatoryView";
 import { installRenderProbe } from "./renderProbe";
 import { useVisibilityUpdates } from "./useVisibilityUpdates";
 import { compileVisible } from "./compileVisible";
@@ -169,7 +169,7 @@ const World = memo(function World({
     if (
       !tour.observatoryPending &&
       !tour.observatoryOpen &&
-      (p < 1.58 || p > 1.7)
+      p < 1.58
     )
       observatoryArmed.current = true;
     // Enter on a forward approach, never when selecting a different floor.
@@ -178,6 +178,8 @@ const World = memo(function World({
       !tour.observatoryOpen &&
       !tour.observatoryPending &&
       !tour.aboutPanel &&
+      tour.liftPhase === "idle" &&
+      requested > p &&
       requested >= 1.592 &&
       requested < 1.67 &&
       p >= 1.588
@@ -317,7 +319,7 @@ const World = memo(function World({
       scene.background.copy(vectors.interior).lerp(vectors.exterior, outside);
     if (shell.current) shell.current.visible = p < 1.38 || p > 11.715;
     if (city.current) city.current.visible = p < 1.38 || p > 11.72;
-    if (useTour.getState().observatoryPending && Math.abs(p - 1.605) < 0.0004)
+    if (useTour.getState().observatoryPending && Math.abs(p - OBSERVATORY_AT) < 0.0004)
       useTour.getState().setObservatory(true);
     diagnosticTime.current += dt;
     if (diagnosticTime.current >= 0.1) {

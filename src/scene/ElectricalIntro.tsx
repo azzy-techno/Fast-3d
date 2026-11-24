@@ -1,3 +1,4 @@
+import { floorNumber } from "../lib/journeyScroll";
 import { galleries, type GalleryId } from "./serviceGalleries";
 import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
@@ -39,7 +40,7 @@ export function ElectricalIntro({ service }: { service: GalleryId }) {
     }
     c.fillStyle = "#dfbe7c";
     c.font = "500 26px sans-serif";
-    c.fillText(`FAST O&M     /     LEVEL 0${gallery.start - 1}`, 90, 100);
+    c.fillText(`FAST O&M     /     LEVEL ${floorNumber(service)}`, 90, 100);
     c.fillStyle = "#f2f1e8";
     c.font = "600 116px sans-serif";
     c.fillText(gallery.name.toUpperCase(), 80, 280);

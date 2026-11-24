@@ -1,9 +1,9 @@
+import { OBSERVATORY_AT } from "../lib/observatoryView";
 import { Vector3 } from "three";
 import type { Point } from "../data/chapters";
 export const ABOUT_START = 1.53,
   ABOUT_END = 1.74,
   ABOUT_Y = 76;
-export const OBSERVATORY_AT = 1.605;
 type Key = { at: number; camera: Point; guide: Point; target: Point };
 export const aboutRouteKeys: Key[] = [
   {
@@ -57,13 +57,13 @@ export const aboutRouteKeys: Key[] = [
     target: [0, 77.65, 29],
   },
   {
-    at: 1.605,
+    at: OBSERVATORY_AT,
     camera: [0, 77.65, 31.4],
     guide: [0, 76, 31],
     target: [0, 77.65, 28],
   },
   {
-    at: 1.65,
+    at: 1.606,
     camera: [0, 77.65, 31.4],
     guide: [0, 76, 31],
     target: [0, 77.65, 28],

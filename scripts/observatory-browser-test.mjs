@@ -148,10 +148,9 @@ try {
         +document.getElementById("optical-transition").style.opacity,
       );
     }, 50);
-    const a = document.getElementById("about-hall").offsetTop;
-    const b = document.getElementById("about-departure").offsetTop;
+    const range = document.documentElement.scrollHeight - innerHeight;
     window.scrollTo({
-      top: a + (b - a) * ((1.595 - 1.53) / 0.21),
+      top: range * ((1.595 - 1.535) / (1.74 - 1.535)),
       behavior: "instant",
     });
   });
@@ -319,11 +318,11 @@ try {
   await wait(() => !document.querySelector(".observatory").open, "exit");
   await wait(
     () =>
-      Math.abs(+document.querySelector("canvas").dataset.journey - 1.585) <
+      Math.abs(+document.querySelector("canvas").dataset.journey - 1.675) <
       0.001,
-    "return camera",
+    "step onto the lift-bound route",
   );
-  console.log("PASS smooth return to presentation point");
+  console.log("PASS smooth retreat from the eyepiece toward the lift");
   await delay(800);
   assert.equal(
     await page.evaluate(() => document.querySelector(".observatory").open),
@@ -336,7 +335,28 @@ try {
     (await page.evaluate(() => window.__draws)) > resumed,
     "Main scene resumes",
   );
-  await click(".lift-toggle");
+  // Follow the departure in short scrolls so a repeated close-up or a reopened viewer is observable.
+  for (const pose of [1.682, 1.695, 1.712, 1.733, 1.74]) {
+    await page.evaluate((pose) => {
+      window.__exitPose = pose;
+      const range = document.documentElement.scrollHeight - innerHeight;
+      window.scrollTo({
+        top: range * ((pose - 1.535) / (1.74 - 1.535)),
+        behavior: "instant",
+      });
+    }, pose);
+    await wait(
+      () =>
+        Math.abs(
+          +document.querySelector("canvas").dataset.journey - window.__exitPose,
+        ) < 0.0005,
+      "lift-bound camera",
+    );
+    assert.equal(
+      await page.evaluate(() => document.querySelector(".observatory").open),
+      false,
+    );
+  }
   await wait(
     () => document.querySelector(".lift-dialog").open,
     "outgoing lift",

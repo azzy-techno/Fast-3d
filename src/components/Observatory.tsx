@@ -92,7 +92,7 @@ export function Observatory({
     } else if (dialog.current?.open) {
       dialog.current.close();
       lookThroughObservatory(0, 0);
-      opener.current?.isConnected && opener.current.focus();
+      opener.current?.isConnected && opener.current.focus({ preventScroll: true });
     }
   }, [open]);
   useEffect(() => {

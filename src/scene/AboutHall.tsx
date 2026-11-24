@@ -1,3 +1,5 @@
+import { insideEyepiece } from "../lib/observatoryView";
+import { floorNumber } from "../lib/journeyScroll";
 import { ArchitecturalAsset } from "./ArchitecturalAsset";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -142,7 +144,7 @@ export function AboutHall() {
         )}
         <Wayfinding
           text="THE FAST GALLERY"
-          sub="08 / ASSURANCE / INDUSTRY / GLOBAL TECHNOLOGY"
+          sub={`${floorNumber("about")} / ASSURANCE / INDUSTRY / GLOBAL TECHNOLOGY`}
           p={[0, 4.9, 10]}
           rotation={[0, Math.PI, 0]}
           width={12}
@@ -244,7 +246,7 @@ function BinocularStation() {
     // The optical housing is behind our eyes in first-person view.
     if (instrument.current)
       instrument.current.visible =
-        journeyState.progress < 1.602 || journeyState.progress >= 1.67;
+        !insideEyepiece(journeyState.progress);
   });
   return (
     <group

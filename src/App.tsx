@@ -1,9 +1,10 @@
 import { galleries,isGallery } from "./scene/serviceGalleries";
-import { Fragment } from "react";
+import { OBSERVATORY_AT, OBSERVATORY_EXIT } from "./lib/observatoryView";
 import { flushSync } from "react-dom";
 import {
   EXTERIOR_ARRIVAL,
   floors,
+  floorNumber,
   floorProgress,
   floorFraction,
   scrollRange,
@@ -344,12 +345,12 @@ export default function App() {
   useEffect(() => {
     if (observatoryPending) {
       if (lenis.current)
-        lenis.current.scrollTo(floorScroll(1.605), {
+        lenis.current.scrollTo(floorScroll(OBSERVATORY_AT), {
           duration: useTour.getState().progress >= 1.588 ? 3.2 : 9,
           force: true,
           lock: true,
         });
-      else scrollToProgress(1.605, true);
+      else scrollToProgress(OBSERVATORY_AT, true);
     }
   }, [observatoryPending]);
   const closeObservatory = () => {
@@ -357,12 +358,12 @@ export default function App() {
     if (lenis.current) {
       // Resume before starting the return: Lenis.start() resets its animation.
       lenis.current.start();
-      lenis.current.scrollTo(floorScroll(1.585), {
+      lenis.current.scrollTo(floorScroll(OBSERVATORY_EXIT), {
         duration: 2.2,
         force: true,
         lock: true,
       });
-    } else scrollToProgress(1.585, true);
+    } else scrollToProgress(OBSERVATORY_EXIT, true);
     requestAnimationFrame(() =>
       document
         .querySelector<HTMLButtonElement>(".lift-toggle")
@@ -563,11 +564,11 @@ export default function App() {
                   </p>
                   <button
                     className="enter-button"
-                    onClick={() => (list ? jump("electrical") : scrollToProgress(11.89))}
+                    onClick={() => (list ? jump("about") : scrollToProgress(11.89))}
                   >
                     {t(
-                      list ? "Explore our capabilities" : "Approach the gate",
-                      list ? "استكشف إمكاناتنا" : "توجّه إلى البوابة",
+                      list ? "Discover FAST" : "Approach the gate",
+                      list ? "اكتشف فاست" : "توجّه إلى البوابة",
                     )}
                     <span>{down}</span>
                   </button>
@@ -582,15 +583,14 @@ export default function App() {
             </section>
           </div>
         )}
+        {list && (
+          <div id="about">
+            <AboutList rtl={rtl} onOpen={showAbout} />
+          </div>
+        )}
         {orderedChapters
           .filter((c) => list || c.id === floor.id)
           .map((chapter) => (
-            <Fragment key={chapter.id}>
-              {list && chapter.id === "cooling" && (
-                <div id="about">
-                  <AboutList rtl={rtl} onOpen={showAbout} />
-                </div>
-              )}
               <section
                 className="chapter"
                 id={chapter.id}
@@ -605,11 +605,7 @@ export default function App() {
                   <p className="chapter-kicker">
                     {t("THE CONNECTED BUILDING", "المبنى المترابط")}
                     <span>
-                      {String(orderedChapters.indexOf(chapter) + 1).padStart(
-                        2,
-                        "0",
-                      )}{" "}
-                      / {orderedChapters.length}
+                      {chapter.id === "cooling" ? t("Roof", "السطح") : t("Floor", "الطابق") + " " + floorNumber(chapter.id)}
                     </span>
                   </p>
                   <h2 id={`${chapter.id}-title`}>
@@ -681,11 +677,10 @@ export default function App() {
                   </figure>
                 </div>
                 <div className="chapter-location" aria-hidden="true">
-                  <span>{orderedChapters.indexOf(chapter) + 1} / {orderedChapters.length}</span>
+                  <span>{floorNumber(chapter.id)}</span>
                   <span>{t("Explore the building", "استكشف المبنى")}</span>
                 </div>
               </section>
-            </Fragment>
           ))}
 
         {!list && floor.id === "about" && (

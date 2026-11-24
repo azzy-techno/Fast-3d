@@ -1,3 +1,4 @@
+import { insideEyepiece } from "../lib/observatoryView";
 import { independentGalleryAt, independentRoutes } from "./serviceGalleries";
 import { ContactShadow } from "./ContactShadow";
 import { useMemo, useRef } from "react";
@@ -49,7 +50,7 @@ export function Host() {
     state.telemetry += dt;
     const report = state.telemetry >= 0.1;
     if (report) state.telemetry = 0;
-    root.current.visible = !(p >= 1.602 && p < 1.67);
+    root.current.visible = !insideEyepiece(p);
     if (!root.current.visible) {
       state.initialized = false;
       return;
