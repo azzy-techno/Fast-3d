@@ -87,6 +87,8 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(0);
   const [menu, setMenu] = useState(false);
+  const roofWalk = useTour(s => s.roofWalk);
+  const walkingOnRoof = roofWalk !== "idle" && !list;
   const [liftOpen, setLiftOpen] = useState(false);
   const [pendingAbout, setPendingAbout] = useState<AboutPanel | null>(null);
   const aboutPanel = useTour((s) => s.aboutPanel);
@@ -134,12 +136,18 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [ready, loaded]);
   const loading = !list && !revealed;
-  const openLift = () => {
+  const visitLift = (destination: string | null) => {
     setMenu(false);
-    setLiftDestination(null);
+    setLiftDestination(destination);
     useTour.getState().setObservatory(false);
-    setLiftOpen(true);
+    if (!list && floor.id === "cooling") useTour.getState().setRoofWalk("toLift");
+    else setLiftOpen(true);
   };
+  const openLift = () => visitLift(null);
+  useEffect(() => {
+    if (roofWalk === "landed" && !list) setLiftOpen(true);
+    if (list && roofWalk !== "idle") useTour.getState().setRoofWalk("idle");
+  }, [roofWalk, list]);
   useEffect(() => {
     if (liftRequest) openLift();
   }, [liftRequest]);
@@ -195,16 +203,16 @@ export default function App() {
     };
   }, [list, reduced]);
   useEffect(() => {
-    if (menu || loading || liftOpen || aboutPanel || observatoryOpen)
+    if (menu || loading || liftOpen || walkingOnRoof || aboutPanel || observatoryOpen)
       lenis.current?.stop();
     else lenis.current?.start();
     const previous = document.body.style.overflow;
-    if (menu || loading || liftOpen || aboutPanel || observatoryOpen)
+    if (menu || loading || liftOpen || walkingOnRoof || aboutPanel || observatoryOpen)
       document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [menu, loading, list, liftOpen, aboutPanel, observatoryOpen]);
+  }, [menu, loading, list, liftOpen, walkingOnRoof, aboutPanel, observatoryOpen]);
   useEffect(() => {
     if (menu && !dialog.current?.open) dialog.current?.showModal();
     if (!menu && dialog.current?.open) dialog.current?.close();
@@ -323,8 +331,7 @@ export default function App() {
     if (id === "arrival") id = "reception";
     setMenu(false);
     if (!list && !loading && floors.some((d) => d.id === id)) {
-      setLiftDestination(id);
-      setLiftOpen(true);
+      visitLift(id);
       return;
     }
     const target = document.getElementById(id === "reception" ? "arrival" : id);
@@ -379,8 +386,7 @@ export default function App() {
       return;
     }
     setPendingAbout(panel);
-    setLiftDestination("about");
-    setLiftOpen(true);
+    visitLift("about");
   };
   const toggleView = () => {
     const dest = currentFloor;
@@ -402,7 +408,7 @@ export default function App() {
 
   return (
     <div
-      className={`app ${observatoryOpen ? "observatory-active" : ""} ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${currentFloor.id === "reception" ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
+      className={`app ${walkingOnRoof ? "roof-lift-walk" : ""} ${observatoryOpen ? "observatory-active" : ""} ${list ? "list-view" : "tour-view"} ${rtl ? "rtl" : ""} ${currentFloor.id === "reception" ? "at-arrival" : ""} ${cinematic && !list ? "cinematic" : ""}`}
     >
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
@@ -444,7 +450,7 @@ export default function App() {
             onLift={openLift}
           />
 
-          {floor.id === "cooling" && <CoolingTour rtl={rtl} onSelect={(at) => scrollToProgress(at, false, at === 0.55 ? 5 : 2.4)} />}
+          {floor.id === "cooling" && !walkingOnRoof && <CoolingTour rtl={rtl} onLift={openLift} onSelect={(at) => scrollToProgress(at, false, at === 0.55 ? 5 : 2.4)} />}
           {galleryId && <>
             <ElectricalWelcome key={galleryId} service={galleryId} rtl={rtl}
               onProjects={galleries[galleryId].projectStart ? () => scrollToProgress(galleries[galleryId].stations[galleries[galleryId].projectStart-1].at+.005,true) : undefined}
@@ -464,6 +470,9 @@ export default function App() {
           />
         </>
       )}
+      {walkingOnRoof && !liftOpen && <div className="roof-walk-status" role="status">
+        {roofWalk === "toExhibit" ? t("Returning to the rooftop tour", "العودة إلى جولة السطح") : t("Following your guide to the lift", "رافق المرشد إلى المصعد")}
+      </div>}
       <header className="header">
         <a
           className="brand"
@@ -878,6 +887,7 @@ export default function App() {
         onClose={() => {
           setLiftOpen(false);
           setLiftDestination(null);
+          if (useTour.getState().roofWalk === "landed") useTour.getState().setRoofWalk("toExhibit");
           if (pendingAbout) {
             setAboutPanel(pendingAbout);
             setPendingAbout(null);

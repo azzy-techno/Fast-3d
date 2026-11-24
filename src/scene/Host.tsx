@@ -11,6 +11,7 @@ import {
   journeyState,
   routeDistance,
   sampleGuide,
+  sampleRoofLiftGuide,
   guideIsPresenting,
 } from "./journey";
 export function Host() {
@@ -57,7 +58,11 @@ export function Host() {
     }
     const galleryId = independentGalleryAt(p);
     const route = galleryId ? independentRoutes[galleryId] : null;
-    if (route) route.guide(p, state.p, state.face);
+    const roofWalk = journeyState.roofWalk;
+    if (roofWalk > 0) {
+      sampleRoofLiftGuide(p, roofWalk, state.p);
+      state.face.set(11, 84.6, -5);
+    } else if (route) route.guide(p, state.p, state.face);
     else sampleGuide(p, state.p, state.face);
     const cut =
       state.previousProgress < ELECTRICAL_EXIT.cut !== p < ELECTRICAL_EXIT.cut;
@@ -78,7 +83,7 @@ export function Host() {
     state.previous.copy(state.p);
     state.initialized = true;
     const walking =
-      distance / Math.max(dt, 0.001) > 0.06 && p > 0.7 && p < 11.87 ? 1 : 0;
+      distance / Math.max(dt, 0.001) > 0.06 && (roofWalk > 0 || p > 0.7) && p < 11.87 ? 1 : 0;
     state.walking = MathUtils.damp(
       state.walking,
       walking,
@@ -92,7 +97,7 @@ export function Host() {
     rig.idle.setEffectiveWeight(1 - state.walking);
     rig.mixer.update(0);
     standHuman(rig, 1 - state.walking);
-    const waving = p < 0.7 || p >= 11.87 || (p >= 11.68 && p <= 11.69);
+    const waving = !roofWalk && (p < 0.7 || p >= 11.87 || (p >= 11.68 && p <= 11.69));
     if (arriving) state.wave = waving ? 1 : 0;
     state.wave = MathUtils.damp(
       state.wave,
@@ -100,7 +105,7 @@ export function Host() {
       8,
       Math.min(dt, 0.1),
     );
-    const presentingHere = route ? route.presenting(p) : guideIsPresenting(p);
+    const presentingHere = !roofWalk && (route ? route.presenting(p) : guideIsPresenting(p));
 
     const settled = presentingHere && state.walking < 0.2;
     state.presentation = MathUtils.damp(

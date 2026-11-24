@@ -37,7 +37,7 @@ import { useTour } from "../store";
 import { Building } from "./Building";
 import { Interior, RoofAccess } from "./Architecture";
 import { Atmosphere } from "./Atmosphere";
-import { journeyState, sampleJourney } from "./journey";
+import { journeyState, sampleRoofLiftGuide, sampleJourney } from "./journey";
 import { OBSERVATORY_AT, observatoryView } from "../lib/observatoryView";
 import { installRenderProbe } from "./renderProbe";
 import { useVisibilityUpdates } from "./useVisibilityUpdates";
@@ -85,6 +85,7 @@ const World = memo(function World({
   const scene = useThree((s) => s.scene);
   const invalidate = useThree((s) => s.invalidate);
   const observatoryArmed = useRef(true);
+  const motionPreference = useMemo(() => matchMedia("(prefers-reduced-motion: reduce)"), []);
   const landingPrompt = useRef<number | null>(null);
   const ready = useRef(false),
     initialized = useRef(false),
@@ -100,6 +101,8 @@ const World = memo(function World({
     () => ({
       p: new Vector3(),
       target: new Vector3(),
+      roofGuide: new Vector3(),
+      follow: new Vector3(),
       exterior: new Color("#d4c9b6"),
       interior: new Color("#bdc4bc"),
     }),
@@ -239,6 +242,28 @@ const World = memo(function World({
       const extra = mobile ? Math.min(1.0, Math.max(0.15, size.height / size.width * 0.72 - 1)) : 0.15;
       vectors.p.sub(vectors.target).multiplyScalar(1 + extra * roofInspection).add(vectors.target);
     }
+    const step = motionPreference.matches ? 1 : Math.min(dt, 0.2) / 5.2;
+    const previousWalk = journeyState.roofWalk;
+    let walk = previousWalk;
+    if (tour.roofWalk === "idle") walk = 0;
+    else if (tour.roofWalk === "toExhibit") walk = Math.max(0, walk - step);
+    else walk = Math.min(1, walk + step);
+    journeyState.roofWalk = walk;
+    const follow = walk * walk * (3 - 2 * walk);
+    if (walk > 0) {
+      sampleRoofLiftGuide(p, walk, vectors.roofGuide);
+      vectors.follow.copy(vectors.roofGuide);
+      vectors.follow.x += 1.5;
+      vectors.follow.y += mobile ? 3.0 : 2.7;
+      vectors.follow.z += mobile ? 6.2 : 5.2;
+      vectors.p.lerp(vectors.follow, follow);
+      vectors.follow.copy(vectors.roofGuide);
+      vectors.follow.y += 1.3;
+      vectors.follow.z -= 0.9;
+      vectors.target.lerp(vectors.follow, follow);
+    }
+    if (tour.roofWalk === "toLift" && previousWalk === 1) tour.setRoofWalk("landed");
+    if (tour.roofWalk === "toExhibit" && walk === 0) tour.setRoofWalk("idle");
     camera.position.copy(vectors.p);
     if (tour.observatoryOpen) {
       vectors.target.x += observatoryView.x * 1.7;
@@ -250,7 +275,7 @@ const World = memo(function World({
     // moving the camera out through an interior wall on narrow screens.
     const offsetX = mobile
       ? 0
-      : (rtl ? 1 : -1) *
+      : (rtl ? 1 : -1) * (1 - follow) *
         ((0.19 - 0.065 * roofInspection) * outside +
           0.03 * inside +
           0.13 *
@@ -263,7 +288,7 @@ const World = memo(function World({
       Math.min(1, (galleryPose - 2.025) / 0.02, (2.76 - galleryPose) / 0.02),
     );
     const offsetY = mobile
-      ? (0.19 - 0.18 * skyline - 0.04 * roofInspection) * outside +
+      ? (0.19 - 0.18 * skyline - 0.04 * roofInspection) * outside * (1 - follow) +
         (0.1 - 0.04 * electricalBays) * inside
       : 0;
     // Leave room above the closing card for both the roof and the street on phones.

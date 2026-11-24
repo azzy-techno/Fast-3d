@@ -242,12 +242,13 @@ export function Lift({
   stack?: boolean;
   rear?: GalleryId;
 }) {
+  const rooftopLanding = roof && p[1] === 83;
   const panels = useRef<Group>(null),
     cabin = useRef<Group>(null);
   useFrame(({ camera }) => {
     if (!panels.current) return;
     const progress = journeyState.progress;
-    if (roof && p[1] === 83 && cabin.current)
+    if (rooftopLanding && cabin.current)
       cabin.current.visible = progress < 1.36;
     const galleryId = independentGalleryAt(progress);
     const stackProgress = galleryId ? galleries[galleryId].start : progress;
@@ -317,14 +318,14 @@ export function Lift({
           exit
             ? "WELCOME / RECEPTION"
             : roof
-              ? `ABOUT FAST / LEVEL ${floorNumber("about")}`
+              ? rooftopLanding ? "ROOFTOP LIFT" : `ABOUT FAST / LEVEL ${floorNumber("about")}`
               : "ENGINEERING FLOORS"
         }
         sub={
           exit
             ? "FAST / GROUND FLOOR"
             : roof
-              ? "FAST / ROOF LOBBY"
+              ? rooftopLanding ? "FAST / ROOF LOBBY" : "FAST / KNOWLEDGE GALLERY"
               : stack || rear
                 ? "FAST / VERTICAL JOURNEY"
                 : "FAST / SERVICE LIFT"
@@ -333,7 +334,7 @@ export function Lift({
         width={2.8}
       />
       <Wayfinding
-        text={exit ? "G" : stack ? "↓" : roof ? "08" : "01"}
+        text={exit ? "G" : stack ? "↓" : roof ? (rooftopLanding ? floorNumber("cooling") : floorNumber("about")) : floorNumber("electrical")}
         sub="DESTINATION"
         p={[1.75, 1.75, 0]}
         rotation={[0, -Math.PI / 2, 0]}

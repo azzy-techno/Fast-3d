@@ -1,10 +1,13 @@
 import { EXTERIOR_ARRIVAL } from "./lib/journeyScroll";
 import { create } from "zustand";
 import type { AboutPanel } from "./data/about";
+export type RoofWalk = "idle" | "toLift" | "landed" | "toExhibit";
 export type LiftPhase =
   "idle" | "select" | "closing" | "travelling" | "opening";
 export const useTour = create<{
   progress: number;
+  roofWalk: RoofWalk;
+  setRoofWalk: (state: RoofWalk) => void;
   liftPhase: LiftPhase;
   setLiftPhase: (phase: LiftPhase) => void;
   liftFrameReady: number;
@@ -24,6 +27,8 @@ export const useTour = create<{
   setProgress: (progress: number) => void;
 }>((set) => ({
   progress: EXTERIOR_ARRIVAL,
+  roofWalk: "idle",
+  setRoofWalk: (roofWalk) => set({ roofWalk }),
   liftPhase: "idle",
   setLiftPhase: (liftPhase) => set({ liftPhase }),
   liftFrameReady: -1,
@@ -44,6 +49,7 @@ export const useTour = create<{
     set((s) => ({
       progress,
       jumpVersion: s.jumpVersion + 1,
+      roofWalk: "idle",
     })),
   setProgress: (progress) =>
     set({

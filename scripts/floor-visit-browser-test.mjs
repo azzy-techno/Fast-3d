@@ -234,14 +234,61 @@ try {
       { part, index },
     );
   };
+  async function walkToRoofLift(button) {
+    await click(button);
+    await wait("guide walks before the roof picker opens", () => {
+      const data = document.querySelector("canvas").dataset;
+      return (
+        data.guide === "walking" &&
+        document.querySelector(".roof-walk-status") &&
+        !document.querySelector(".lift-dialog").open
+      );
+    });
+    if (button === ".roof-return") {
+      await wait("guide approaches roof doors", () => {
+        const canvas = document.querySelector("canvas");
+        return Number(canvas.dataset.guidePosition.split(",")[2]) < -0.5;
+      });
+      await capture("rooftop-guide-to-lift");
+    }
+    await wait(
+      "picker at rooftop landing",
+      () => document.querySelector(".lift-dialog").open,
+    );
+    const [x, y, z] = await page.evaluate(() =>
+      document
+        .querySelector("canvas")
+        .dataset.guidePosition.split(",")
+        .map(Number),
+    );
+    assert(
+      Math.hypot(x - 11, y - 83, z + 2.4) < 0.05,
+      "Guide arrives outside the rooftop doors",
+    );
+  }
   for (const [index, part] of towerParts.entries()) {
     if (index)
       await click(".cooling-tour .electrical-tour-actions button:last-child");
     await checkTower(part, index);
+    if (index === 2) {
+      await walkToRoofLift(".lift-toggle");
+      await click(".lift-console-top button");
+      await wait(
+        "original roof exhibit restored",
+        () => !!document.querySelector(".cooling-tour"),
+      );
+      await checkTower(part, index);
+    }
   }
   await capture("roof-exploded");
   await click(".cooling-tour nav button:first-child");
   await checkTower("Frame", 0);
+  await click(".cooling-tour nav button:last-child");
+  await checkTower("Basin", 7);
+  await walkToRoofLift(".roof-return");
+  await ride("electrical", 2);
+  await click(".lift-toggle");
+  await ride("cooling", 1.12);
   await click(".cooling-tour nav button:last-child");
   await checkTower("Basin", 7);
   await click(".cooling-tour .electrical-tour-actions button:last-child");
@@ -328,7 +375,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    "PASS automatic landing picker, dismiss, direct masked rides, station 01, roof finale, phone replay and list order",
+    "PASS automatic landing picker, dismiss, direct masked rides, station 01, rooftop lift walk and return, roof finale, phone replay and list order",
   );
 } finally {
   await browser?.close({ silent: true });

@@ -28,7 +28,7 @@ export const serviceRooms = Array.from({ length: 10 }, (_, i) => ({
   y: serviceLevel(i),
   side: i % 2 === 0 ? -1 : 1,
 }));
-export const journeyState = { progress: EXTERIOR_ARRIVAL, section: "reception" };
+export const journeyState = { progress: EXTERIOR_ARRIVAL, section: "reception", roofWalk: 0 };
 type Shot = { at: number; p: Point; target: Point; fov: number };
 const frames: Shot[] = [];
 const shot = (at: number, p: Point, target: Point, fov = 62) =>
@@ -314,6 +314,21 @@ const receptionGuide = [
   [11.87, 4.1, 18],
   [EXTERIOR_ARRIVAL, 4.1, 18],
 ];
+function rooftopGuidePosition(p: number, out: Vector3) {
+  const t = Math.min(1, Math.max(0, (p - 0.7) / 0.045));
+  const blend = t * t * (3 - 2 * t);
+  out.set(8 - 2.2 * blend, 83, 5 - 3.4 * blend);
+}
+
+// Round the pipe headers in the east aisle, then approach the lift doors from the front.
+export function sampleRoofLiftGuide(p: number, fraction: number, out: Vector3) {
+  rooftopGuidePosition(p, out);
+  const t = fraction * fraction * (3 - 2 * fraction);
+  const remaining = 1 - t;
+  out.x += (11 - out.x) * (1 - remaining * remaining);
+  out.z += (-2.4 - out.z) * t * t;
+}
+
 export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   if (p >= 11.61) {
     // Follow the centre aisle past the desk and wait at the call panel.
@@ -345,14 +360,12 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     return;
   }
   if (p > 0.7 && p <= 1.12) {
-    const t = Math.min(1, (p - 0.7) / 0.045);
-    const u = t * t * (3 - 2 * t);
-    position.set(8 - 2.2 * u, 83, 5 - 3.4 * u);
+    rooftopGuidePosition(p, position);
     coolingFocus(Math.max(0, coolingIndex(p)), p, facing);
     return;
   }
   if (p <= 0.7) {
-    position.set(8, 83, 5);
+    rooftopGuidePosition(p, position);
     facing.set(12, 84, 12);
     return;
   }

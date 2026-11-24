@@ -4,9 +4,11 @@ import { useTour } from "../store";
 export function CoolingTour({
   rtl,
   onSelect,
+  onLift,
 }: {
   rtl: boolean;
   onSelect: (at: number) => void;
+  onLift: () => void;
 }) {
   const i = useTour((s) => coolingIndex(s.progress));
   if (i < 0) return null;
@@ -43,6 +45,11 @@ export function CoolingTour({
           >
             {rtl ? "السابق" : "Previous"}
           </button>
+          {i === coolingStops.length - 1 && (
+            <button className="roof-return" onClick={onLift}>
+              {rtl ? "العودة إلى المصعد" : "Return to lift"}
+            </button>
+          )}
           <button onClick={() => onSelect(coolingStops[i + 1]?.at ?? 0.55)}>
             {i === 0
               ? rtl
@@ -50,8 +57,8 @@ export function CoolingTour({
                 : "Open the tower"
               : i === 7
                 ? rtl
-                  ? "أعِد التجميع وتابع"
-                  : "Reassemble & continue"
+                  ? "مشهد الوداع"
+                  : "Skyline farewell"
                 : rtl
                   ? "التالي"
                   : "Next"}
