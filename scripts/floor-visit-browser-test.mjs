@@ -194,9 +194,57 @@ try {
   await click(".lift-toggle");
   await ride("cooling", 1.12);
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
-  await page.evaluate(() =>
-    window.scrollTo(0, document.getElementById("together").offsetTop * 0.68),
-  );
+  const towerParts = [
+    "Frame",
+    "RightShell",
+    "Rotor",
+    "Drive",
+    "Eliminator",
+    "Distribution",
+    "FillRight",
+    "Basin",
+  ];
+  const checkTower = async (part, index) => {
+    await wait(
+      "roof component " + part,
+      ({ part, index }) => {
+        const scene = document.querySelector("canvas").dataset;
+        const pin = document.querySelector("#cooling-callout");
+        if (
+          !pin ||
+          pin.dataset.part !== part ||
+          Math.abs(+scene.journey - (1.12 - index * 0.05)) > 0.0007 ||
+          !(+scene.guideAim >= 0.98)
+        )
+          return false;
+        const bounds = pin.getBoundingClientRect();
+        const caption = document
+          .querySelector(".cooling-tour")
+          .getBoundingClientRect();
+        const toolbar = document
+          .querySelector(".journey-toolbar")
+          .getBoundingClientRect();
+        return (
+          bounds.left >= 0 &&
+          bounds.right <= innerWidth &&
+          bounds.top >= toolbar.bottom &&
+          bounds.bottom < caption.top
+        );
+      },
+      { part, index },
+    );
+  };
+  for (const [index, part] of towerParts.entries()) {
+    if (index)
+      await click(".cooling-tour .electrical-tour-actions button:last-child");
+    await checkTower(part, index);
+  }
+  await capture("roof-exploded");
+  await click(".cooling-tour nav button:first-child");
+  await checkTower("Frame", 0);
+  await click(".cooling-tour nav button:last-child");
+  await checkTower("Basin", 7);
+  await click(".cooling-tour .electrical-tour-actions button:last-child");
   await wait("rooftop farewell", () => {
     const pose = document.querySelector("canvas").dataset;
     return Math.abs(+pose.journey - 0.55) < 0.002 && pose.guide === "waving";

@@ -1,3 +1,4 @@
+import { coolingIndex, coolingFocus } from "../data/cooling";
 import {
   ABOUT_START,
   ABOUT_END,
@@ -46,9 +47,15 @@ shot(0.28, [58, 104, 71], [1, 66, 0], 47);
 shot(0.42, [34, 96, 35], [2.5, 79, 1], 47);
 shot(0.55, [17, 29, 14], [2.4, 24.3, 0.9], 48);
 shot(0.7, [11, 25.1, 10], [8, 24.1, 5], 54);
-shot(0.86, [10, 25.05, 9], [3, 24.2, -1], 58);
-shot(1, [9, 25.05, 8], [0, 24.4, -1], 62);
-shot(1.12, [9, 25.05, 7.8], [0, 24.4, -1], 62);
+// The same cell stays in view as the shell opens, the internals separate and the basin draws forward.
+shot(0.75, [9.7, 31.0, 11.7], [1.0, 26.3, 0.2], 47);
+shot(0.82, [8.8, 31.8, 12.5], [0.8, 26.3, 0.4], 46);
+shot(0.87, [8, 32.7, 12.7], [0.3, 26.8, -0.1], 46);
+shot(0.92, [7.0, 33.3, 12.6], [-0.65, 27.0, -0.9], 47);
+shot(0.97, [8.4, 33.9, 12.4], [0.8, 27.0, -1.2], 46);
+shot(1.02, [8.6, 35.2, 12.1], [0.3, 27.4, -1.4], 47);
+shot(1.07, [8.4, 28.6, 12.0], [0.55, 25.9, -1.4], 47);
+shot(1.12, [8.3, 27.9, 11.9], [0.3, 25.5, -1.4], 45);
 shot(1.28, [11, 25, 2], [11, 25, -5], 62);
 shot(1.37, [11, 24.8, -5], [11, 24.8, -9], 66);
 shot(1.4, [11, 23, -5], [7, 23, -5], 66);
@@ -337,6 +344,13 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
     }
     return;
   }
+  if (p > 0.7 && p <= 1.12) {
+    const t = Math.min(1, (p - 0.7) / 0.045);
+    const u = t * t * (3 - 2 * t);
+    position.set(8 - 2.2 * u, 83, 5 - 3.4 * u);
+    coolingFocus(Math.max(0, coolingIndex(p)), p, facing);
+    return;
+  }
   if (p <= 0.7) {
     position.set(8, 83, 5);
     facing.set(12, 84, 12);
@@ -378,11 +392,11 @@ export function sampleGuide(p: number, position: Vector3, facing: Vector3) {
   position.y = floor;
   position.x += liftBlend * 0.65;
   position.z -= liftBlend * 0.85;
-  if (p > 0.7 && p < 1.28) {
+  if (p > 1.12 && p < 1.28) {
     const weight = smooth(0.7, 0.86) * (1 - smooth(1.14, 1.28));
     // The guide presents from the clear service aisle, to the side of the
     // camera-to-plant sight line and beyond the foreground pipe manifold.
-    arcTarget.set(7.2, 83, 3.45);
+    arcTarget.set(5.8, 83, 1.6);
     position.lerp(arcTarget, weight);
     if (p >= 0.86 && p <= 1.14) facing.set(0, 84.5, -1);
   }
@@ -487,7 +501,7 @@ function sampleServiceGuide(p: number, position: Vector3, facing: Vector3) {
 export function guideIsPresenting(p: number) {
   if (p >= ABOUT_START && p <= ABOUT_END) return aboutPresenting(p);
   if (p >= 1.94 && p < ELECTRICAL_END) return electricalPresenting(p);
-  if (p >= 0.86 && p <= 1.14) return true;
+  if (p >= 0.744 && p <= 1.14) return true;
   const at = Math.round(p);
   return (
     at >= 2 && at <= 11 && p >= at - (at === 2 ? 0.02 : 0.04) && p <= at + 0.28

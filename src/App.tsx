@@ -18,6 +18,7 @@ import {
   AboutList,
 } from "./components/AboutFAST";
 import type { AboutPanel } from "./data/about";
+import { CoolingScope, CoolingTour } from "./components/CoolingTour";
 import { ElectricalTour } from "./components/ElectricalTour";
 import { ElectricalWelcome } from "./components/ElectricalWelcome";
 import { LiftNavigator } from "./components/LiftNavigator";
@@ -335,10 +336,10 @@ export default function App() {
     } else
       window.scrollTo({ top: y, behavior: reduced ? "instant" : "smooth" });
   };
-  const scrollToProgress = (at: number, immediate = false) => {
+  const scrollToProgress = (at: number, immediate = false, duration = 1.8) => {
     const y = floorScroll(at);
     if (lenis.current)
-      lenis.current.scrollTo(y, { immediate, force: true, duration: 1.8 });
+      lenis.current.scrollTo(y, { immediate, force: true, duration });
     else window.scrollTo({ top: y, behavior: "instant" });
     if (immediate) useTour.getState().teleport(at);
   };
@@ -443,6 +444,7 @@ export default function App() {
             onLift={openLift}
           />
 
+          {floor.id === "cooling" && <CoolingTour rtl={rtl} onSelect={(at) => scrollToProgress(at, false, at === 0.55 ? 5 : 2.4)} />}
           {galleryId && <>
             <ElectricalWelcome key={galleryId} service={galleryId} rtl={rtl}
               onProjects={galleries[galleryId].projectStart ? () => scrollToProgress(galleries[galleryId].stations[galleries[galleryId].projectStart-1].at+.005,true) : undefined}
@@ -631,31 +633,7 @@ export default function App() {
                       ))}
                     </ul>
                   )}
-                  {chapter.id === "cooling" && (
-                    <details className="roof-scope">
-                      <summary>
-                        {t("Inside this service", "تفاصيل الخدمة")}
-                      </summary>
-                      <p>
-                        {t(
-                          "Survey → engineering & design → installation or retrofit → testing and handover.",
-                          "المعاينة ← الهندسة والتصميم ← التركيب أو إعادة التأهيل ← الاختبار والتسليم.",
-                        )}
-                      </p>
-                      <p>
-                        {t(
-                          "FAST projects include Dammam Airport and AK Tower cooling-tower retrofits, and NFIC Jeddah cooling towers.",
-                          "تشمل مشاريع فاست إعادة تأهيل أبراج التبريد في مطار الدمام وبرج AK، وأبراج التبريد في NFIC جدة.",
-                        )}
-                      </p>
-                      <a href="https://fast-arabia.com/services/mechanical">
-                        {t(
-                          "Project references & full scope ↗",
-                          "المشاريع ونطاق العمل الكامل ↗",
-                        )}
-                      </a>
-                    </details>
-                  )}
+                  {chapter.id === "cooling" && list && <CoolingScope rtl={rtl} />}
                   {isGallery(chapter.id) && list && (
                     <ElectricalScope service={chapter.id} rtl={rtl} />
                   )}

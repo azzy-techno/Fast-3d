@@ -23,9 +23,9 @@ export const chapters: Chapter[] = [
     place: "On the rooftop",
     placeAr: "على السطح",
     description:
-      "Keeping the entire facility in balance. Cooling tower design, supply and retrofit, backed by the mechanical expertise to keep your operations running.",
+      "Explore one rooftop cooling tower from its axial fan to its cold-water basin. Each layer reveals the component and the work FAST carries out on it.",
     descriptionAr:
-      "تصميم وتوريد وإعادة تأهيل أبراج التبريد، بخبرات ميكانيكية تدعم استمرارية تشغيل منشآتك.",
+      "استكشف برج تبريد واحداً على السطح من المروحة المحورية إلى حوض الماء البارد. تكشف كل طبقة مكوّناً والخدمات التي تقدمها فاست له.",
     capabilities: ["Design & supply", "Retrofit", "Maintenance"],
     image: "cooling.webp",
     imageAlt: "Industrial mechanical and cooling systems from FAST",

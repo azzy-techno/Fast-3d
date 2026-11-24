@@ -46,8 +46,8 @@ export function floorStops(floor: Floor): [number, number][] {
   if (floor.id === "cooling")
     return [
       [0, 1.12],
-      [0.34, 0.94],
-      [0.5, 0.68],
+      [0.52, 0.77],
+      [0.60, 0.70],
       [0.68, 0.55],
       [1, floor.end],
     ];

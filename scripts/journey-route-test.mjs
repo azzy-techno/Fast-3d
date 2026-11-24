@@ -10,7 +10,7 @@ try {
   await build({
     stdin: {
       contents:
-        'export * from "./src/scene/journey.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
+        'export * from "./src/scene/journey.ts"; export * from "./src/data/cooling.ts"; export { electricalDepartureAt, ELECTRICAL_EXIT, inElectricalRearLift, toElectricalRear } from "./src/scene/electricalTour.ts"; export { stackLiftFloor, stackDoorOpen } from "./src/scene/travelMotion.ts"; export { Vector3 } from "three";',
       resolveDir: process.cwd(),
     },
     bundle: true,
@@ -21,6 +21,11 @@ try {
   const {
     electricalDepartureAt,
     sampleJourney,
+    coolingStops,
+    towerModules,
+    coolingFocus,
+    placeModule,
+    coolingIndex,
     sampleGuide,
     guideIsPresenting,
     serviceRooms,
@@ -36,6 +41,30 @@ try {
     previous = new Vector3(),
     reverse = new Vector3(),
     reverseTarget = new Vector3();
+  for (const [index, stop] of coolingStops.entries()) {
+    assert.equal(coolingIndex(stop.at), index);
+    sampleGuide(stop.at, p, target);
+    coolingFocus(index, stop.at, reverseTarget);
+    assert(
+      target.distanceTo(reverseTarget) < 0.001,
+      "Guide points to the component callout",
+    );
+    assert(guideIsPresenting(stop.at));
+    for (const [name, part] of Object.entries(towerModules)) {
+      placeModule(name, stop.at, reverse);
+      const destination =
+        part.stage <= index ? new Vector3(...part.offset) : new Vector3();
+      assert(
+        reverse.distanceTo(destination) < 0.001,
+        name + " reaches its assembly stop",
+      );
+      placeModule(name, 0.7, reverse);
+      assert(
+        reverse.length() < 0.001,
+        name + " is installed again before the farewell",
+      );
+    }
+  }
   let closest = Infinity,
     maxStep = 0,
     doors = 0;

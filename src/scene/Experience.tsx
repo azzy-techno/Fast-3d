@@ -233,6 +233,12 @@ const World = memo(function World({
           (p > 11.61 ? Math.min(1, Math.max(0, (p - 11.9) / 0.075)) : 1);
       vectors.p.sub(vectors.target).multiplyScalar(scale).add(vectors.target);
     }
+    // Fit the separated shells and the raised fan between the floor controls and the caption.
+    const roofInspection = Math.max(0, Math.min(1, (p - 0.70) / 0.045, (1.26 - p) / 0.14));
+    if (roofInspection > 0) {
+      const extra = mobile ? Math.min(1.0, Math.max(0.15, size.height / size.width * 0.72 - 1)) : 0.15;
+      vectors.p.sub(vectors.target).multiplyScalar(1 + extra * roofInspection).add(vectors.target);
+    }
     camera.position.copy(vectors.p);
     if (tour.observatoryOpen) {
       vectors.target.x += observatoryView.x * 1.7;
@@ -245,7 +251,7 @@ const World = memo(function World({
     const offsetX = mobile
       ? 0
       : (rtl ? 1 : -1) *
-        (0.19 * outside +
+        ((0.19 - 0.065 * roofInspection) * outside +
           0.03 * inside +
           0.13 *
             Math.max(0, Math.min(1, (p - 11.665) / 0.015)) *
@@ -257,7 +263,7 @@ const World = memo(function World({
       Math.min(1, (galleryPose - 2.025) / 0.02, (2.76 - galleryPose) / 0.02),
     );
     const offsetY = mobile
-      ? (0.19 - 0.18 * skyline) * outside +
+      ? (0.19 - 0.18 * skyline - 0.04 * roofInspection) * outside +
         (0.1 - 0.04 * electricalBays) * inside
       : 0;
     // Leave room above the closing card for both the roof and the street on phones.

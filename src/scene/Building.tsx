@@ -3,7 +3,7 @@ import { useTexture } from "@react-three/drei";
 import { assetUrl } from "../lib/assets";
 import { Box, Cylinder } from "./Primitives";
 import { RooftopPlant } from "./RooftopPlant";
-import { Cooling } from "./Equipment";
+import { CoolingAssembly } from "./CoolingAssembly";
 import { useSurface } from "./Exterior";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -160,9 +160,7 @@ export function Building() {
           },
         ]}
       />
-      <group position={[0, 83, -1]} scale={0.8}>
-        <Cooling />
-      </group>
+      <CoolingAssembly />
       <Box p={[3, 6.7, 12]} s={[20, 0.45, 7]} c="#d7d9d0" metal={0.1} />
       <Box p={[3, 6.45, 14.9]} s={[19.5, 0.07, 0.1]} c="#eece9a" glow />
       {[-6, 12].map((x) => (
