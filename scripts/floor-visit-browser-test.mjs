@@ -252,12 +252,14 @@ try {
   const waveDistance = await page.evaluate(
     () => +document.querySelector("canvas").dataset.guideCameraDistance,
   );
-  await page.evaluate(() =>
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "instant",
-    }),
-  );
+  // A real wheel gesture hands control back to the visitor, even during the tail of the reassembly animation.
+  await page._client().send("Input.dispatchMouseEvent", {
+    type: "mouseWheel",
+    x: 190,
+    y: 325,
+    deltaX: 0,
+    deltaY: 12000,
+  });
   await wait(
     "roof finale",
     () => +document.querySelector("canvas").dataset.journey < 0.002,
