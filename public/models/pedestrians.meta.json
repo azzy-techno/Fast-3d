@@ -1,0 +1,83 @@
+{
+  "note": "ped-1.glb carries the Walk and Idle clips; apply them to ped-2/ped-3 by bone name (identical names, same hips height).",
+  "units": "metres, Y up, facing +Z, feet on y=0",
+  "hipsHeight": 0.8604,
+  "walkSpeed": 0.972,
+  "walkStride": 1.167,
+  "clips": {
+    "Idle": 6.0333,
+    "Walk": 1.2
+  },
+  "bones": [
+    "Hips",
+    "Spine",
+    "Spine1",
+    "Spine2",
+    "Neck",
+    "Head",
+    "LeftShoulder",
+    "LeftArm",
+    "LeftForeArm",
+    "LeftHand",
+    "RightShoulder",
+    "RightArm",
+    "RightForeArm",
+    "RightHand",
+    "LeftUpLeg",
+    "LeftLeg",
+    "LeftFoot",
+    "LeftToeBase",
+    "RightUpLeg",
+    "RightLeg",
+    "RightFoot",
+    "RightToeBase"
+  ],
+  "files": {
+    "ped-1.glb": {
+      "source": "Male_Adult_14",
+      "description": "business-casual man (grey shirt, khaki trousers)",
+      "height": 1.724,
+      "suggestedScale": 1.02,
+      "triangles": 4980,
+      "joints": 22,
+      "textures": [
+        "ped-1_body 512x512 image/webp 25KB",
+        "ped-1_head 512x512 image/webp 22KB"
+      ],
+      "bytes": 165464,
+      "clips": {
+        "Idle": 6.0333,
+        "Walk": 1.2
+      }
+    },
+    "ped-2.glb": {
+      "source": "Female_Adult_10",
+      "description": "woman in black abaya and hijab",
+      "height": 1.614,
+      "suggestedScale": 1,
+      "triangles": 4980,
+      "joints": 22,
+      "textures": [
+        "ped-2_body 512x512 image/webp 13KB",
+        "ped-2_head 512x512 image/webp 9KB"
+      ],
+      "bytes": 154388,
+      "clips": {}
+    },
+    "ped-3.glb": {
+      "source": "Male_Adult_21",
+      "description": "man in white thobe and red-checked shemagh",
+      "height": 1.746,
+      "suggestedScale": 1.03,
+      "triangles": 4980,
+      "joints": 22,
+      "textures": [
+        "ped-3_body 512x512 image/webp 18KB",
+        "ped-3_head 512x512 image/webp 12KB",
+        "ped-3_keffiyeh 512x512 image/webp 61KB"
+      ],
+      "bytes": 229928,
+      "clips": {}
+    }
+  }
+}

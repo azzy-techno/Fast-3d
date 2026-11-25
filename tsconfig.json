@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -13,5 +14,5 @@
     "resolveJsonModule": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src/main.tsx", "src/state.ts", "src/i18n.ts", "src/engine", "src/ui", "src/content", "vite.config.ts"]
 }

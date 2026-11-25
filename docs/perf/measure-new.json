@@ -1,0 +1,100 @@
+[
+ {
+  "name": "new",
+  "profile": "desktop",
+  "url": "http://127.0.0.1:4173/Fast-3d/?probe",
+  "firstUsableMs": 68,
+  "firstUsableKB": 263,
+  "ready3dMs": 1099,
+  "ready3dKB": 3295,
+  "ready3dRequests": 36,
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "canvas": [
+   1440,
+   900
+  ],
+  "scrollArrival": {
+   "frames": 978,
+   "avgMs": 16.7,
+   "p95Ms": 16.9,
+   "p99Ms": 17.2,
+   "worstMs": 18,
+   "over33": 0,
+   "over50": 0,
+   "over100": 0
+  },
+  "liftCoveredMs": 1770,
+  "liftTotalMs": 2399,
+  "afterLift": {
+   "frames": 323,
+   "avgMs": 16.7,
+   "p95Ms": 17,
+   "p99Ms": 17.3,
+   "worstMs": 33,
+   "over33": 0,
+   "over50": 0,
+   "over100": 0
+  },
+  "scrollFloor": {
+   "frames": 715,
+   "avgMs": 16.7,
+   "p95Ms": 16.9,
+   "p99Ms": 17.1,
+   "worstMs": 18,
+   "over33": 0,
+   "over50": 0,
+   "over100": 0
+  },
+  "totalKB": 5570,
+  "errors": []
+ },
+ {
+  "name": "new",
+  "profile": "mobile",
+  "url": "http://127.0.0.1:4173/Fast-3d/?probe",
+  "firstUsableMs": 782,
+  "firstUsableKB": 1171,
+  "ready3dMs": 2392,
+  "ready3dKB": 3295,
+  "ready3dRequests": 33,
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "canvas": [
+   624,
+   1350
+  ],
+  "scrollArrival": {
+   "frames": 911,
+   "avgMs": 34.3,
+   "p95Ms": 100.1,
+   "p99Ms": 166.5,
+   "worstMs": 267,
+   "over33": 249,
+   "over50": 166,
+   "over100": 48
+  },
+  "liftCoveredMs": 1944,
+  "liftTotalMs": 2759,
+  "afterLift": {
+   "frames": 209,
+   "avgMs": 27,
+   "p95Ms": 83.3,
+   "p99Ms": 183.4,
+   "worstMs": 250,
+   "over33": 32,
+   "over50": 19,
+   "over100": 6
+  },
+  "scrollFloor": {
+   "frames": 784,
+   "avgMs": 31.7,
+   "p95Ms": 100,
+   "p99Ms": 133.5,
+   "worstMs": 200,
+   "over33": 178,
+   "over50": 128,
+   "over100": 36
+  },
+  "totalKB": 5570,
+  "errors": []
+ }
+]

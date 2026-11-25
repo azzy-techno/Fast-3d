@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+
+// Static site; BASE_PATH is "/Fast-3d/" on GitHub Pages.
 export default defineConfig({
-  plugins: [react()],
   base: process.env.BASE_PATH || "/",
-  server: { host: "0.0.0.0" },
-  build: { chunkSizeWarningLimit: 1100 },
+  server: { host: "127.0.0.1" },
+  preview: { host: "127.0.0.1" },
+  build: { target: "es2022", chunkSizeWarningLimit: 900, assetsInlineLimit: 2048 },
 });

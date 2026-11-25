@@ -1,0 +1,217 @@
+{
+ "when": "2026-11-24T17:27:58.986Z",
+ "passed": 42,
+ "failed": 0,
+ "results": [
+  {
+   "name": "first view shows headline, services and contact before 3D is ready",
+   "pass": true,
+   "detail": "40 ms"
+  },
+  {
+   "name": "3D arrival ready",
+   "pass": true,
+   "detail": "974 ms"
+  },
+  {
+   "name": "street stop shows the company headline",
+   "pass": true,
+   "detail": "Engineering the backbone of Saudi industry"
+  },
+  {
+   "name": "scrolling walks street -> entrance -> reception",
+   "pass": true,
+   "detail": "28 + 20 wheel notches"
+  },
+  {
+   "name": "reaching the lift opens the floor selector",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "selector lists reception, 8 floors and the roof",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "focus moves into the selector",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "Escape closes the selector",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "L key calls the lift",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "lift ride arrives on Level 01 About",
+   "pass": true,
+   "detail": "LEVEL 01 · ABOUT FAST"
+  },
+  {
+   "name": "arrow keys step between stops",
+   "pass": true,
+   "detail": "LEVEL 01 · ABOUT FAST · 1 / 5 | LEVEL 01 · ABOUT FAST · 2 / 5"
+  },
+  {
+   "name": "credentials stop offers the viewer",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "About viewer shows a real certificate image",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "viewer steps with the arrow keys",
+   "pass": true,
+   "detail": "ISO 9001:2015 Quality Management System -> ISO 14001:2015 Environmental Management System"
+  },
+  {
+   "name": "viewer lists the partners with logos",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "services menu lists every floor with its official page link",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "services menu jumps straight to a floor",
+   "pass": true,
+   "detail": "2404 ms"
+  },
+  {
+   "name": "contact sheet has email and the RFQ link",
+   "pass": true,
+   "detail": "mailto:info@fast-arabia.com | https://fast-arabia.com/contact?type=rfq"
+  },
+  {
+   "name": "Arabic switches the document to RTL",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "Arabic card text is Arabic",
+   "pass": true,
+   "detail": "تركيب أنظمة الرشاشات"
+  },
+  {
+   "name": "RTL layout mirrors: card on the right, dock on the left",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "floor names are Arabic in the selector",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "ten consecutive lift rides all arrive",
+   "pass": true,
+   "detail": "electrical:2400ms mechanical:2376ms fabrication:2395ms civil:2391ms ict:2382ms digital:2404ms roof:2399ms about:2387ms arrival:2399ms electrical:2382ms"
+  },
+  {
+   "name": "no frame gap over 250 ms during any ride",
+   "pass": true,
+   "detail": "electrical:17 mechanical:18 fabrication:33 civil:17 ict:33 digital:33 roof:33 about:133 arrival:17 electrical:17"
+  },
+  {
+   "name": "changing floor mid-ride ends on the last choice",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "choosing again while the doors open rides on to the new floor",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "reversing during a camera move settles on the new stop",
+   "pass": true,
+   "detail": "LEVEL 07 · INDUSTRIAL ICT · 1 / 5"
+  },
+  {
+   "name": "roof edge offers the two endings",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "following the engineer returns to the lift",
+   "pass": true,
+   "detail": "Where would you like to go?"
+  },
+  {
+   "name": "skyline farewell flies out and shows the closing message",
+   "pass": true,
+   "detail": "{\"flight\":12,\"txt\":\"Thank you for visiting FAST.\",\"y\":62}"
+  },
+  {
+   "name": "back to the rooftop restores the choice",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no runtime errors on desktop",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "reduced motion starts in the still overview with no WebGL",
+   "pass": true,
+   "detail": "{\"canvas\":false,\"floors\":8,\"links\":8,\"mail\":true,\"overflow\":false}"
+  },
+  {
+   "name": "overview links every service to its official page and has contact",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "overview can opt in to the 3D tour",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no runtime errors in the overview",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "without WebGL the complete overview is shown",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone: swiping walks the visitor in",
+   "pass": true,
+   "detail": "Engineering the backbone of Saudi industry -> Eight floors and a rooftop plant"
+  },
+  {
+   "name": "phone: the text card fits the lower part of the screen",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone: lift ride to a floor works",
+   "pass": true,
+   "detail": "LEVEL 03 · MECHANICAL · 1 / 5"
+  },
+  {
+   "name": "phone: Arabic layout applies",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no runtime errors on phone",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

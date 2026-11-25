@@ -1,27 +1,27 @@
-# Public deployment
+# Deployment
 
 Live site: https://azzy-techno.github.io/Fast-3d/
 
-The exterior update in commit `27710a4` was published on 17 October 2026. The [deployment workflow](https://github.com/azzy-techno/Fast-3d/actions/runs/39016666990) completed successfully. The public homepage returned HTTP 200 and referenced the current build's JavaScript bundle; both new exterior assets returned HTTP 200 with checksums matching the tested local files.
-
-## Future updates
-
-GitHub Pages is enabled with **GitHub Actions** as the source. Pushes to `main` automatically build and publish the homepage. To redeploy manually, open **Actions → Deploy FAST homepage → Run workflow** on `main`.
+GitHub Pages is configured with **GitHub Actions** as the source. `.github/workflows/deploy-pages.yml`
+runs on every push to `main` (and on manual dispatch): it installs the locked dependencies, runs
+`npm run build` with `BASE_PATH=/<repository name>/` and publishes `dist/`.
 
 - Settings: https://github.com/azzy-techno/Fast-3d/settings/pages
 - Workflow: https://github.com/azzy-techno/Fast-3d/actions/workflows/deploy-pages.yml
 
-The workflow installs locked dependencies, builds the Vite application and publishes only `dist/` using GitHub's Pages artifact mechanism. No hosting API key is embedded in the application.
+All asset URLs go through Vite's base path, so the same build works under a project path or, built
+without `BASE_PATH`, at a domain root. No runtime API keys, CDNs or external requests are involved.
 
-All local asset references honor Vite's base path, including the loader images, logo texture, audio, character model and HDR lighting map. Validate the project-path build with:
+The baked 3D assets in `public/` are committed, so the workflow does not need Blender. Re-bake locally
+(see the README) only when a scene script changes.
 
-```bash
-BASE_PATH=/Fast-3d/ npm run build
-BASE_PATH=/Fast-3d/ npm run test:browser
+## Before publishing
+
+```powershell
+$env:BASE_PATH='/Fast-3d/'; npm run build
+node tools/serve.mjs dist 4173 /Fast-3d/
+npm test
 ```
 
-For a domain-root static host, run `npm run build` without `BASE_PATH` and upload `dist/`.
-
-## Cloud access
-
-GitHub API and public-site access were verified in this session. Future cloud environments need `api.github.com` and `azzy-techno.github.io` in their allowed network destinations, in addition to the package/Git access required for setup. These domains were previously saved in the environment configuration draft. Live development-server processes must still be restarted in each new environment.
+`tools/serve.mjs` gzips the same file types GitHub Pages does (including `.glb`), so transfer sizes
+measured locally match the published site closely.

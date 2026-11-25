@@ -1,0 +1,96 @@
+[
+ {
+  "name": "old",
+  "profile": "desktop",
+  "url": "http://127.0.0.1:4174/Fast-3d/",
+  "ready3dMs": 11455,
+  "ready3dKB": 11514,
+  "ready3dRequests": 141,
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "canvas": [
+   1430,
+   900
+  ],
+  "scrollArrival": {
+   "frames": 695,
+   "avgMs": 27.2,
+   "p95Ms": 33.5,
+   "p99Ms": 49.7,
+   "worstMs": 217,
+   "over33": 101,
+   "over50": 4,
+   "over100": 1
+  },
+  "liftCoveredMs": 1394,
+  "liftTotalMs": 1394,
+  "afterLift": {
+   "frames": 181,
+   "avgMs": 19.3,
+   "p95Ms": 17.1,
+   "p99Ms": 33.1,
+   "worstMs": 483,
+   "over33": 1,
+   "over50": 1,
+   "over100": 1
+  },
+  "scrollFloor": {
+   "frames": 823,
+   "avgMs": 16.7,
+   "p95Ms": 16.9,
+   "p99Ms": 17.2,
+   "worstMs": 18,
+   "over33": 0,
+   "over50": 0,
+   "over100": 0
+  },
+  "totalKB": 11514,
+  "errors": []
+ },
+ {
+  "name": "old",
+  "profile": "mobile",
+  "url": "http://127.0.0.1:4174/Fast-3d/",
+  "ready3dMs": 47682,
+  "ready3dKB": 11514,
+  "ready3dRequests": 141,
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "canvas": [
+   331,
+   717
+  ],
+  "scrollArrival": {
+   "frames": 719,
+   "avgMs": 54.9,
+   "p95Ms": 166.5,
+   "p99Ms": 316.8,
+   "worstMs": 1850,
+   "over33": 325,
+   "over50": 205,
+   "over100": 86
+  },
+  "liftCoveredMs": 2595,
+  "liftTotalMs": 2595,
+  "afterLift": {
+   "frames": 85,
+   "avgMs": 54.3,
+   "p95Ms": 116.7,
+   "p99Ms": 1066.6,
+   "worstMs": 1067,
+   "over33": 27,
+   "over50": 17,
+   "over100": 8
+  },
+  "scrollFloor": {
+   "frames": 629,
+   "avgMs": 46.2,
+   "p95Ms": 150,
+   "p99Ms": 266.7,
+   "worstMs": 383,
+   "over33": 212,
+   "over50": 167,
+   "over100": 63
+  },
+  "totalKB": 11514,
+  "errors": []
+ }
+]

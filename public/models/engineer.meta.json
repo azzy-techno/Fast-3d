@@ -1,0 +1,1062 @@
+{
+  "asset": "engineer.glb",
+  "source": "Microsoft Rocketbox Construction_Male_08 + Rocketbox animations (MIT) - see tools/blender/character/SOURCES.md",
+  "height": 1.76,
+  "units": "metres, Y up, character faces +Z, feet on y=0, origin between the feet",
+  "walkSpeed": 1.348,
+  "walkSpeedNote": "Walk is in place; one cycle (1.0667s, 2 steps) covers 1.438 m in the source root motion => 1.348 m/s cycle average (no net slide). Root speed while a foot is planted averages 1.309 m/s.",
+  "clips": {
+    "Idle": 6.0333,
+    "Walk": 1.0667,
+    "Wave": 2.8333,
+    "Talk": 8.5333
+  },
+  "clipNotes": {
+    "Idle": "seamless loop",
+    "Walk": "seamless loop, in place (vertical bob + sway kept)",
+    "Talk": "seamless loop, left-hand explaining gestures (right arm stays low, free for pointing IK)",
+    "Wave": "one-shot right-hand wave; starts and ends in the Idle frame-0 pose"
+  },
+  "triangles": 8474,
+  "rootNode": "Engineer",
+  "skinnedMesh": "EngineerMesh",
+  "bones": {
+    "hips": "Hips",
+    "spine": [
+      "Spine",
+      "Spine1",
+      "Spine2"
+    ],
+    "neck": "Neck",
+    "head": "Head",
+    "jaw": "Jaw",
+    "left": {
+      "shoulder": "LeftShoulder",
+      "upperArm": "LeftArm",
+      "foreArm": "LeftForeArm",
+      "hand": "LeftHand",
+      "index": [
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3"
+      ],
+      "thumb": [
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3"
+      ],
+      "middle": [
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3"
+      ],
+      "ring": [
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3"
+      ],
+      "pinky": [
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3"
+      ],
+      "upLeg": "LeftUpLeg",
+      "leg": "LeftLeg",
+      "foot": "LeftFoot",
+      "toe": "LeftToeBase"
+    },
+    "right": {
+      "shoulder": "RightShoulder",
+      "upperArm": "RightArm",
+      "foreArm": "RightForeArm",
+      "hand": "RightHand",
+      "index": [
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3"
+      ],
+      "thumb": [
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3"
+      ],
+      "middle": [
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3"
+      ],
+      "ring": [
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3"
+      ],
+      "pinky": [
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3"
+      ],
+      "upLeg": "RightUpLeg",
+      "leg": "RightLeg",
+      "foot": "RightFoot",
+      "toe": "RightToeBase"
+    },
+    "all": [
+      "Hips",
+      "LeftUpLeg",
+      "LeftLeg",
+      "LeftFoot",
+      "LeftToeBase",
+      "RightUpLeg",
+      "RightLeg",
+      "RightFoot",
+      "RightToeBase",
+      "Spine",
+      "Spine1",
+      "Spine2",
+      "LeftShoulder",
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandMiddle1",
+      "LeftHandMiddle2",
+      "LeftHandMiddle3",
+      "LeftHandPinky1",
+      "LeftHandPinky2",
+      "LeftHandPinky3",
+      "LeftHandRing1",
+      "LeftHandRing2",
+      "LeftHandRing3",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "Neck",
+      "Head",
+      "Jaw",
+      "RightShoulder",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandMiddle1",
+      "RightHandMiddle2",
+      "RightHandMiddle3",
+      "RightHandPinky1",
+      "RightHandPinky2",
+      "RightHandPinky3",
+      "RightHandRing1",
+      "RightHandRing2",
+      "RightHandRing3",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3"
+    ]
+  },
+  "conventions": {
+    "boneAxis": "local +Y runs along every limb/spine/finger bone toward its child (see detail.*.axisToChild); feet are the exception (local +Y points forward/down toward the toes)",
+    "restPose": "A-pose (arms ~45 deg down). detail.*.restAxesWorld gives each bone's local X/Y/Z axes in character space at rest.",
+    "elbowHinge": {
+      "LeftForeArm": [
+        0,
+        0,
+        -1
+      ],
+      "RightForeArm": [
+        0,
+        0,
+        -1
+      ],
+      "note": "measured: dominant local rotation axis (relative to rest) of each forearm in the shipped clips"
+    },
+    "hierarchyNote": "Rocketbox parents thighs to Spine and clavicles to Neck; here thighs are children of Hips and shoulders children of Spine2, so Neck/Head can be driven by a look-at without moving the arms. Facial bones were folded into Head (lower-lip bones into Jaw); Jaw is kept un-animated for an optional talk flap.",
+    "headLookAt": "Spine/Spine1/Spine2/Neck/Head share one frame at rest: local +Y up (yaw; +angle turns toward the character's left), local +Z = character's left (pitch; +angle nods down), local -X forward (roll axis).",
+    "jaw": "open the mouth with a positive rotation about Jaw local +Z (0.2 rad is wide open); 0 = closed (rest).",
+    "elbowFlex": "flexing either elbow is a rotation of the ForeArm about its local -Z (i.e. a negative angle about +Z); rest pose already has ~20 deg of flex.",
+    "threeNames": "node names contain no spaces/dots, so three.js keeps them unchanged"
+  },
+  "detail": {
+    "Hips": {
+      "parent": "Engineer",
+      "restWorldPosition": [
+        0,
+        0.8604,
+        0
+      ],
+      "length": 0.1155,
+      "child": "Spine",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0,
+          0,
+          -1
+        ],
+        "y": [
+          0,
+          1,
+          0
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Spine": {
+      "parent": "Hips",
+      "restWorldPosition": [
+        0,
+        0.9759,
+        -0.0016
+      ],
+      "length": 0.1471,
+      "child": "Spine1",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0,
+          -0.0445,
+          -0.999
+        ],
+        "y": [
+          0,
+          0.999,
+          -0.0445
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Spine1": {
+      "parent": "Spine",
+      "restWorldPosition": [
+        0,
+        1.1228,
+        -0.0082
+      ],
+      "length": 0.1471,
+      "child": "Spine2",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0,
+          -0.0718,
+          -0.9974
+        ],
+        "y": [
+          0,
+          0.9974,
+          -0.0718
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Spine2": {
+      "parent": "Spine1",
+      "restWorldPosition": [
+        0,
+        1.2695,
+        -0.0189
+      ],
+      "length": 0.1918,
+      "child": "Neck",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0,
+          -0.0407,
+          -0.9992
+        ],
+        "y": [
+          0,
+          0.9992,
+          -0.0407
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Neck": {
+      "parent": "Spine2",
+      "restWorldPosition": [
+        0,
+        1.4612,
+        -0.0117
+      ],
+      "length": 0.0665,
+      "child": "Head",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0,
+          0.2934,
+          -0.956
+        ],
+        "y": [
+          0,
+          0.956,
+          0.2934
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Head": {
+      "parent": "Neck",
+      "restWorldPosition": [
+        0,
+        1.5247,
+        0.0078
+      ],
+      "restAxesWorld": {
+        "x": [
+          0,
+          0.1512,
+          -0.9885
+        ],
+        "y": [
+          0,
+          0.9885,
+          0.1512
+        ],
+        "z": [
+          1,
+          0,
+          0
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "+Y",
+        "left": "+Z"
+      }
+    },
+    "Jaw": {
+      "parent": "Head",
+      "restWorldPosition": [
+        0,
+        1.5542,
+        0.0244
+      ],
+      "restAxesWorld": {
+        "x": [
+          0.005,
+          0.9491,
+          0.3148
+        ],
+        "y": [
+          0.0073,
+          -0.3149,
+          0.9491
+        ],
+        "z": [
+          1,
+          -0.0024,
+          -0.0085
+        ]
+      },
+      "facing": {
+        "forward": "+Y",
+        "up": "+X",
+        "left": "+Z"
+      }
+    },
+    "LeftShoulder": {
+      "parent": "Spine2",
+      "restWorldPosition": [
+        0.0699,
+        1.4022,
+        -0.0227
+      ],
+      "length": 0.1355,
+      "child": "LeftArm",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.0223,
+          0.0415,
+          0.9989
+        ],
+        "y": [
+          0.975,
+          -0.222,
+          -0.0126
+        ],
+        "z": [
+          0.2212,
+          0.9742,
+          -0.0454
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "+Z",
+        "left": "+Y"
+      }
+    },
+    "LeftArm": {
+      "parent": "LeftShoulder",
+      "restWorldPosition": [
+        0.202,
+        1.3721,
+        -0.0244
+      ],
+      "length": 0.2744,
+      "child": "LeftForeArm",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.1151,
+          -0.0887,
+          0.9894
+        ],
+        "y": [
+          0.72,
+          -0.6936,
+          0.0216
+        ],
+        "z": [
+          0.6844,
+          0.7149,
+          0.1437
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "+Z",
+        "left": "+Y"
+      }
+    },
+    "LeftForeArm": {
+      "parent": "LeftArm",
+      "restWorldPosition": [
+        0.3996,
+        1.1818,
+        -0.0184
+      ],
+      "length": 0.2601,
+      "child": "LeftHand",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.3619,
+          0.1619,
+          0.9181
+        ],
+        "y": [
+          0.633,
+          -0.6803,
+          0.3695
+        ],
+        "z": [
+          0.6844,
+          0.7149,
+          0.1437
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "+Z",
+        "left": "+Z"
+      }
+    },
+    "LeftHand": {
+      "parent": "LeftForeArm",
+      "restWorldPosition": [
+        0.5643,
+        1.0048,
+        0.0777
+      ],
+      "length": 0.0918,
+      "child": "LeftHandMiddle1",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.7345,
+          0.6627,
+          0.1461
+        ],
+        "y": [
+          0.5958,
+          -0.7328,
+          0.3287
+        ],
+        "z": [
+          0.3249,
+          -0.1544,
+          -0.9331
+        ]
+      },
+      "facing": {
+        "forward": "-Z",
+        "up": "-Y",
+        "left": "+X"
+      }
+    },
+    "LeftHandIndex1": {
+      "parent": "LeftHand",
+      "restWorldPosition": [
+        0.6127,
+        0.943,
+        0.1278
+      ],
+      "length": 0.03,
+      "child": "LeftHandIndex2",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.8447,
+          0.4913,
+          0.2125
+        ],
+        "y": [
+          0.4229,
+          -0.8559,
+          0.2977
+        ],
+        "z": [
+          0.3281,
+          -0.1616,
+          -0.9307
+        ]
+      },
+      "facing": {
+        "forward": "-Z",
+        "up": "-Y",
+        "left": "+X"
+      }
+    },
+    "LeftHandIndex2": {
+      "parent": "LeftHandIndex1",
+      "restWorldPosition": [
+        0.6254,
+        0.9173,
+        0.1368
+      ],
+      "length": 0.0228,
+      "child": "LeftHandIndex3",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.9086,
+          0.3234,
+          0.2642
+        ],
+        "y": [
+          0.2583,
+          -0.9323,
+          0.253
+        ],
+        "z": [
+          0.3281,
+          -0.1616,
+          -0.9307
+        ]
+      },
+      "facing": {
+        "forward": "-Z",
+        "up": "-Y",
+        "left": "+X"
+      }
+    },
+    "LeftHandIndex3": {
+      "parent": "LeftHandIndex2",
+      "restWorldPosition": [
+        0.6313,
+        0.896,
+        0.1426
+      ],
+      "restAxesWorld": {
+        "x": [
+          0.9187,
+          0.2838,
+          0.2746
+        ],
+        "y": [
+          0.2198,
+          -0.9452,
+          0.2416
+        ],
+        "z": [
+          0.3281,
+          -0.1616,
+          -0.9307
+        ]
+      },
+      "facing": {
+        "forward": "-Z",
+        "up": "-Y",
+        "left": "+X"
+      }
+    },
+    "LeftUpLeg": {
+      "parent": "Hips",
+      "restWorldPosition": [
+        0.0849,
+        0.8604,
+        0
+      ],
+      "length": 0.3832,
+      "child": "LeftLeg",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.2732,
+          -0.0538,
+          -0.9605
+        ],
+        "y": [
+          0.0529,
+          -0.9978,
+          0.0408
+        ],
+        "z": [
+          -0.9605,
+          -0.0397,
+          0.2754
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "-Y",
+        "left": "-Z"
+      }
+    },
+    "LeftLeg": {
+      "parent": "LeftUpLeg",
+      "restWorldPosition": [
+        0.1051,
+        0.4781,
+        0.0156
+      ],
+      "length": 0.3809,
+      "child": "LeftFoot",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.2776,
+          0.0695,
+          -0.9582
+        ],
+        "y": [
+          0.0189,
+          -0.9968,
+          -0.0777
+        ],
+        "z": [
+          -0.9605,
+          -0.0397,
+          0.2754
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "-Y",
+        "left": "-Z"
+      }
+    },
+    "LeftFoot": {
+      "parent": "LeftLeg",
+      "restWorldPosition": [
+        0.1123,
+        0.0984,
+        -0.014
+      ],
+      "length": 0.1632,
+      "child": "LeftToeBase",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.0039,
+          -0.9998,
+          0.0173
+        ],
+        "y": [
+          0.2478,
+          0.0177,
+          0.9687
+        ],
+        "z": [
+          -0.9688,
+          0.0005,
+          0.2478
+        ]
+      },
+      "facing": {
+        "forward": "+Y",
+        "up": "-X",
+        "left": "-Z"
+      }
+    },
+    "RightShoulder": {
+      "parent": "Spine2",
+      "restWorldPosition": [
+        -0.0699,
+        1.4022,
+        -0.0227
+      ],
+      "length": 0.1355,
+      "child": "RightArm",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.0223,
+          0.0415,
+          0.9989
+        ],
+        "y": [
+          -0.975,
+          -0.222,
+          -0.0126
+        ],
+        "z": [
+          0.2212,
+          -0.9742,
+          0.0454
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "-Z",
+        "left": "-Y"
+      }
+    },
+    "RightArm": {
+      "parent": "RightShoulder",
+      "restWorldPosition": [
+        -0.202,
+        1.3721,
+        -0.0244
+      ],
+      "length": 0.2744,
+      "child": "RightForeArm",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.1151,
+          -0.0887,
+          0.9894
+        ],
+        "y": [
+          -0.72,
+          -0.6936,
+          0.0216
+        ],
+        "z": [
+          0.6844,
+          -0.7148,
+          -0.1437
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "-Z",
+        "left": "-Y"
+      }
+    },
+    "RightForeArm": {
+      "parent": "RightArm",
+      "restWorldPosition": [
+        -0.3996,
+        1.1818,
+        -0.0184
+      ],
+      "length": 0.2601,
+      "child": "RightHand",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.3619,
+          0.1619,
+          0.9181
+        ],
+        "y": [
+          -0.633,
+          -0.6803,
+          0.3695
+        ],
+        "z": [
+          0.6844,
+          -0.7148,
+          -0.1437
+        ]
+      },
+      "facing": {
+        "forward": "+X",
+        "up": "-Z",
+        "left": "+Z"
+      }
+    },
+    "RightHand": {
+      "parent": "RightForeArm",
+      "restWorldPosition": [
+        -0.5643,
+        1.0048,
+        0.0777
+      ],
+      "length": 0.0918,
+      "child": "RightHandMiddle1",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.7345,
+          0.6627,
+          0.1461
+        ],
+        "y": [
+          -0.5958,
+          -0.7328,
+          0.3287
+        ],
+        "z": [
+          0.3249,
+          0.1544,
+          0.9331
+        ]
+      },
+      "facing": {
+        "forward": "+Z",
+        "up": "-Y",
+        "left": "-X"
+      }
+    },
+    "RightHandIndex1": {
+      "parent": "RightHand",
+      "restWorldPosition": [
+        -0.6127,
+        0.943,
+        0.1278
+      ],
+      "length": 0.03,
+      "child": "RightHandIndex2",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.8447,
+          0.4913,
+          0.2125
+        ],
+        "y": [
+          -0.4229,
+          -0.8559,
+          0.2977
+        ],
+        "z": [
+          0.3281,
+          0.1616,
+          0.9307
+        ]
+      },
+      "facing": {
+        "forward": "+Z",
+        "up": "-Y",
+        "left": "-X"
+      }
+    },
+    "RightHandIndex2": {
+      "parent": "RightHandIndex1",
+      "restWorldPosition": [
+        -0.6254,
+        0.9173,
+        0.1368
+      ],
+      "length": 0.0228,
+      "child": "RightHandIndex3",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.9086,
+          0.3234,
+          0.2642
+        ],
+        "y": [
+          -0.2583,
+          -0.9323,
+          0.253
+        ],
+        "z": [
+          0.3281,
+          0.1616,
+          0.9307
+        ]
+      },
+      "facing": {
+        "forward": "+Z",
+        "up": "-Y",
+        "left": "-X"
+      }
+    },
+    "RightHandIndex3": {
+      "parent": "RightHandIndex2",
+      "restWorldPosition": [
+        -0.6313,
+        0.896,
+        0.1426
+      ],
+      "restAxesWorld": {
+        "x": [
+          -0.9187,
+          0.2838,
+          0.2746
+        ],
+        "y": [
+          -0.2198,
+          -0.9452,
+          0.2416
+        ],
+        "z": [
+          0.3281,
+          0.1616,
+          0.9307
+        ]
+      },
+      "facing": {
+        "forward": "+Z",
+        "up": "-Y",
+        "left": "-X"
+      }
+    },
+    "RightUpLeg": {
+      "parent": "Hips",
+      "restWorldPosition": [
+        -0.0849,
+        0.8604,
+        0
+      ],
+      "length": 0.3832,
+      "child": "RightLeg",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.2732,
+          -0.0538,
+          -0.9605
+        ],
+        "y": [
+          -0.0529,
+          -0.9978,
+          0.0408
+        ],
+        "z": [
+          -0.9605,
+          0.0397,
+          -0.2754
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "-Y",
+        "left": "-Z"
+      }
+    },
+    "RightLeg": {
+      "parent": "RightUpLeg",
+      "restWorldPosition": [
+        -0.1051,
+        0.4781,
+        0.0156
+      ],
+      "length": 0.3809,
+      "child": "RightFoot",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          0.2776,
+          0.0695,
+          -0.9582
+        ],
+        "y": [
+          -0.0189,
+          -0.9968,
+          -0.0777
+        ],
+        "z": [
+          -0.9605,
+          0.0397,
+          -0.2754
+        ]
+      },
+      "facing": {
+        "forward": "-X",
+        "up": "-Y",
+        "left": "-Z"
+      }
+    },
+    "RightFoot": {
+      "parent": "RightLeg",
+      "restWorldPosition": [
+        -0.1123,
+        0.0984,
+        -0.014
+      ],
+      "length": 0.1632,
+      "child": "RightToeBase",
+      "axisToChild": "+Y",
+      "restAxesWorld": {
+        "x": [
+          -0.0039,
+          -0.9998,
+          0.0173
+        ],
+        "y": [
+          -0.2478,
+          0.0177,
+          0.9687
+        ],
+        "z": [
+          -0.9688,
+          -0.0005,
+          -0.2478
+        ]
+      },
+      "facing": {
+        "forward": "+Y",
+        "up": "-X",
+        "left": "-Z"
+      }
+    }
+  }
+}
